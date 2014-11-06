@@ -1,8 +1,5 @@
 package com.edaviessmith.consumecontent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,6 +19,9 @@ import com.edaviessmith.consumecontent.data.Media;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.view.FragmentStateCachePagerAdapter;
 import com.edaviessmith.consumecontent.view.NavigationDrawerFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Content extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
@@ -60,7 +60,8 @@ public class Content extends ActionBarActivity implements NavigationDrawerFragme
 			
 			add(new User("Ben", new ArrayList<Media>() {{
 				add(new Media(0, "Youtube uploads"));
-				add(new Media(1, "Twitter Feed"));
+                add(new Media(1, "Twitter Feed"));
+                add(new Media(1, "Twitter Channel"));
 			}}));
 			
 			add(new User("Chris", new ArrayList<Media>() {{
@@ -122,9 +123,11 @@ public class Content extends ActionBarActivity implements NavigationDrawerFragme
 	public static class PagerAdapter extends FragmentStateCachePagerAdapter {
 		
 		User user;
-		
-        public PagerAdapter(FragmentManager fragmentManager, User user) {
-            super(fragmentManager);
+		Content act;
+
+        public PagerAdapter(Content act, User user) {
+            super(act.getSupportFragmentManager());
+            this.act = act;
             this.user = user;
         }
 
@@ -138,8 +141,17 @@ public class Content extends ActionBarActivity implements NavigationDrawerFragme
         // Returns the fragment to display for that page
         @Override
         public Fragment getItem(int position) {
-        	return FirstFragment.newInstance(position, user.media.get(position).type+" ");
+            Fragment frag = null;
+            switch(user.media.get(position).type) {
+                case 0: frag = YoutubeFragment.newInstance(act, user.media.get(position), position); break;
+                case 1: frag = TwitterFragment.newInstance(act, user.media.get(position), position); break;
+                default: frag =  FirstFragment.newInstance(position, user.media.get(position).type+" ");
+            }
+
+            return frag;
         }
+
+
 
         // Returns the page title for the top indicator
         @Override
@@ -221,7 +233,7 @@ public class Content extends ActionBarActivity implements NavigationDrawerFragme
 			View view = inflater.inflate(R.layout.fragment_content, container, false);
 			
 			ViewPager viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
-	        adapterViewPager = new PagerAdapter(act.getSupportFragmentManager(), user);
+	        adapterViewPager = new PagerAdapter(act, user);
 	        viewPager.setAdapter(adapterViewPager);
 	        
 			return view;
