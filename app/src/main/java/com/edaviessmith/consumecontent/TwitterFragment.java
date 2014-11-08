@@ -6,24 +6,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import com.edaviessmith.consumecontent.data.Media;
+import com.edaviessmith.consumecontent.data.TwitterFeed;
 
 
 public class TwitterFragment extends Fragment {
 
     private static String TAG = "TwitterFragment";
     private static TwitterFragment twitterFragment;
-    private static Content act;
-    private Media media;
+    private static ContentActivity act;
+    private TwitterFeed twitterFeed;
     private int pos;
 
-    public static TwitterFragment newInstance(Content activity, Media media, int pos) {
+    private TextView feedId_tv;
+
+    public static TwitterFragment newInstance(ContentActivity activity, TwitterFeed twitterFeed, int pos) {
         Log.e(TAG, "newInstance");
         act = activity;
 
         twitterFragment = new TwitterFragment();
-        twitterFragment.media = media;
+        twitterFragment.twitterFeed = twitterFeed;
         twitterFragment.pos = pos;
         return twitterFragment;
     }
@@ -32,8 +35,11 @@ public class TwitterFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_twitter, container, false);
         Log.e(TAG, "onCreateView");
-
         view.setId(pos);
+
+        //TODO getting null pointer (because Twitter feed object is null)
+        //feedId_tv = (TextView) view.findViewById(R.id.id_tv);
+        //feedId_tv.setText(twitterFeed.feedId);
 
         return view;
     }

@@ -6,24 +6,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import com.edaviessmith.consumecontent.data.Media;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
 
 
 public class YoutubeFragment extends Fragment {
 
     private static String TAG = "YoutubeFragment";
     private static YoutubeFragment youtubeFragment;
-    private static Content act;
-    private Media media;
+    private static ContentActivity act;
+    private YoutubeFeed youtubeFeed;
     private int pos;
 
-    public static YoutubeFragment newInstance(Content activity, Media media, int pos) {
+    private TextView feedId_tv;
+
+    public static YoutubeFragment newInstance(ContentActivity activity, YoutubeFeed youtubeFeed, int pos) {
         Log.e(TAG, "newInstance");
         act = activity;
 
         youtubeFragment = new YoutubeFragment();
-        youtubeFragment.media = media;
+        youtubeFragment.youtubeFeed = youtubeFeed;
         youtubeFragment.pos = pos;
 
         return youtubeFragment;
@@ -35,7 +38,10 @@ public class YoutubeFragment extends Fragment {
         view.setId(pos);
         Log.e(TAG, "onCreateView");
 
-
+        //TODO getting null pointer (because Youtube feed object is null)
+        //feedId_tv = (TextView) view.findViewById(R.id.id_tv);
+        //feedId_tv.setText(youtubeFeed.feedId);
+        
         return view;
     }
 }
