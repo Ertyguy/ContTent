@@ -7,23 +7,35 @@ import java.util.List;
 
 public class YoutubeFeed extends MediaFeed {
 
-    public String feedId;
+    public String feedId;   //Not required for YT_ACTIVITY
     public List<YoutubeItem> youtubeItems;
+    public int feedType;
 
     //Used for search
     public String image;
-    public String type_name;
+
+    public boolean vis;
+
+    public YoutubeFeed() {
+        this.type = Var.TYPE_YOUTUBE;
+        this.feedType = Var.YT_ACTIVITY;
+        this.name = "Activity";
+    }
 
     public YoutubeFeed(String feedId) {
         this.type = Var.TYPE_YOUTUBE;
         this.feedId = feedId;
         this.name = "Youtube";
+        this.feedType = Var.YT_FEED;
+        setVisible(true);
     }
 
     public YoutubeFeed(String feedId, String name) {
         this.type = Var.TYPE_YOUTUBE;
         this.feedId = feedId;
         this.name = name;
+        this.feedType = Var.YT_FEED;
+        setVisible(true);
     }
 
     public String getFeedId() {
@@ -50,12 +62,8 @@ public class YoutubeFeed extends MediaFeed {
         this.image = image;
     }
 
-    public String getType_name() {
-        return type_name;
-    }
+    public boolean isVisible() {return vis; }
 
-    public void setType_name(String type_name) {
-        this.type_name = type_name;
-    }
+    public void setVisible(boolean vis) {this.vis = vis; }
 
 }

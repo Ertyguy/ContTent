@@ -10,6 +10,9 @@ public class TwitterFeed extends MediaFeed {
     public String feedId;
     public List<TwitterItem> twitterItems;
 
+    public String thumbnail;
+    public String displayName;
+
     public TwitterFeed(String feedId) {
         this.type = Var.TYPE_TWITTER;
         this.feedId = feedId;
@@ -22,4 +25,36 @@ public class TwitterFeed extends MediaFeed {
         this.name = name;
     }
 
+
+    public String getFeedId() {
+        return feedId;
+    }
+
+    public void setFeedId(String feedId) {
+        this.feedId = feedId;
+    }
+
+    public List<TwitterItem> getTwitterItems() {
+        return twitterItems;
+    }
+
+    public void setTwitterItems(List<TwitterItem> twitterItems) {
+        this.twitterItems = twitterItems;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }

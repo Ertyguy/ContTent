@@ -6,7 +6,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +22,9 @@ public class Var {
 
     //APIs
     static public final String DEVELOPER_KEY = "AIzaSyCfyVwQZCgFDgt-s02mPbpYgVgA_m-r7jI";
+    static public final String TWITTER_OAUTH_CONSUMER_KEY = "dTvI2BDGYncp0H1ypSYygg";
+    static public final String TWITTER_OAUTH_CONSUMER_SECRET = "84iO1oRvzFlMBJIRZm47pMV1FCWdrnFW7koDv0dyY8";
+
     static public final String PREF_TW_AUTH = "twitter_auth";
     static public final String PREF_TW_ACCESS_TOKEN = "twitter_beareraccesstoken";
     static public final String PREF_TW_TOKEN_TYPE = "twitter_bearertokentype";
@@ -37,21 +42,29 @@ public class Var {
     public static final int SEARCH_YOUTUBE = 1;
     public static final int SEARCH_TWITTER = 2;
 
+    //Youtube Feed types
+    public static final int YT_ACTIVITY = 0; //Custom url call
+    public static final int YT_FEED = 1;     //Default search call
+
 
     //Util functions
+    public static String HTTPGet(String url) {
+        return HTTPGet(new HttpGet(url));
+    }
 
-    public static String HTTPGet(String url)
-    {
+    public static String HTTPGet(HttpGet httpget) {
         HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httpget = new HttpGet(url);
+
         HttpResponse response;
+        BufferedReader reader = null;
+
         try {
             response = httpclient.execute(httpget);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
                 InputStream instream = entity.getContent();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
+                reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line;
                 try {
@@ -59,16 +72,50 @@ public class Var {
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    try {
-                        instream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    try { instream.close(); }
+                    catch (IOException e) { e.printStackTrace(); }
                 }
                 return sb.toString().trim();
             }
 
 
+        } catch (Exception e) { e.printStackTrace();  Log.e("GetData", "error in http Request"); }
+        finally{
+            if (reader != null)
+                try { reader.close(); }
+                catch (IOException e) { e.printStackTrace(); }
+        }
+        return null;
+    }
+
+
+    public static String HTTPPost(String url) {
+        return HTTPPost(new HttpPost(url));
+    }
+
+    public static String HTTPPost(HttpPost httpPost) {
+        try {
+            DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
+
+            InputStream inputStream;
+            HttpResponse response = httpclient.execute(httpPost);
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+                InputStream instream = entity.getContent();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                try {
+                    while ((line = reader.readLine()) != null)  sb.append(line + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try { instream.close(); }
+                    catch (IOException e) { e.printStackTrace(); }
+                }
+                return sb.toString().trim();
+            }
         } catch (Exception e) { e.printStackTrace();  Log.e("GetData", "error in http Request"); }
         return null;
     }

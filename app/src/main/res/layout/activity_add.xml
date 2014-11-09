@@ -4,158 +4,33 @@
     tools:context="com.edaviessmith.consumecontent.AddActivity">
 
 
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" >
-
-        <LinearLayout
-            android:id="@+id/profile"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin">
-
-            <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
-
-                <ImageButton
-                    android:id="@+id/user_picture_ib"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"/>
-
-                <EditText
-                    android:id="@+id/user_name_edt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginLeft="25dp"
-                    android:layout_marginStart="25dp"
-                    android:layout_toEndOf="@+id/user_picture_ib"
-                    android:layout_toRightOf="@+id/user_picture_ib" />
-
-                <android.support.v7.widget.SwitchCompat
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/notification_sw"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignLeft="@+id/user_name_edt"
-                    android:layout_alignStart="@+id/user_name_edt" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Notification"
-                    android:id="@+id/textView3"
-                    android:layout_toEndOf="@+id/notification_sw"
-                    android:layout_alignParentBottom="true"
-                    android:layout_toRightOf="@+id/notification_sw" />
-
-            </RelativeLayout>
-
-            <ImageButton
-                android:id="@+id/youtube_ib"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_below="@+id/user_picture_ib"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-
-            <ImageButton
-                android:id="@+id/twitter_ib"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_below="@+id/user_picture_ib"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-
-
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:gravity="center_vertical"
-                android:text="Feeds"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_below="@+id/user_picture_ib" />
-
-
-            <View
+            <!--<View
                 android:id="@+id/div_v"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@+id/textView2"
-                android:background="#b4949494" />
+                android:background="#b4949494" />-->
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/feed_lv" />
 
 
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/div_v"
-                android:layout_marginTop="25dp"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:id="@+id/media_type_iv" />
-
-                    <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/display_name_edt"
-                        android:text="Youtube Uploads"
-                        android:layout_alignParentTop="true"
-                        android:layout_toRightOf="@+id/media_type_iv"
-                        android:layout_toEndOf="@+id/media_type_iv"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentEnd="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="Uploads"
-                        android:id="@+id/feed_type_tv"
-                        android:layout_toEndOf="@+id/media_type_iv"
-                        android:layout_toRightOf="@+id/media_type_iv"
-                        android:layout_below="@+id/display_name_edt"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentEnd="true" />
-                </RelativeLayout>
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/search_rl"
-        android:background="#bb000000"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/search_ll"
+        android:background="#d2000000"
+        android:orientation="vertical"
         android:visibility="gone">
+
 
         <ListView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/search_lv" />
-    </RelativeLayout>
+    </LinearLayout>
 
 
 </RelativeLayout>
