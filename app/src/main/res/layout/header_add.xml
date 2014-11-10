@@ -31,7 +31,7 @@
             android:layout_marginStart="25dp"
             android:layout_toEndOf="@+id/user_picture_ib"
             android:layout_toRightOf="@+id/user_picture_ib"
-            android:text="Display Name" />
+            android:hint="@string/user_name" />
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/notification_sw"
@@ -48,54 +48,71 @@
             android:layout_alignBottom="@+id/notification_sw"
             android:layout_alignTop="@+id/notification_sw"
             android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_toLeftOf="@+id/notification_sw"
             android:layout_toStartOf="@+id/notification_sw"
             android:gravity="center_vertical"
-            android:text="All Notifications"
+            android:text="@string/all_notifications"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/youtube_v"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/youtube_ib"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@null"
             android:scaleType="fitCenter"
+            android:contentDescription="@string/youtube"
             android:src="@drawable/ic_youtube_icon" />
 
         <TextView
             android:id="@+id/youtube_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Youtube Channel" />
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:text="@string/find_youtube_channel" />
 
     </LinearLayout>
 
 
     <LinearLayout
+        android:id="@+id/twitter_v"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:padding="5dp"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/twitter_ib"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@null"
             android:scaleType="fitCenter"
+            android:contentDescription="@string/twitter"
             android:src="@drawable/ic_twitter_icon" />
 
         <TextView
             android:id="@+id/twitter_ib_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Twitter Handle" />
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:text="@string/find_twitter_handle" />
 
     </LinearLayout>
 
@@ -104,11 +121,9 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/user_picture_ib"
+        android:layout_marginTop="5dp"
         android:gravity="center_vertical"
-        android:text="Feeds"
+        android:text="@string/feeds"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

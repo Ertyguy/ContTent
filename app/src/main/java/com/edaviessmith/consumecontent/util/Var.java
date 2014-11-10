@@ -20,9 +20,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Var {
 
@@ -158,17 +155,7 @@ public class Var {
     }
 
 
-    public static Map<String, String> decodeUrl(String s) {
-        Map<String, String> params = new HashMap<String, String>();
-        if (s != null) {
-            String array[] = s.split("&");
-            for (String parameter : array) {
-                String v[] = parameter.split("=");
-                if (v.length > 1) {
-                    params.put(URLDecoder.decode(v[0]), v.length > 1 ? URLDecoder.decode(v[1]) : null);
-                }
-            }
-        }
-        return params;
+    public static boolean isEmpty(String s) {
+        return (s != null && (s.toString().trim().isEmpty()));
     }
 }

@@ -11,7 +11,14 @@ public class TwitterFeed extends MediaFeed {
     public List<TwitterItem> twitterItems;
 
     public String thumbnail;
+    public String name;
     public String displayName;
+
+
+    public TwitterFeed() {
+        this.type = Var.TYPE_TWITTER;
+        this.name = "Twitter";
+    }
 
     public TwitterFeed(String feedId) {
         this.type = Var.TYPE_TWITTER;
@@ -56,5 +63,15 @@ public class TwitterFeed extends MediaFeed {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 }

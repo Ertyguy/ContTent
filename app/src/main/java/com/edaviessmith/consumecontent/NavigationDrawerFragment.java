@@ -141,7 +141,7 @@ public class NavigationDrawerFragment extends Fragment {
 	        }
 	        
 	        User user = data.get(position);
-	        holder.name_tv.setText(user.name);
+	        holder.name_tv.setText(user.getName());
 	        
 	        return row;
 	    }

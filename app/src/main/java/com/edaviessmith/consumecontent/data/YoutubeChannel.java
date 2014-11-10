@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class YoutubeChannel {
-    String displayName;
+
     String channelId;
+    String name;
     String thumbnail;
     List<YoutubeFeed> youtubeFeeds;
 
@@ -15,19 +16,19 @@ public class YoutubeChannel {
         youtubeFeeds = new ArrayList<YoutubeFeed>();
     }
 
-    public YoutubeChannel(String displayName, String channelId, String thumbnail) {
-        this.displayName = displayName;
+    public YoutubeChannel(String name, String channelId, String thumbnail) {
+        this.name = name;
         this.channelId = channelId;
         this.thumbnail = thumbnail;
         youtubeFeeds = new ArrayList<YoutubeFeed>();
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getName() {
+        return name;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getChannelId() {

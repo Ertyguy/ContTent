@@ -22,11 +22,7 @@ import com.edaviessmith.consumecontent.R;
 
 public final class TwitterDialog extends Dialog {
 
-    //private static final float[] DIMENSIONS_LANDSCAPE = { 460, 260 };
-    //private static final float[] DIMENSIONS_PORTRAIT = { 280, 420 };
     private static final FrameLayout.LayoutParams FILL = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-
     private final String url;
     private final TwitterAuthListener listener;
     private ProgressDialog spinner;

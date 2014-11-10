@@ -64,7 +64,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     LinearLayout search_ll;
     View searchYoutube_v, searchTwitter_v, searchDiv_v;
 
-    ImageButton userPicture_ib, youtube_ib, twitter_ib;
+    View youtube_v, twitter_v;
+    ImageButton userPicture_ib;
     EditText userName_edt;
 
     int spinnerInit, spinnerSelect;
@@ -144,7 +145,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
 
         feed_lv = (ListView) findViewById(R.id.feed_lv);
-        feed_lv.addHeaderView(header);
+        feed_lv.addHeaderView(header, null, false);
 
 
         feedAdapter = new FeedAdapter(this);
@@ -153,10 +154,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //Header
         userPicture_ib = (ImageButton) header.findViewById(R.id.user_picture_ib);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
-        youtube_ib = (ImageButton) header.findViewById(R.id.youtube_ib);
-        twitter_ib = (ImageButton) header.findViewById(R.id.twitter_ib);
-        youtube_ib.setOnClickListener(this);
-        twitter_ib.setOnClickListener(this);
+        youtube_v = header.findViewById(R.id.youtube_v);
+        twitter_v = header.findViewById(R.id.twitter_v);
+        youtube_v.setOnClickListener(this);
+        twitter_v.setOnClickListener(this);
 
         //Search
         search_ll = (LinearLayout) findViewById(R.id.search_ll);
@@ -290,16 +291,20 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         if(searchMode == Var.SEARCH_YOUTUBE) {
-            editUser.youtubeChannel = youtubeChannelSearch.get(position - 1);
-            if (editUser.youtubeChannel.getThumbnail() != null)
-                imageLoader.DisplayImage(editUser.youtubeChannel.getThumbnail(), userPicture_ib);
-            userName_edt.setText(editUser.youtubeChannel.getDisplayName());
+            editUser.setYoutubeChannel(youtubeChannelSearch.get(position - 1));
+            if (!Var.isEmpty(editUser.getThumbnail()) && !Var.isEmpty(editUser.getYoutubeChannel().getThumbnail())) {
+                editUser.setThumbnail(editUser.getYoutubeChannel().getThumbnail());
+                imageLoader.DisplayImage(editUser.getThumbnail(), userPicture_ib);
+            }
+            userName_edt.setText(editUser.getYoutubeChannel().getName());
         }
 
         if(searchMode == Var.SEARCH_TWITTER) {
-            editUser.twitterFeed = twitterFeedSearch.get(position - 1);
-            if (editUser.twitterFeed.getThumbnail() != null)
-                imageLoader.DisplayImage(editUser.twitterFeed.getThumbnail(), userPicture_ib);
+            editUser.setTwitterFeed(twitterFeedSearch.get(position - 1));
+            if (!Var.isEmpty(editUser.getThumbnail()) && !Var.isEmpty(editUser.getTwitterFeed().getThumbnail())) {
+                editUser.setThumbnail(editUser.getTwitterFeed().getThumbnail());
+                imageLoader.DisplayImage(editUser.getThumbnail(), userPicture_ib);
+            }
 
 
         }
@@ -319,16 +324,14 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     @Override
     public void onClick(View v) {
-        if(v == youtube_ib) toggleSearch(Var.SEARCH_YOUTUBE);
-        if(v == twitter_ib) toggleSearch(Var.SEARCH_TWITTER);
+        if(v == youtube_v) toggleSearch(Var.SEARCH_YOUTUBE);
+        if(v == twitter_v) toggleSearch(Var.SEARCH_TWITTER);
         if(v == searchTwitterLogin_tv) {
             twitter.resetAccessToken();
             if (!twitter.hasAccessToken()) twitter.authorize();
-
             //Hide the signin
             searchTwitter_v.setVisibility(View.GONE);
             searchDiv_v.setVisibility(View.GONE);
-
         }
     }
 
@@ -361,6 +364,16 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+        if(searchMode != Var.SEARCH_NONE) {
+            toggleSearch(Var.SEARCH_NONE);
+            return;
+        }
+        moveTaskToBack(true);
+    }
+
 
 
     private class SearchYoutubeTask extends AsyncTask<String, Void, String> {
@@ -420,7 +433,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                             if (Var.isJsonObject(item, "snippet")) {                        //Channel Name
                                 JSONObject snippet = item.getJSONObject("snippet");
                                 if (Var.isJsonString(snippet, "title")) {
-                                    channel.setDisplayName(snippet.getString("title"));
+                                    channel.setName(snippet.getString("title"));
                                 }
 
                                 if (Var.isJsonObject(snippet, "thumbnails")) {              //Channel Thumbnail
@@ -461,7 +474,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
                 //TODO check the internet connection here
 
-                String url = "https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id="+editUser.youtubeChannel.getChannelId()+"&fields=items%2FcontentDetails&key=" + Var.DEVELOPER_KEY;
+                String url = "https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id="+editUser.getYoutubeChannel().getChannelId()+"&fields=items%2FcontentDetails&key=" + Var.DEVELOPER_KEY;
                 feeds = Var.HTTPGet(url);
 
             } catch (Throwable t) {
@@ -476,7 +489,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if (isCancelled()) return;
             else {
 
-                editUser.youtubeChannel.getYoutubeFeeds().clear();
+                editUser.getYoutubeChannel().getYoutubeFeeds().clear();
 
                 try {
                     JSONObject res = new JSONObject(feeds);
@@ -488,13 +501,13 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                             if (Var.isJsonObject(contentDetails, "relatedPlaylists")) {                        //Channel Name
                                 JSONObject relatedPlaylists = contentDetails.getJSONObject("relatedPlaylists");
                                 if (Var.isJsonString(relatedPlaylists, "uploads"))
-                                    editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("uploads"), "Youtube Uploads"));
+                                    editUser.getYoutubeChannel().getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("uploads"), "Youtube Uploads"));
                                 if (Var.isJsonString(relatedPlaylists, "likes"))
-                                    editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("likes"), "Liked Videos"));
+                                    editUser.getYoutubeChannel().getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("likes"), "Liked Videos"));
                                 if (Var.isJsonString(relatedPlaylists, "favorites"))
-                                    editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("favorites"), "Favorite Videos"));
+                                    editUser.getYoutubeChannel().getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("favorites"), "Favorite Videos"));
                             }
-                            editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed()); //Activity
+                            editUser.getYoutubeChannel().getYoutubeFeeds().add(new YoutubeFeed()); //Activity
                         }
                         //if(youtubeChannelSearch.size() >= maxResults) searchBusy = false; //Keep busy if nothing is returned
                     }
@@ -503,7 +516,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                     t.printStackTrace();
                 }
 
-                Log.d(TAG,"feed sync working "+editUser.youtubeChannel.getYoutubeFeeds().size());
+                Log.d(TAG,"feed sync working "+editUser.getYoutubeChannel().getYoutubeFeeds().size());
                 feedAdapter.notifyDataSetChanged();
             }
         }
@@ -523,12 +536,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         @Override
         public int getCount() {
-            return editUser.youtubeChannel.getYoutubeFeeds().size();
+            return editUser.getYoutubeChannel().getYoutubeFeeds().size();
         }
 
         @Override
         public YoutubeFeed getItem(int position) {
-            return editUser.youtubeChannel.getYoutubeFeeds().get(position);
+            return editUser.getYoutubeChannel().getYoutubeFeeds().get(position);
         }
 
         @Override
@@ -624,7 +637,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
                 if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
 
-                holder.name_tv.setText(feed.getDisplayName());
+                holder.name_tv.setText(feed.getName());
             }
 
             if(searchMode == Var.SEARCH_TWITTER) {
