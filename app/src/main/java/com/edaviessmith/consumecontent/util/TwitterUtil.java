@@ -187,15 +187,11 @@ public final class TwitterUtil {
             progressDialog.dismiss();
 
             if (msg.what == 1) {
-                if (msg.arg1 == 1)
-                    listener.onError("Error getting request token");
-                else
-                    listener.onError("Error getting access token");
+                if (msg.arg1 == 1) listener.onError("Error getting request token");
+                else listener.onError("Error getting access token");
             } else {
-                if (msg.arg1 == 1)
-                    showLoginDialog((String) msg.obj);
-                else
-                    listener.onComplete("");
+                if (msg.arg1 == 1) showLoginDialog((String) msg.obj);
+                else listener.onComplete("");
             }
         }
     };
@@ -215,11 +211,8 @@ public final class TwitterUtil {
             httppost.setHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8");
             httppost.setEntity(new StringEntity("grant_type=client_credentials"));
 
-
             JSONObject root = new JSONObject(Var.HTTPPost(httppost));
-            if(Var.isJsonString(root, "access_token"))
-                bearerToken =root.getString("access_token");
-
+            if(Var.isJsonString(root, "access_token")) bearerToken = root.getString("access_token");
         } catch (Exception e) {
             Log.e("loadTwitterToken", "onPost Error:" + e.getMessage());
         }

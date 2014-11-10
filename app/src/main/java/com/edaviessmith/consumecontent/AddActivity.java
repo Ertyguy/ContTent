@@ -62,7 +62,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     List<YoutubeChannel> youtubeChannelSearch;
     List<TwitterFeed> twitterFeedSearch;
     LinearLayout search_ll;
-    View searchYoutube_v, searchTwitter_v;
+    View searchYoutube_v, searchTwitter_v, searchDiv_v;
 
     ImageButton userPicture_ib, youtube_ib, twitter_ib;
     EditText userName_edt;
@@ -122,7 +122,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             searchView.requestFocusFromTouch();
 
             searchTwitter_v.setVisibility((searchMode == Var.SEARCH_TWITTER && !twitter.hasAccessToken()) ? View.VISIBLE: View.GONE);
+            searchDiv_v.setVisibility((searchMode == Var.SEARCH_TWITTER && twitter.hasAccessToken()) ? View.GONE: View.VISIBLE);
             searchYoutube_v.setVisibility((searchMode == Var.SEARCH_YOUTUBE) ? View.VISIBLE: View.GONE);
+
 
         }
     }
@@ -160,6 +162,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         search_ll = (LinearLayout) findViewById(R.id.search_ll);
         searchYoutube_v = searchHeader.findViewById(R.id.youtube_v);
         searchTwitter_v = searchHeader.findViewById(R.id.twitter_v);
+        searchDiv_v = searchHeader.findViewById(R.id.div_v);
         searchTwitterLogin_tv = (TextView) searchHeader.findViewById(R.id.twitter_login_tv);
         searchTwitterLogin_tv.setOnClickListener(this);
 
@@ -191,8 +194,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 Log.d(TAG, "twitter listener authorized " + twitter.getUsername());
             }
         });
-
-        //if (!twitter.hasAccessToken()) twitter.authorize();
 
         spinnerInit = 1;
     }
@@ -270,6 +271,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 searchTwitterTask.cancel(true);
                 searchTwitterTask = null;
             }
+            searchTwitter_v.setVisibility(twitter.hasAccessToken() ? View.GONE: View.VISIBLE);
+            searchDiv_v.setVisibility(twitter.hasAccessToken() ? View.GONE: View.VISIBLE);
+
             searchTwitterTask = new SearchTwitterTask();
             searchTwitterTask.execute();
         } else {
@@ -292,6 +296,14 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             userName_edt.setText(editUser.youtubeChannel.getDisplayName());
         }
 
+        if(searchMode == Var.SEARCH_TWITTER) {
+            editUser.twitterFeed = twitterFeedSearch.get(position - 1);
+            if (editUser.twitterFeed.getThumbnail() != null)
+                imageLoader.DisplayImage(editUser.twitterFeed.getThumbnail(), userPicture_ib);
+
+
+        }
+
         toggleSearch(Var.SEARCH_NONE);
         updateFeeds();
     }
@@ -312,6 +324,11 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         if(v == searchTwitterLogin_tv) {
             twitter.resetAccessToken();
             if (!twitter.hasAccessToken()) twitter.authorize();
+
+            //Hide the signin
+            searchTwitter_v.setVisibility(View.GONE);
+            searchDiv_v.setVisibility(View.GONE);
+
         }
     }
 

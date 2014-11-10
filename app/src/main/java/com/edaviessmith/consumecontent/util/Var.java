@@ -1,6 +1,9 @@
 package com.edaviessmith.consumecontent.util;
 
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -51,6 +54,12 @@ public class Var {
 
 
     //Util functions
+    public static int getPixels(int unit, float size) {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        return (int) TypedValue.applyDimension(unit, size, metrics);
+    }
+
+
     public static String HTTPGet(String url) {
         return HTTPGet(new HttpGet(url));
     }

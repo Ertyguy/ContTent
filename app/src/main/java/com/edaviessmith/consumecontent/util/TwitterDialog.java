@@ -8,7 +8,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Display;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebView;
@@ -20,16 +21,11 @@ import android.widget.TextView;
 import com.edaviessmith.consumecontent.R;
 
 public final class TwitterDialog extends Dialog {
-    //
-    // This code is heavily borrowed from
-    // http://abhinavasblog.blogspot.com/2011/06/for-all-my-code-thirsty-friends-twitter.html
-    //
-    private static final float[] DIMENSIONS_LANDSCAPE = { 460, 260 };
-    private static final float[] DIMENSIONS_PORTRAIT = { 280, 420 };
-    private static final FrameLayout.LayoutParams FILL = new FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
-    private static final int MARGIN = 4;
-    private static final int PADDING = 2;
+
+    //private static final float[] DIMENSIONS_LANDSCAPE = { 460, 260 };
+    //private static final float[] DIMENSIONS_PORTRAIT = { 280, 420 };
+    private static final FrameLayout.LayoutParams FILL = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
 
     private final String url;
     private final TwitterAuthListener listener;
@@ -37,10 +33,11 @@ public final class TwitterDialog extends Dialog {
     private WebView webView;
     private TextView title;
     private boolean progressDialogRunning = false;
+    private Context context;
 
     public TwitterDialog(Context context, String url, TwitterAuthListener listener) {
         super(context);
-
+        this.context = context;
         this.url = url;
         this.listener = listener;
     }
@@ -54,32 +51,35 @@ public final class TwitterDialog extends Dialog {
         spinner.setMessage("Loading...");
 
         LinearLayout layout = new LinearLayout(getContext());
-
         layout.setOrientation(LinearLayout.VERTICAL);
 
         setUpTitle(layout);
         setUpWebView(layout);
 
-        Display display = getWindow().getWindowManager().getDefaultDisplay();
-        float scale = getContext().getResources().getDisplayMetrics().density;
-        float[] dimensions =
-                (display.getWidth() < display.getHeight()) ? DIMENSIONS_PORTRAIT : DIMENSIONS_LANDSCAPE;
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
 
-        addContentView(layout, new FrameLayout.LayoutParams((int) (dimensions[0] * scale + 0.5f),
-                (int) (dimensions[1] * scale + 0.5f)));
+        float[] dimensions = (width < height) ?
+            new float[]{ width < Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 280)? width :Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 280), height < Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 420) ? height : Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 420) }:
+            new float[]{ width < Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 460)? width :Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 460), height < Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 260) ? height : Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 260) };
+
+        addContentView(layout, new FrameLayout.LayoutParams((int) (dimensions[0]), (int) (dimensions[1])));
     }
 
     private void setUpTitle(LinearLayout layout) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        Drawable icon = getContext().getResources().getDrawable(R.drawable.ic_twitter_icon);
+        Drawable icon = getContext().getResources().getDrawable(R.drawable.ic_twitter_white);
+
+        int MARGIN = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 5);
+        int PADDING = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 5);
 
         title = new TextView(getContext());
-
-        title.setText("Twitter");
+        title.setText("Twitter / Authorize an application");
         title.setTextColor(Color.WHITE);
         title.setTypeface(Typeface.DEFAULT_BOLD);
-        title.setBackgroundColor(0xFFbbd7e9);
+        title.setBackgroundColor(getContext().getResources().getColor(R.color.blue_twitter));
         title.setPadding(MARGIN + PADDING, MARGIN, MARGIN, MARGIN);
         title.setCompoundDrawablePadding(MARGIN + PADDING);
         title.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
