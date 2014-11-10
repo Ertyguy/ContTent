@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent;
+package com.edaviessmith.consumecontent.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

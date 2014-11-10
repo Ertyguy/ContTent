@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent;
+package com.edaviessmith.consumecontent.util;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -16,6 +16,8 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.edaviessmith.consumecontent.R;
 
 public final class TwitterDialog extends Dialog {
     //
@@ -102,7 +104,7 @@ public final class TwitterDialog extends Dialog {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (url.startsWith(TwitterApp.CALLBACK_URL)) {
+            if (url.startsWith(TwitterUtil.CALLBACK_URL)) {
                 listener.onComplete(url);
 
                 TwitterDialog.this.dismiss();

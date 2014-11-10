@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent;
+package com.edaviessmith.consumecontent.util;
 
 public interface TwitterAuthListener {
     public void onComplete(String value);

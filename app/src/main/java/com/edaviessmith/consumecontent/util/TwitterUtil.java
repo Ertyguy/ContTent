@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent;
+package com.edaviessmith.consumecontent.util;
 
 
 import android.app.ProgressDialog;
@@ -8,8 +8,6 @@ import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Window;
-
-import com.edaviessmith.consumecontent.util.Var;
 
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -27,15 +25,13 @@ import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.auth.AccessToken;
 
-public final class TwitterApp {
+public final class TwitterUtil {
 
     private final Context context;
     public final Twitter twitter;
     private final TwitterSession session;
     private final CommonsHttpOAuthConsumer httpOauthConsumer;
-    private final OAuthProvider httpOauthprovider;
-    private final String consumerKey;
-    private final String secretKey;
+    private final OAuthProvider httpOauthProvider;
     private final ProgressDialog progressDialog;
     private TwitterAuthListener listener;
     private AccessToken accessToken;
@@ -47,23 +43,16 @@ public final class TwitterApp {
     private static final String TWITTER_REQUEST_URL = "https://api.twitter.com/oauth/request_token";
     private static final String TWITTER_BEARER_TOKEN_URL = "https://api.twitter.com/oauth2/token";
 
-    public TwitterApp(Context context, String consumerKey, String secretKey) {
+    public TwitterUtil(Context context) {
         this.context = context;
-        this.consumerKey = consumerKey;
-        this.secretKey = secretKey;
 
         twitter = new TwitterFactory().getInstance();
         session = new TwitterSession(context);
         progressDialog = new ProgressDialog(context);
         progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        httpOauthConsumer = new CommonsHttpOAuthConsumer(consumerKey, secretKey);
-
-        String request_url = TWITTER_REQUEST_URL;
-        String access_token_url = TWITTER_ACCESS_TOKEN_URL;
-        String authorize_url = TWITTER_AUTHORIZE_URL;
-
-        httpOauthprovider = new DefaultOAuthProvider(request_url, access_token_url, authorize_url);
+        httpOauthConsumer = new CommonsHttpOAuthConsumer(Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
+        httpOauthProvider = new DefaultOAuthProvider(TWITTER_REQUEST_URL, TWITTER_ACCESS_TOKEN_URL, TWITTER_AUTHORIZE_URL);
         accessToken = session.getAccessToken();
 
         configureToken();
@@ -75,7 +64,7 @@ public final class TwitterApp {
 
     private void configureToken() {
         if (accessToken != null) {
-            twitter.setOAuthConsumer(consumerKey, secretKey);
+            twitter.setOAuthConsumer(Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
             twitter.setOAuthAccessToken(accessToken);
         }
     }
@@ -108,7 +97,7 @@ public final class TwitterApp {
                 int what = 1;
 
                 try {
-                    authUrl = httpOauthprovider.retrieveRequestToken(httpOauthConsumer, CALLBACK_URL);
+                    authUrl = httpOauthProvider.retrieveRequestToken(httpOauthConsumer, CALLBACK_URL);
                     what = 0;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -130,7 +119,7 @@ public final class TwitterApp {
                 int what = 1;
 
                 try {
-                    httpOauthprovider.retrieveAccessToken(httpOauthConsumer, verifier);
+                    httpOauthProvider.retrieveAccessToken(httpOauthConsumer, verifier);
 
                     accessToken = new AccessToken(httpOauthConsumer.getToken(), httpOauthConsumer.getTokenSecret());
 
@@ -185,7 +174,7 @@ public final class TwitterApp {
             }
             @Override
             public void onError(String value) {
-                TwitterApp.this.listener.onError("Failed opening authorization page");
+                TwitterUtil.this.listener.onError("Failed opening authorization page");
             }
         };
 

@@ -31,6 +31,8 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.util.TwitterAuthListener;
+import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
 
 import org.apache.http.client.methods.HttpGet;
@@ -40,9 +42,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.ResponseList;
 
-public class AddActivity extends ActionBarActivity implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener, View.OnClickListener, AbsListView.OnScrollListener, SearchView.OnQueryTextListener{
 
+public class AddActivity extends ActionBarActivity implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener, View.OnClickListener,
+                                                              AbsListView.OnScrollListener, SearchView.OnQueryTextListener{
     String TAG = "AddActivity";
 
     SearchView searchView;
@@ -67,6 +71,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     int searchMode = Var.SEARCH_NONE;
 
     String search, pageToken;
+    int twitterPage;
     boolean searchBusy;
 
     User editUser;
@@ -80,7 +85,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     private SearchTwitterTask searchTwitterTask;
     private HttpFeedAsyncTask feedTask;
 
-    TwitterApp twitter;
+    TwitterUtil twitter;
 
 
 
@@ -116,7 +121,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             searchItem.setVisible(true);
             searchView.requestFocusFromTouch();
 
-            searchTwitter_v.setVisibility((searchMode == Var.SEARCH_TWITTER) ? View.VISIBLE: View.GONE);
+            searchTwitter_v.setVisibility((searchMode == Var.SEARCH_TWITTER && !twitter.hasAccessToken()) ? View.VISIBLE: View.GONE);
             searchYoutube_v.setVisibility((searchMode == Var.SEARCH_YOUTUBE) ? View.VISIBLE: View.GONE);
 
         }
@@ -172,7 +177,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //icon_sp.setSelection(social_icons.length - 1);
         //icon_sp.setOnItemSelectedListener(this);
 
-        twitter = new TwitterApp(this, Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
+        twitter = new TwitterUtil(this);
         twitter.setListener(new TwitterAuthListener() {
             @Override
             public void onError(String value) {
@@ -180,16 +185,14 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 Log.e("TWITTER", value);
                 twitter.resetAccessToken();
             }
+
             @Override
             public void onComplete(String value) {
-                Log.d(TAG, "twitter listener authorized "+twitter.getUsername());
+                Log.d(TAG, "twitter listener authorized " + twitter.getUsername());
             }
         });
 
-        //twitter.resetAccessToken();
-        if (!twitter.hasAccessToken()) twitter.authorize();
-
-        //new loadTwitterToken().execute();
+        //if (!twitter.hasAccessToken()) twitter.authorize();
 
         spinnerInit = 1;
     }
@@ -228,6 +231,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     @Override
     public boolean onQueryTextSubmit(String s) {
         pageToken = null;
+        twitterPage = 0;
         search = s;
         if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
         if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
@@ -237,6 +241,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     @Override
     public boolean onQueryTextChange(String s) {
         pageToken = null;
+        twitterPage = 0;
         search = s;
         if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
         if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
@@ -305,17 +310,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         if(v == youtube_ib) toggleSearch(Var.SEARCH_YOUTUBE);
         if(v == twitter_ib) toggleSearch(Var.SEARCH_TWITTER);
         if(v == searchTwitterLogin_tv) {
-           //TODO: authorize app here
-
             twitter.resetAccessToken();
-            if (twitter.hasAccessToken()) {
-                //tweetWithValidAuth(twitter);
-                Log.d(TAG, "twitter authorized "+twitter.getUsername());
-            } else {
-                twitter.authorize();
-            }
-
-
+            if (!twitter.hasAccessToken()) twitter.authorize();
         }
     }
 
@@ -335,7 +331,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         if(view.getLastVisiblePosition() >= totalItemCount - 5 && !searchBusy){
-            searchYoutube();
+            if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
+            if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
         }
     }
 
@@ -636,17 +633,22 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     protected class SearchTwitterTask extends AsyncTask<Void, Void, Integer> {
         String jsonTokenStream;
+        ResponseList<twitter4j.User> users;
 
         @Override
         protected Integer doInBackground(Void... params) {
 
             try {
-                String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
-                HttpGet httpget = new HttpGet(tweeterURL);
-                httpget.setHeader("Authorization", "Bearer " + twitter.getBearerToken());
-                httpget.setHeader("Content-type", "application/json");
+                if(!twitter.hasAccessToken()) {
+                    String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
+                    HttpGet httpget = new HttpGet(tweeterURL);
+                    httpget.setHeader("Authorization", "Bearer " + twitter.getBearerToken());
+                    httpget.setHeader("Content-type", "application/json");
 
-                jsonTokenStream = Var.HTTPGet(httpget);
+                    jsonTokenStream = Var.HTTPGet(httpget);
+                } else {
+                    users = twitter.twitter.searchUsers(search, twitterPage++);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -657,41 +659,44 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if (isCancelled()) return;
             else {
 
-                twitterFeedSearch.clear();
 
-                StringBuilder sb = new StringBuilder();
+                if(users == null || twitterPage == 1) {
+                    twitterFeedSearch.clear();
+                }
+
                 try {
+                    if(!twitter.hasAccessToken()) {
 
-                    JSONArray results = new JSONArray(jsonTokenStream);
 
-                    for (int i = 0; i < results.length(); i++) {
-                        JSONObject item = results.getJSONObject(i);
+                        JSONArray results = new JSONArray(jsonTokenStream);
 
-                        if(Var.isJsonString(item, "id")) {
+                        for (int i = 0; i < results.length(); i++) {
+                            JSONObject item = results.getJSONObject(i);
 
-                            TwitterFeed feed = new TwitterFeed(item.getString("id"));
+                            if (Var.isJsonString(item, "id")) {
 
-                            if (Var.isJsonString(item, "name") && Var.isJsonString(item, "screen_name")) {
-                                feed.setDisplayName(item.getString("name") + " @" + item.get("screen_name"));
+                                TwitterFeed feed = new TwitterFeed(item.getString("id"));
+
+                                if (Var.isJsonString(item, "name") && Var.isJsonString(item, "screen_name"))
+                                    feed.setDisplayName(item.getString("name") + " @" + item.get("screen_name"));
+                                if (Var.isJsonString(item, "profile_image_url"))
+                                    feed.setThumbnail(item.getString("profile_image_url"));
+
+                                twitterFeedSearch.add(feed);
                             }
-
-                            if(Var.isJsonString(item, "profile_image_url")) {
-                                feed.setThumbnail(item.getString("profile_image_url"));
-                            }
+                        }
+                    } else {
+                        Log.e("loadTwitterToken", "user search " + users.size());
+                        for(twitter4j.User u : users) {
+                            TwitterFeed feed = new TwitterFeed(String.valueOf(u.getId()));
+                            feed.setDisplayName(u.getName() + " @" + u.getScreenName());
+                            feed.setThumbnail(u.getProfileImageURL());
 
                             twitterFeedSearch.add(feed);
                         }
                     }
-
                     searchAdapter.notifyDataSetChanged();
-
-                    //JSONArray tweetArray = resultObject.getJSONArray("results");
-               /* for (int t=0; t<tweetArray.length(); t++) {
-                    JSONObject tweetObject = tweetArray.getJSONObject(t);
-                    sb.append(tweetObject.getString("from_user")+": ");
-                    sb.append(tweetObject.get("text")+"\n\n");
-                }*/
-                    Log.e("loadTwitterToken", "all worked but nothing set" + jsonTokenStream);
+                    Log.e("loadTwitterToken", "all worked");
                 } catch (Exception e) {
                     Log.e("Tweet", "Error retrieving JSON stream" + e.getMessage());
                     e.printStackTrace();
