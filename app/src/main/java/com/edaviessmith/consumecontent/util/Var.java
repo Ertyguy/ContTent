@@ -17,13 +17,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Var {
 
     //APIs
     static public final String DEVELOPER_KEY = "AIzaSyCfyVwQZCgFDgt-s02mPbpYgVgA_m-r7jI";
-    static public final String TWITTER_OAUTH_CONSUMER_KEY = "dTvI2BDGYncp0H1ypSYygg";
-    static public final String TWITTER_OAUTH_CONSUMER_SECRET = "84iO1oRvzFlMBJIRZm47pMV1FCWdrnFW7koDv0dyY8";
+    static public final String TWITTER_OAUTH_CONSUMER_KEY = "ZyQynwwUcoU885CixQM66gpk5";
+    static public final String TWITTER_OAUTH_CONSUMER_SECRET = "Vb1cTAkmOL3NY459eIBl14FweUV3Z3Y4Z4K53fiiJCPk8QVC9a";
 
     static public final String PREF_TW_AUTH = "twitter_auth";
     static public final String PREF_TW_ACCESS_TOKEN = "twitter_beareraccesstoken";
@@ -145,4 +148,18 @@ public class Var {
         return isValid;
     }
 
+
+    public static Map<String, String> decodeUrl(String s) {
+        Map<String, String> params = new HashMap<String, String>();
+        if (s != null) {
+            String array[] = s.split("&");
+            for (String parameter : array) {
+                String v[] = parameter.split("=");
+                if (v.length > 1) {
+                    params.put(URLDecoder.decode(v[0]), v.length > 1 ? URLDecoder.decode(v[1]) : null);
+                }
+            }
+        }
+        return params;
+    }
 }

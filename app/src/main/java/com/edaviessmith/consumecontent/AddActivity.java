@@ -7,7 +7,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SwitchCompat;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,7 +16,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -26,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
@@ -35,11 +34,6 @@ import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
 
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.brickred.socialauth.android.DialogListener;
-import org.brickred.socialauth.android.SocialAuthAdapter;
-import org.brickred.socialauth.android.SocialAuthError;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -53,7 +47,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     SearchView searchView;
     MenuItem searchItem, saveItem;
-    Integer social_icons[] = {R.drawable.ic_youtube_icon, R.drawable.ic_twitter_icon , R.drawable.ic_action_new};
+    Integer social_icons[] = {
+            R.drawable.ic_youtube_icon,
+            R.drawable.ic_twitter_icon ,
+            R.drawable.ic_action_new };
     Spinner icon_sp;
     ListView search_lv, feed_lv;
     SearchAdapter searchAdapter;
@@ -75,13 +72,16 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     User editUser;
 
 
-    SocialAuthAdapter adapter;
+    //SocialAuthAdapter adapter;
     private TextView searchTwitterLogin_tv;
 
     private ImageLoader imageLoader;
     private SearchYoutubeTask searchTask;
     private SearchTwitterTask searchTwitterTask;
     private HttpFeedAsyncTask feedTask;
+
+    TwitterApp twitter;
+
 
 
     @Override
@@ -172,14 +172,31 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //icon_sp.setSelection(social_icons.length - 1);
         //icon_sp.setOnItemSelectedListener(this);
 
-        new loadTwitterToken().execute();
+        twitter = new TwitterApp(this, Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
+        twitter.setListener(new TwitterAuthListener() {
+            @Override
+            public void onError(String value) {
+                Toast.makeText(AddActivity.this, "Login Failed", Toast.LENGTH_LONG).show();
+                Log.e("TWITTER", value);
+                twitter.resetAccessToken();
+            }
+            @Override
+            public void onComplete(String value) {
+                Log.d(TAG, "twitter listener authorized "+twitter.getUsername());
+            }
+        });
+
+        //twitter.resetAccessToken();
+        if (!twitter.hasAccessToken()) twitter.authorize();
+
+        //new loadTwitterToken().execute();
 
         spinnerInit = 1;
     }
 
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -288,37 +305,21 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         if(v == youtube_ib) toggleSearch(Var.SEARCH_YOUTUBE);
         if(v == twitter_ib) toggleSearch(Var.SEARCH_TWITTER);
         if(v == searchTwitterLogin_tv) {
-            adapter = new SocialAuthAdapter(new ResponseListener());
-            adapter.authorize(this, SocialAuthAdapter.Provider.TWITTER);
+           //TODO: authorize app here
+
+            twitter.resetAccessToken();
+            if (twitter.hasAccessToken()) {
+                //tweetWithValidAuth(twitter);
+                Log.d(TAG, "twitter authorized "+twitter.getUsername());
+            } else {
+                twitter.authorize();
+            }
+
+
         }
     }
 
-    private final class ResponseListener implements DialogListener
-    {
-        public void onComplete(Bundle values) {
 
-            //adapter.updateStatus(edit.getText().toString(), new MessageListener(),false);
-        }
-
-        @Override
-        public void onError(SocialAuthError e) {
-
-        }
-
-        @Override
-        public void onBack() {
-
-        }
-
-//        public void onError(DialogError error) {
-//            Log.d("Custom-UI" , "Error");
-//        }
-
-        public void onCancel() {
-            Log.d("Custom-UI" , "Cancelled");
-        }
-
-    }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) { }
@@ -465,30 +466,22 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
                 try {
                     JSONObject res = new JSONObject(feeds);
-
                     if (Var.isJsonArray(res, "items")) {
                         JSONArray items = res.getJSONArray("items");
-
                         JSONObject item = items.getJSONObject(0);
-
                         if(Var.isJsonObject(item, "contentDetails")) {
                             JSONObject contentDetails = item.getJSONObject(("contentDetails"));
-
                             if (Var.isJsonObject(contentDetails, "relatedPlaylists")) {                        //Channel Name
                                 JSONObject relatedPlaylists = contentDetails.getJSONObject("relatedPlaylists");
-                                if (Var.isJsonString(relatedPlaylists, "uploads")) {
+                                if (Var.isJsonString(relatedPlaylists, "uploads"))
                                     editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("uploads"), "Youtube Uploads"));
-                                }
-                                if (Var.isJsonString(relatedPlaylists, "likes")) {
+                                if (Var.isJsonString(relatedPlaylists, "likes"))
                                     editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("likes"), "Liked Videos"));
-                                }
-                                if (Var.isJsonString(relatedPlaylists, "favorites")) {
+                                if (Var.isJsonString(relatedPlaylists, "favorites"))
                                     editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed(relatedPlaylists.getString("favorites"), "Favorite Videos"));
-                                }
                             }
                             editUser.youtubeChannel.getYoutubeFeeds().add(new YoutubeFeed()); //Activity
                         }
-
                         //if(youtubeChannelSearch.size() >= maxResults) searchBusy = false; //Keep busy if nothing is returned
                     }
 
@@ -641,106 +634,22 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
 
-    public class IconAdapter extends ArrayAdapter<Integer> {
-
-        Integer objects[];
-
-        public IconAdapter(Context context, int textViewResourceId,   Integer[] objects) {
-            super(context, textViewResourceId, objects);
-            this.objects = objects;
-        }
-
-        @Override
-        public int getCount() {
-            // don't display last item. It is used as hint.
-            int count = super.getCount();
-            return count > 0 ? count - 1 : count;
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView,ViewGroup parent) {
-            return getCustomView(position, convertView, parent);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-            LayoutInflater inflater=getLayoutInflater();
-            View row = inflater.inflate(R.layout.item_image, parent, false);
-            ImageView image = (ImageView) row.findViewById(R.id.image_iv);
-            image.setImageResource(R.drawable.ic_action_new);
-            return row;
-
-        }
-
-        public View getCustomView(int position, View convertView, ViewGroup parent) {
-
-            LayoutInflater inflater=getLayoutInflater();
-            View row = inflater.inflate(R.layout.item_image, parent, false);
-            ImageView image = (ImageView) row.findViewById(R.id.image_iv);
-            image.setImageResource(objects[position]);
-
-            return row;
-        }
-    }
-
-
-
-
-
-
-    static String twitterToken = null;
-
-    protected class loadTwitterToken extends AsyncTask<Void, Void, Integer> {
-
-        String jsonTokenStream;
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-
-            try {
-                HttpPost httppost = new HttpPost("https://api.twitter.com/oauth2/token");
-
-                String authorization = "Basic " + Base64.encodeToString((Var.TWITTER_OAUTH_CONSUMER_KEY + ":" + Var.TWITTER_OAUTH_CONSUMER_SECRET).getBytes(), Base64.NO_WRAP);
-                httppost.setHeader("Authorization", authorization);
-                httppost.setHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8");
-                httppost.setEntity(new StringEntity("grant_type=client_credentials"));
-
-                jsonTokenStream = Var.HTTPPost(httppost);
-
-                return 1;
-            } catch (Exception e) {
-                Log.e("loadTwitterToken",  "doInBackground Error:" + e.getMessage());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            try {
-                JSONObject root = new JSONObject(jsonTokenStream);
-                if(Var.isJsonString(root, "access_token"))
-                    twitterToken = root.getString("access_token");
-            } catch (Exception e) {
-                Log.e("loadTwitterToken", "onPost Error:" + e.getMessage());
-            }
-
-        }
-    }
-
     protected class SearchTwitterTask extends AsyncTask<Void, Void, Integer> {
         String jsonTokenStream;
 
         @Override
         protected Integer doInBackground(Void... params) {
 
-            String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
-            HttpGet httpget = new HttpGet(tweeterURL);
-            httpget.setHeader("Authorization", "Bearer " + twitterToken);
-            httpget.setHeader("Content-type", "application/json");
+            try {
+                String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
+                HttpGet httpget = new HttpGet(tweeterURL);
+                httpget.setHeader("Authorization", "Bearer " + twitter.getBearerToken());
+                httpget.setHeader("Content-type", "application/json");
 
-            jsonTokenStream = Var.HTTPGet(httpget);
-
+                jsonTokenStream = Var.HTTPGet(httpget);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return 1;
         }
 

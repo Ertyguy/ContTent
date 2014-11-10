@@ -28,6 +28,12 @@
             android:name="com.edaviessmith.consumecontent.AddActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
             android:label="@string/title_activity_add" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="oauth" android:host="t4jsample"/>
+            </intent-filter>
         </activity>
     </application>
 
