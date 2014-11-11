@@ -29,4 +29,5 @@
     <string name="twitter_login_help">If you don\'t know the exact twitter username you must login to search</string>
     <string name="youtube_search_help">Picking a new channel will overwrite previous youtube settings (visibility and notifications)</string>
     <string name="rate_limit_error">Twitter only allows a certain number of searches overy 15 minutes</string>
+    <string name="page_does_not_exist_error">Could not find Twitter user</string>
 </resources>

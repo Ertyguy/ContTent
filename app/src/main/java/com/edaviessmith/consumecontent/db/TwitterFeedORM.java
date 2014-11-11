@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.TwitterFeed;
+import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class TwitterFeedORM {
             DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
             DB.COL_SORT             + " INTEGER, " +
             DB.COL_NAME   	        + " TEXT, " +
-            DB.COL_DISPLAY_NAME		+ " TEXT " +
+            DB.COL_DISPLAY_NAME		+ " TEXT ," +
             DB.COL_THUMBNAIL 	    + " TEXT, " +
             DB.COL_FEED_ID          + " TEXT, " +
             DB.COL_TYPE		        + " INTEGER " + ");";
@@ -80,7 +81,7 @@ public class TwitterFeedORM {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
         try {
-            database.update(DB.TABLE_TWITTER_FEED, twitterFeedUpdateToContentValues(twitterFeed), DB.COL_ID + " = ?", new String[]{String.valueOf(twitterFeed.getId())});
+            database.update(DB.TABLE_TWITTER_FEED, twitterFeedToContentValues(twitterFeed, false), DB.COL_ID + " = ?", new String[]{String.valueOf(twitterFeed.getId())});
         }catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -117,7 +118,7 @@ public class TwitterFeedORM {
         try {
             database.beginTransaction();
             for(TwitterFeed twitterFeed : twitterFeeds) {
-                database.update(DB.TABLE_TWITTER_FEED, twitterFeedUpdateToContentValues(twitterFeed), DB.COL_ID + " = ?", new String[]{String.valueOf(twitterFeed.getId())});
+                database.update(DB.TABLE_TWITTER_FEED, twitterFeedToContentValues(twitterFeed, false), DB.COL_ID + " = ?", new String[]{String.valueOf(twitterFeed.getId())});
             }
             database.setTransactionSuccessful();
         }catch (Exception e) {
@@ -129,12 +130,15 @@ public class TwitterFeedORM {
     }
 
 
-    private static ContentValues twitterFeedUpdateToContentValues(TwitterFeed twitterFeed) {
-        return twitterFeedToContentValues(twitterFeed, false);
-    }
+    public static int saveTwitterFeed(SQLiteDatabase database, TwitterFeed twitterFeed) {
 
-    public static ContentValues twitterFeedInsertToContentValues(TwitterFeed twitterFeed) {
-        return twitterFeedToContentValues(twitterFeed, true);
+        if(Var.isValid(twitterFeed.getId())) {
+            database.update(DB.TABLE_TWITTER_FEED, twitterFeedToContentValues(twitterFeed, false), DB.COL_ID + " = " + twitterFeed.getId(), null);
+            return twitterFeed.getId();
+        } else {
+            return (int) database.insert(DB.TABLE_TWITTER_FEED, null, twitterFeedToContentValues(twitterFeed, false));
+        }
+
     }
 
     private static ContentValues twitterFeedToContentValues(TwitterFeed twitterFeed, boolean includeId) {

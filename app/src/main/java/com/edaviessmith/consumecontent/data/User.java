@@ -1,5 +1,6 @@
 package com.edaviessmith.consumecontent.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User extends Content{
@@ -12,10 +13,12 @@ public class User extends Content{
 
     private boolean isNotification;
 
+    private List<Group> groups; //TODO need to thoroughly hash out this relationship
 
     public User () {
         youtubeChannel = new YoutubeChannel();
         twitterFeed = new TwitterFeed();
+        groups = new ArrayList<Group>();
         isNotification = true;
     }
 
@@ -25,21 +28,14 @@ public class User extends Content{
 		this.media = media;
 	}
 
-    public User(int id, int sort, String name, String thumbnail, boolean isNotification) {
+    public User(int id, int sort, String name, String thumbnail, int youtubeChannelId, int twitterFeedId, boolean isNotification) {
         super(id, sort, name, thumbnail);
         setNotification(isNotification);
 
-        youtubeChannel = new YoutubeChannel();
-        twitterFeed = new TwitterFeed();
+        youtubeChannel = new YoutubeChannel(youtubeChannelId);
+        twitterFeed = new TwitterFeed(twitterFeedId);
     }
 
-    public List<MediaFeed> getMedia() {
-        return media;
-    }
-
-    public void setMedia(List<MediaFeed> media) {
-        this.media = media;
-    }
 
     public YoutubeChannel getYoutubeChannel() {
         return youtubeChannel;
@@ -64,5 +60,13 @@ public class User extends Content{
 
     public void setNotification(boolean isNotification) {
         this.isNotification = isNotification;
+    }
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Group> groups) {
+        this.groups = groups;
     }
 }

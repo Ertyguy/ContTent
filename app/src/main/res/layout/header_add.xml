@@ -43,29 +43,43 @@
             android:layout_toRightOf="@+id/user_picture_sp"
             android:hint="@string/user_name" />
 
+        <com.edaviessmith.consumecontent.view.SpinnerTrigger
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/group_sp"
+            android:layout_alignLeft="@+id/user_name_edt"
+            android:layout_alignStart="@+id/user_name_edt"
+            android:layout_below="@+id/user_name_edt"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true" />
+
+
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/notification_v"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/notification_sw"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/user_picture_sp"
-            android:layout_alignEnd="@+id/user_name_edt"
-            android:layout_alignRight="@+id/user_name_edt" />
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/notification_sw"
-            android:layout_alignTop="@+id/notification_sw"
-            android:layout_marginRight="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_toLeftOf="@+id/notification_sw"
-            android:layout_toStartOf="@+id/notification_sw"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:gravity="center_vertical"
             android:text="@string/all_notifications"
             android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/youtube_v"

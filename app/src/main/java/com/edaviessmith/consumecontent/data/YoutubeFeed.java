@@ -26,6 +26,11 @@ public class YoutubeFeed extends MediaFeed {
         setVisible(true);
     }
 
+    public YoutubeFeed(int id, int sort, String name, String thumbnail, String feedId, int type, boolean isVisible) {
+        super(id, sort, name, thumbnail, feedId, type);
+        this.isVisible = isVisible;
+    }
+
     public List<YoutubeItem> getYoutubeItems() {
         return youtubeItems;
     }

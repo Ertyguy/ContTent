@@ -1,7 +1,7 @@
 package com.edaviessmith.consumecontent.data;
 
 public class Content {
-    private int id;
+    private int id = -1;    //Placeholder for null
     private int sort;
     private String name;
     private String thumbnail;

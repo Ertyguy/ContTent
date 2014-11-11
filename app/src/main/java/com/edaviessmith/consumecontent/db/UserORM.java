@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,8 @@ public class UserORM {
             DB.COL_SORT             + " INTEGER, " +
             DB.COL_NAME   	        + " TEXT, " +
             DB.COL_THUMBNAIL 	    + " TEXT, " +
+            DB.COL_YOUTBUE_CHANNEL	+ " INTEGER, " +
+            DB.COL_TWITTER_FEED		+ " INTEGER, " +
             DB.COL_NOTIFICATION		+ " INTEGER " + ");";
 
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_USER;
@@ -78,7 +81,7 @@ public class UserORM {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
         try {
-            database.update(DB.TABLE_USER, userUpdateToContentValues(user), DB.COL_ID + " = ?", new String[]{String.valueOf(user.getId())});
+            database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = ?", new String[]{String.valueOf(user.getId())});
         }catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -115,7 +118,7 @@ public class UserORM {
         try {
             database.beginTransaction();
             for(User user : users) {
-                database.update(DB.TABLE_USER, userUpdateToContentValues(user), DB.COL_ID + " = ?", new String[]{String.valueOf(user.getId())});
+                database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = ?", new String[]{String.valueOf(user.getId())});
             }
             database.setTransactionSuccessful();
         }catch (Exception e) {
@@ -127,13 +130,33 @@ public class UserORM {
     }
 
 
-    private static ContentValues userUpdateToContentValues(User user) {
-        return userToContentValues(user, false);
+    public static void saveUser(Context context, User user) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+
+        try {
+            database.beginTransaction();
+
+            user.getYoutubeChannel().setId(YoutubeChannelORM.saveYoutubeChannel(database, user.getYoutubeChannel()));
+            user.getTwitterFeed().setId(TwitterFeedORM.saveTwitterFeed(database, user.getTwitterFeed()));
+
+            if(Var.isValid(user.getId())) {
+                database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = " + user.getId(), null);
+            } else {
+                user.setId((int) database.insert(DB.TABLE_USER, null, userToContentValues(user, false)));
+            }
+
+            GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
+
+            database.setTransactionSuccessful();
+
+            Log.d(TAG, "User saved with id:" + user.getId());
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static ContentValues userInsertToContentValues(User user) {
-        return userToContentValues(user, true);
-    }
 
     private static ContentValues userToContentValues(User user, boolean includeId) {
         ContentValues values = new ContentValues();
@@ -141,6 +164,8 @@ public class UserORM {
         values.put(DB.COL_SORT, user.getSort());
         values.put(DB.COL_NAME, user.getName());
         values.put(DB.COL_THUMBNAIL, user.getThumbnail());
+        values.put(DB.COL_YOUTBUE_CHANNEL, user.getYoutubeChannel().getId());
+        values.put(DB.COL_TWITTER_FEED, user.getTwitterFeed().getId());
         values.put(DB.COL_NOTIFICATION, user.isNotification());
         return values;
     }
@@ -150,6 +175,8 @@ public class UserORM {
                          cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
                          cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
                          cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
+                         cursor.getInt(cursor.getColumnIndex(DB.COL_YOUTBUE_CHANNEL)),
+                         cursor.getInt(cursor.getColumnIndex(DB.COL_TWITTER_FEED)),
                          cursor.getInt(cursor.getColumnIndex(DB.COL_NOTIFICATION)) == 1);
     }
 

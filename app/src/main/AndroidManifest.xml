@@ -27,7 +27,8 @@
         <activity
             android:name="com.edaviessmith.consumecontent.AddActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
-            android:label="@string/title_activity_add" >
+            android:label="@string/title_activity_add"
+            android:parentActivityName=".ContentActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

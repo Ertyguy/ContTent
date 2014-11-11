@@ -19,6 +19,12 @@ public class TwitterFeed extends MediaFeed {
         setName("Twitter");
     }
 
+
+    public TwitterFeed(int id) {
+        setType(Var.TYPE_TWITTER);
+        setId(id);
+    }
+
     public TwitterFeed(String feedId) {
         super(feedId, "Twitter", Var.TYPE_TWITTER);
     }

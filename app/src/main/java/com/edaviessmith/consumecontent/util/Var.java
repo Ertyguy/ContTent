@@ -149,4 +149,8 @@ public class Var {
     public static boolean isEmpty(String s) {
         return (s != null && (s.toString().trim().isEmpty()));
     }
+
+    public static boolean isValid(int i) { //Check if integer has been set
+        return i != -1;
+    }
 }

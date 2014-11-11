@@ -7,6 +7,11 @@ public class Group extends Content {
 
     public Group () { }
 
+    public Group (String name, boolean isVisible) {
+        setName(name);
+        setVisible(isVisible);
+    }
+
     public Group(int id, int sort, String name, String thumbnail, boolean isVisible) {
         super(id, sort, name, thumbnail);
         this.isVisible = isVisible;

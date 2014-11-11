@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.YoutubeChannel;
+import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public class YoutubeChannelORM {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
         try {
-            database.update(DB.TABLE_YOUTUBE_CHANNEL, youtubeChannelUpdateToContentValues(youtubeChannel), DB.COL_ID + " = ?", new String[]{String.valueOf(youtubeChannel.getId())});
+            database.update(DB.TABLE_YOUTUBE_CHANNEL, youtubeChannelToContentValues(youtubeChannel, false), DB.COL_ID + " = ?", new String[]{String.valueOf(youtubeChannel.getId())});
         }catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -116,7 +117,7 @@ public class YoutubeChannelORM {
         try {
             database.beginTransaction();
             for(YoutubeChannel youtubeChannel : youtubeChannels) {
-                database.update(DB.TABLE_YOUTUBE_CHANNEL, youtubeChannelUpdateToContentValues(youtubeChannel), DB.COL_ID + " = ?", new String[]{String.valueOf(youtubeChannel.getId())});
+                database.update(DB.TABLE_YOUTUBE_CHANNEL, youtubeChannelToContentValues(youtubeChannel, false), DB.COL_ID + " = ?", new String[]{String.valueOf(youtubeChannel.getId())});
             }
             database.setTransactionSuccessful();
         }catch (Exception e) {
@@ -127,14 +128,24 @@ public class YoutubeChannelORM {
         }
     }
 
+    public static int saveYoutubeChannel(SQLiteDatabase database, YoutubeChannel youtubeChannel) {
 
-    private static ContentValues youtubeChannelUpdateToContentValues(YoutubeChannel youtubeChannel) {
-        return youtubeChannelToContentValues(youtubeChannel, false);
+        if(Var.isValid(youtubeChannel.getId())) {
+            database.update(DB.TABLE_YOUTUBE_CHANNEL, youtubeChannelToContentValues(youtubeChannel, false), DB.COL_ID + " = " + youtubeChannel.getId(), null);
+
+            YoutubeFeedORM.saveYoutubeFeeds(database, youtubeChannel.getYoutubeFeeds(), youtubeChannel.getId());
+
+            return youtubeChannel.getId();
+        } else {
+
+            int id = (int) database.insert(DB.TABLE_YOUTUBE_CHANNEL, null, youtubeChannelToContentValues(youtubeChannel, false));
+            YoutubeFeedORM.saveYoutubeFeeds(database, youtubeChannel.getYoutubeFeeds(), id);
+            return id;
+        }
+
     }
 
-    public static ContentValues youtubeChannelInsertToContentValues(YoutubeChannel youtubeChannel) {
-        return youtubeChannelToContentValues(youtubeChannel, true);
-    }
+
 
     private static ContentValues youtubeChannelToContentValues(YoutubeChannel youtubeChannel, boolean includeId) {
         ContentValues values = new ContentValues();

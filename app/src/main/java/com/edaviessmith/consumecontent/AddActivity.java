@@ -1,6 +1,8 @@
 package com.edaviessmith.consumecontent;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -25,14 +27,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
+import com.edaviessmith.consumecontent.db.GroupORM;
+import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.TwitterAuthListener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
+import com.edaviessmith.consumecontent.view.SpinnerTrigger;
 
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
@@ -55,8 +61,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     ListView search_lv, feed_lv;
     SearchAdapter searchAdapter;
     FeedAdapter feedAdapter;
+    GroupAdapter groupAdapter;
     List<YoutubeChannel> youtubeChannelSearch;
     List<TwitterFeed> twitterFeedSearch;
+    List<Group> groups;
     List<String> userPictureThumbnails;
     LinearLayout search_ll;
     View searchYoutube_v, searchTwitter_v, searchDiv_v;
@@ -67,6 +75,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     TextView youtubeName_tv, twitterHandle_tv, searchMessage_tv;
     EditText userName_edt;
     Spinner userPicture_sp;
+    SpinnerTrigger group_sp;
     IconAdapter iconAdapter;
     int spinnerInit, spinnerSelect;
     int searchMode = Var.SEARCH_NONE;
@@ -87,18 +96,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     private GetFeedAsyncTask feedTask;
 
     TwitterUtil twitter;
-
-
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        /*if(spinnerSelect < spinnerInit) spinnerSelect ++; else { //if(position < social_icons.length - 1){
-
-            editUser.setThumbnail(userPictureThumbnails.get(position));
-            userPicture_sp.setSelection(position);
-            //icon_sp.setSelection(social_icons.length - 1);
-        }*/
-    }
 
 
     private void toggleSearch(int searchMode) {
@@ -139,6 +136,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         twitterFeedSearch = new ArrayList<TwitterFeed>();
         userPictureThumbnails = new ArrayList<String>();
 
+        groups = GroupORM.getVisibleGroups(this);
+
         View header = getLayoutInflater().inflate(R.layout.header_add, null, false);
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
 
@@ -152,12 +151,18 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //Header
         userPicture_sp = (Spinner) header.findViewById(R.id.user_picture_sp);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
+        group_sp = (SpinnerTrigger) header.findViewById(R.id.group_sp);
+
         youtube_v = header.findViewById(R.id.youtube_v);
         twitter_v = header.findViewById(R.id.twitter_v);
         youtube_v.setOnClickListener(this);
         twitter_v.setOnClickListener(this);
         youtubeName_tv = (TextView) header.findViewById(R.id.youtube_name_tv);
         twitterHandle_tv = (TextView) header.findViewById(R.id.twitter_handle_tv);
+
+        groupAdapter = new GroupAdapter(this, groups);
+        group_sp.setAdapter(groupAdapter);
+        group_sp.setOnItemSelectedListener(this);
 
         //Search
         search_ll = (LinearLayout) findViewById(R.id.search_ll);
@@ -255,7 +260,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
 
     private void searchYoutube() {
-        if(!Var.isEmpty(search) && search.length() > 2) {
+        if(search != null && search.length() > 2) {
             if (searchTask != null) {
                 searchTask.cancel(true);
                 searchTask = null;
@@ -269,7 +274,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
     private void searchTwitter() {
-        if(!Var.isEmpty(search) && search.length() > 2) {
+        if(search != null && search.length() > 2) {
             if (searchTwitterTask != null) {
                 searchTwitterTask.cancel(true);
                 searchTwitterTask = null;
@@ -353,9 +358,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
 
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) { }
-
     public void onScrollStateChanged(AbsListView view, int scrollState) {
        dismissSearch();
     }
@@ -377,6 +379,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         // Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if(id == R.id.action_save) {
+            UserORM.saveUser(this, editUser);
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -706,6 +711,163 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
 
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG,"item selected "+spinnerSelect+", "+spinnerInit + "pos: "+position);
+        if(spinnerSelect < spinnerInit) spinnerSelect ++; else { //if(position < social_icons.length - 1){
+
+
+            if(position < groups.size()) {
+                groupAdapter.selected = position;
+                if(spinnerSelect == 1 && position == 0) {
+                    Log.d(TAG, "trying to refresh");
+                    groupAdapter.notifyDataSetChanged();
+                }
+
+            } else {    //Do nothing because an option outside the list was selected
+                spinnerSelect --;
+
+
+                final EditText input = new EditText(this);
+                new AlertDialog.Builder(this)
+                        .setTitle("Update Status")
+                        .setMessage("Create a new Group")
+                        .setView(input)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //TODO most of this is hardcoded ugliness
+                                Group group = new Group(input.getText().toString(), true);
+                                GroupORM.insertGroup(AddActivity.this, group);
+
+                                groups.clear();
+                                groups.addAll(GroupORM.getVisibleGroups(AddActivity.this));
+                                groupAdapter.notifyDataSetChanged();
+                                group_sp.setSelection(groups.size() - 1);
+
+
+                                editUser.getGroups().clear();
+                                editUser.getGroups().add(group);
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        group_sp.setSelection(groupAdapter.selected);
+                    }
+                }).show();
+            }
+
+            //icon_sp.setSelection(social_icons.length - 1);
+        }
+    }
+
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
+
+
+    public class GroupAdapter extends BaseAdapter {
+
+        private LayoutInflater inflater;
+        Context context;
+        List<Group> groups;
+        int selected;
+
+        public GroupAdapter(Context context, List<Group> groups) {
+            this.context = context;
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.groups = groups;
+            selected = -1;
+        }
+
+
+        @Override
+        public int getCount() {
+            return groups.size() + 1;
+        }
+
+        @Override
+        public Group getItem(int position) {
+            return groups.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+
+            if(convertView == null) {
+                convertView = inflater.inflate(R.layout.item_group, parent, false);
+                holder = new ViewHolder();
+                //holder.image_iv = (ImageView) convertView.findViewById(R.id.image_iv);
+                holder.name_tv = (TextView) convertView.findViewById(R.id.name_tv);
+
+
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+
+            if(position - 1 < 0 && selected == -1) {
+                holder.name_tv.setText("Select Group");
+                holder.name_tv.setTextColor(getResources().getColor(android.R.color.darker_gray));
+            }else if (position < groups.size()) {
+                Group group = getItem(position);
+
+                holder.name_tv.setText(group.getName());
+                holder.name_tv.setTextColor(getResources().getColor(android.R.color.black));
+            } else {
+                holder.name_tv.setText("Add new group");
+                holder.name_tv.setTextColor(getResources().getColor(android.R.color.darker_gray));
+            }
+
+            return convertView;
+        }
+
+
+        @Override
+        public View getDropDownView(int position, View convertView,ViewGroup parent) {
+            ViewHolder holder;
+
+            if(convertView == null) {
+                convertView = inflater.inflate(R.layout.item_group, parent, false);
+                holder = new ViewHolder();
+                //holder.image_iv = (ImageView) convertView.findViewById(R.id.image_iv);
+                holder.name_tv = (TextView) convertView.findViewById(R.id.name_tv);
+
+
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            if (position < groups.size()) {
+                Group group = getItem(position);
+
+                holder.name_tv.setText(group.getName());
+                holder.name_tv.setTextColor(getResources().getColor(android.R.color.black));
+            } else {
+                holder.name_tv.setText("Add new group");
+                holder.name_tv.setTextColor(getResources().getColor(android.R.color.darker_gray));
+            }
+
+            return convertView;
+        }
+
+
+
+        class ViewHolder {
+            //ImageView image_iv;
+            TextView name_tv;
+        }
+    }
+
     protected class SearchTwitterTask extends AsyncTask<Void, Void, Integer> {
         String jsonTokenStream;
         ResponseList<twitter4j.User> users;
@@ -753,8 +915,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                                     int code = errors.getJSONObject(0).getInt("code");
 
                                     searchMessage_tv.setVisibility(View.VISIBLE);
-                                    if (code == 88)
-                                        searchMessage_tv.setText(R.string.rate_limit_error);
+                                    if (code == 88) searchMessage_tv.setText(R.string.rate_limit_error);
+                                    if (code == 34) searchMessage_tv.setText(R.string.page_does_not_exist_error);
                                     else searchMessage_tv.setText(message);
 
 
