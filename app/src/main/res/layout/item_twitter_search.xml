@@ -13,19 +13,34 @@
         android:layout_alignParentStart="true"
         android:src="@drawable/ic_youtube_icon"
         android:layout_marginRight="20dp"
-        android:layout_marginEnd="20dp"/>
+        android:layout_marginEnd="20dp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/name_tv"
+        android:textSize="20sp"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="22sp"
-        android:layout_centerVertical="true"
+        android:gravity="center_vertical"
+        android:layout_alignTop="@+id/image_iv"
         android:layout_toRightOf="@+id/image_iv"
         android:layout_toEndOf="@+id/image_iv"
         android:textColor="@android:color/white" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/screen_name_tv"
+        android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:layout_below="@+id/name_tv"
+        android:layout_toRightOf="@+id/image_iv"
+        android:layout_toEndOf="@+id/image_iv"
+        android:textColor="@android:color/secondary_text_dark" />
 
 </RelativeLayout>

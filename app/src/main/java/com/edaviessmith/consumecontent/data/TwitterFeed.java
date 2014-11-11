@@ -7,39 +7,26 @@ import java.util.List;
 
 public class TwitterFeed extends MediaFeed {
 
-    public String feedId;
+
     public List<TwitterItem> twitterItems;
 
-    public String thumbnail;
-    public String name;
     public String displayName;
 
 
     public TwitterFeed() {
-        this.type = Var.TYPE_TWITTER;
-        this.name = "Twitter";
+        setType(Var.TYPE_TWITTER);
+
+        setName("Twitter");
     }
 
     public TwitterFeed(String feedId) {
-        this.type = Var.TYPE_TWITTER;
-        this.feedId = feedId;
-        this.name = "Twitter";
+        super(feedId, "Twitter", Var.TYPE_TWITTER);
     }
 
     public TwitterFeed(String feedId, String name) {
-        this.type = Var.TYPE_TWITTER;
-        this.feedId = feedId;
-        this.name = name;
+        super(feedId, name, Var.TYPE_TWITTER);
     }
 
-
-    public String getFeedId() {
-        return feedId;
-    }
-
-    public void setFeedId(String feedId) {
-        this.feedId = feedId;
-    }
 
     public List<TwitterItem> getTwitterItems() {
         return twitterItems;
@@ -47,14 +34,6 @@ public class TwitterFeed extends MediaFeed {
 
     public void setTwitterItems(List<TwitterItem> twitterItems) {
         this.twitterItems = twitterItems;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
     }
 
     public String getDisplayName() {
@@ -65,13 +44,5 @@ public class TwitterFeed extends MediaFeed {
         this.displayName = displayName;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
 }

@@ -7,7 +7,9 @@
 
     <string name="user_name">User Name</string>
     <string name="all_notifications">All Notifications</string>
+    <string name="youtube_channel">Youtube Channel</string>
     <string name="find_youtube_channel">Find Youtube Channel</string>
+    <string name="twitter_handle">Twitter Handle</string>
     <string name="find_twitter_handle">Find Twitter Handle</string>
     <string name="feeds">Feeds</string>
 
@@ -23,4 +25,8 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_add">AddActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="sign_in">Sign In</string>
+    <string name="twitter_login_help">If you don\'t know the exact twitter username you must login to search</string>
+    <string name="youtube_search_help">Picking a new channel will overwrite previous youtube settings (visibility and notifications)</string>
+    <string name="rate_limit_error">Twitter only allows a certain number of searches overy 15 minutes</string>
 </resources>

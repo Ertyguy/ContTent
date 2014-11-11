@@ -4,26 +4,42 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
-public class IconAdapter extends ArrayAdapter<Integer> {
+import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.util.Var;
 
-    Integer objects[];
+import java.util.List;
 
-    //Things don't work moving out of the way
+public class IconAdapter  extends BaseAdapter {
 
-    public IconAdapter(Context context, int textViewResourceId,   Integer[] objects) {
-        super(context, textViewResourceId, objects);
+    private LayoutInflater inflater;
+    private Context context;
+    private List<String> thumbnails;
+    private ImageLoader imageLoader;
 
-        this.objects = objects;
+    public IconAdapter(Context context, List<String> thumbnails, ImageLoader imageLoader) {
+        this.context = context;
+        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.thumbnails = thumbnails;
+        this.imageLoader= imageLoader;
     }
+
 
     @Override
     public int getCount() {
-        // don't display last item. It is used as hint.
-        int count = super.getCount();
-        return count > 0 ? count - 1 : count;
+        return thumbnails.size();
+    }
+
+    @Override
+    public String getItem(int position) {
+        return thumbnails.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -33,22 +49,32 @@ public class IconAdapter extends ArrayAdapter<Integer> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        LayoutInflater inflater=null;//getLayoutInflater();
-        View row = inflater.inflate(R.layout.item_image, parent, false);
-        ImageView image = (ImageView) row.findViewById(R.id.image_iv);
-        image.setImageResource(R.drawable.ic_action_new);
-        return row;
-
+        return getCustomView(position, convertView, parent);
     }
+
 
     public View getCustomView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
 
-        LayoutInflater inflater=null;//getLayoutInflater();
-        View row = inflater.inflate(R.layout.item_image, parent, false);
-        ImageView image = (ImageView) row.findViewById(R.id.image_iv);
-        image.setImageResource(objects[position]);
+        if (convertView == null) {
+            convertView = inflater.inflate(R.layout.item_image, parent, false);
+            holder = new ViewHolder();
+            holder.image_iv = (ImageView) convertView.findViewById(R.id.image_iv);
 
-        return row;
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
+        holder.image_iv.setImageDrawable(null);
+        if (!Var.isEmpty(getItem(position)))
+            imageLoader.DisplayImage(getItem(position), holder.image_iv);
+
+        return convertView;
+    }
+
+    class ViewHolder {
+        ImageView image_iv;
     }
 }
+

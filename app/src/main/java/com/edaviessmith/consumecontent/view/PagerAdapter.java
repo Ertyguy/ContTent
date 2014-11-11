@@ -33,10 +33,10 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     @Override
     public Fragment getItem(int position) {
 
-        switch(user.media.get(position).type) {
-            case Var.TYPE_YOUTUBE: return YoutubeFragment.newInstance(act, (YoutubeFeed) user.media.get(position), position);
+        switch(user.media.get(position).getType()) {
+            case Var.TYPE_YOUTUBE_PLAYLIST: case Var.TYPE_YOUTUBE_ACTIVTY: return YoutubeFragment.newInstance(act, (YoutubeFeed) user.media.get(position), position);
             case Var.TYPE_TWITTER: return TwitterFragment.newInstance(act, (TwitterFeed) user.media.get(position), position);
-            default: return PlaceholderFragment.newInstance(position, user.media.get(position).type + " ");
+            default: return PlaceholderFragment.newInstance(position, user.media.get(position).getType() + " ");
         }
 
     }
@@ -46,7 +46,7 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     // Returns the page title for the top indicator
     @Override
     public CharSequence getPageTitle(int position) {
-        return user.media.get(position).name;
+        return user.media.get(position).getName();
     }
 
 }

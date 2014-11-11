@@ -12,7 +12,6 @@ import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
-import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.TaskFragment;
 
 import java.util.ArrayList;
@@ -57,9 +56,9 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
                 add(new TwitterFeed("Twitter Feed3"));
 			}}));
 			
-			add(new User("Chris", new ArrayList<MediaFeed>() {{
+			/*add(new User("Chris", new ArrayList<MediaFeed>() {{
 				add(new MediaFeed(Var.TYPE_REDDIT, "Reddit Feed"));
-			}}));
+			}}));*/
 		}};
 		
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);

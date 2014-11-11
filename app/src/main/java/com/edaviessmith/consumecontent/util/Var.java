@@ -35,19 +35,16 @@ public class Var {
 
 
 
-    //Fragment types
-    public static final int TYPE_YOUTUBE = 0;
-    public static final int TYPE_TWITTER = 1;
-    public static final int TYPE_REDDIT  = 2;
+    //Fragment Feed Types
+    public static final int TYPE_YOUTUBE_PLAYLIST = 0;
+    public static final int TYPE_YOUTUBE_ACTIVTY = 1;
+    public static final int TYPE_TWITTER = 2;
+    //public static final int TYPE_REDDIT  = 3;
 
     //Searching users
     public static final int SEARCH_NONE = 0;
     public static final int SEARCH_YOUTUBE = 1;
     public static final int SEARCH_TWITTER = 2;
-
-    //Youtube Feed types
-    public static final int YT_ACTIVITY = 0; //Custom url call
-    public static final int YT_FEED = 1;     //Default search call
 
 
     //Util functions

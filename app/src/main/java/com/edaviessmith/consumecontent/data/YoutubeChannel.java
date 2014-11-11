@@ -4,11 +4,8 @@ package com.edaviessmith.consumecontent.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class YoutubeChannel {
+public class YoutubeChannel extends MediaFeed {
 
-    String channelId;
-    String name;
-    String thumbnail;
     List<YoutubeFeed> youtubeFeeds;
 
 
@@ -16,36 +13,11 @@ public class YoutubeChannel {
         youtubeFeeds = new ArrayList<YoutubeFeed>();
     }
 
-    public YoutubeChannel(String name, String channelId, String thumbnail) {
-        this.name = name;
-        this.channelId = channelId;
-        this.thumbnail = thumbnail;
+    public YoutubeChannel(String name, String feedId, String thumbnail) {
+        super(name, feedId, thumbnail);
         youtubeFeeds = new ArrayList<YoutubeFeed>();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(String thumnail) {
-        this.thumbnail = thumnail;
-    }
 
     public List<YoutubeFeed> getYoutubeFeeds() {
         return youtubeFeeds;

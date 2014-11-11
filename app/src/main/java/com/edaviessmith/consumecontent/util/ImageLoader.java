@@ -97,7 +97,7 @@ public class ImageLoader {
         }
     }
  
-    //decodes image and scales it to reduce memory consumption
+    //decodes thumbnail and scales it to reduce memory consumption
     private Bitmap decodeFile(File f){
        // try {
     	Bitmap bitmap = null;
@@ -122,7 +122,7 @@ public class ImageLoader {
 	            inputStream = new FileInputStream(f);
 	            if (scale > 1) {
 	                scale--;
-	                // scale to max possible inSampleSize that still yields an image
+	                // scale to max possible inSampleSize that still yields an thumbnail
 	                // larger than target
 	                options = new BitmapFactory.Options();
 	                options.inSampleSize = scale;
@@ -153,14 +153,14 @@ public class ImageLoader {
         return bitmap;
         	
         	/*
-            //decode image size
+            //decode thumbnail size
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(new FileInputStream(f),null,o);
              
             //Find the correct scale value. It should be the power of 2.
             
-            //TODO figure out at what samplesize should be used (image size here?)
+            //TODO figure out at what samplesize should be used (thumbnail size here?)
             // MAKES IMAGE LOOK LIKE GARBAGE
             
             final int REQUIRED_SIZE=70;

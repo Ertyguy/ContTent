@@ -13,7 +13,7 @@
         android:id="@+id/youtube_v"
         android:textColor="@android:drawable/screen_background_light_transparent"
         android:gravity="center_horizontal"
-        android:text="Picking a new channel will overwrite previous youtube settings (visibility and notifications)"
+        android:text="@string/youtube_search_help"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"/>
@@ -32,7 +32,7 @@
             android:textSize="16sp"
             android:textColor="@android:drawable/screen_background_light_transparent"
             android:gravity="center_horizontal"
-            android:text="If you don't know the exact twitter username you must login to search"
+            android:text="@string/twitter_login_help"
             android:paddingBottom="5dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"/>
@@ -44,7 +44,7 @@
             android:textColor="@android:color/white"
             android:gravity="center"
             android:id="@+id/twitter_login_tv"
-            android:text="Sign In"
+            android:text="@string/sign_in"
             android:drawableLeft="@drawable/ic_twitter_white"
             android:drawableStart="@drawable/ic_twitter_white"
             android:drawablePadding="5dp"
@@ -62,5 +62,14 @@
         android:layout_height="1dp"
         android:id="@+id/div_v"
         android:background="@android:drawable/screen_background_light_transparent" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/red_light"
+        android:gravity="center"
+        android:id="@+id/search_message_tv"
+        android:padding="10dp"/>
 
 </LinearLayout>

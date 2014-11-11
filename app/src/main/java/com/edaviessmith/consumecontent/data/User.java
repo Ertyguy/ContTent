@@ -2,35 +2,35 @@ package com.edaviessmith.consumecontent.data;
 
 import java.util.List;
 
-public class User {
-    private String name;
+public class User extends Content{
+
     //TODO feed list is in youtubechannel now
 	public List<MediaFeed> media;
 
     private YoutubeChannel youtubeChannel;
     private TwitterFeed twitterFeed;
-    private String thumbnail;
 
-    private boolean enableNotifications;
+    private boolean isNotification;
+
 
     public User () {
         youtubeChannel = new YoutubeChannel();
         twitterFeed = new TwitterFeed();
-        enableNotifications = true;
+        isNotification = true;
     }
 
     //Depricated
     public User (String name, List<MediaFeed> media) {
-		this.name = name;
+		setName(name);
 		this.media = media;
 	}
 
-    public String getName() {
-        return name;
-    }
+    public User(int id, int sort, String name, String thumbnail, boolean isNotification) {
+        super(id, sort, name, thumbnail);
+        setNotification(isNotification);
 
-    public void setName(String name) {
-        this.name = name;
+        youtubeChannel = new YoutubeChannel();
+        twitterFeed = new TwitterFeed();
     }
 
     public List<MediaFeed> getMedia() {
@@ -57,11 +57,12 @@ public class User {
         this.twitterFeed = twitterFeed;
     }
 
-    public String getThumbnail() {
-        return thumbnail;
+
+    public boolean isNotification() {
+        return isNotification;
     }
 
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setNotification(boolean isNotification) {
+        this.isNotification = isNotification;
     }
 }

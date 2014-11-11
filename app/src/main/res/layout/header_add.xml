@@ -11,14 +11,24 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
 
-        <ImageButton
-            android:id="@+id/user_picture_ib"
+
+        <Spinner
+            android:id="@+id/user_picture_sp"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:scaleType="fitCenter" />
+
+        <!--<ImageButton
+            android:id="@+id/user_picture_ib"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:scaleType="fitCenter" />-->
 
         <EditText
             android:id="@+id/user_name_edt"
@@ -29,15 +39,15 @@
             android:layout_alignParentTop="true"
             android:layout_marginLeft="25dp"
             android:layout_marginStart="25dp"
-            android:layout_toEndOf="@+id/user_picture_ib"
-            android:layout_toRightOf="@+id/user_picture_ib"
+            android:layout_toEndOf="@+id/user_picture_sp"
+            android:layout_toRightOf="@+id/user_picture_sp"
             android:hint="@string/user_name" />
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/notification_sw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/user_picture_ib"
+            android:layout_alignBottom="@+id/user_picture_sp"
             android:layout_alignEnd="@+id/user_name_edt"
             android:layout_alignRight="@+id/user_name_edt" />
 
@@ -107,7 +117,7 @@
             android:src="@drawable/ic_twitter_icon" />
 
         <TextView
-            android:id="@+id/twitter_ib_name_tv"
+            android:id="@+id/twitter_handle_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
