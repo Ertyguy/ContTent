@@ -3,11 +3,13 @@ package com.edaviessmith.consumecontent.data;
 public class MediaFeed {
 
     private int id;
+    private int sort;
     private String name;
+    private String thumbnail;
 
     private String feedId; //Also used for channelId
-    private String thumbnail;
     private int type;
+
     public MediaFeed() { }
 
     public MediaFeed(String feedId, String name) {
@@ -21,8 +23,9 @@ public class MediaFeed {
         this.type = type;
     }
 
-    public MediaFeed(int id, String name, String feedId, String thumbnail) {
+    public MediaFeed(int id, int sort, String name, String feedId, String thumbnail) {
         this.id = id;
+        this.sort = sort;
         this.name = name;
         this.feedId = feedId;
         this.thumbnail = thumbnail;
@@ -34,12 +37,29 @@ public class MediaFeed {
         this.thumbnail = thumbnail;
     }
 
+    public MediaFeed(int id, int sort, String name, String thumbnail, String feedId, int type) {
+        this.id = id;
+        this.sort = sort;
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.feedId = feedId;
+        this.type = type;
+    }
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getSort() {
+        return sort;
+    }
+
+    public void setSort(int sort) {
+        this.sort = sort;
     }
 
     public String getName() {

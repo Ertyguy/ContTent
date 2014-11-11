@@ -28,12 +28,6 @@ public class Var {
     static public final String TWITTER_OAUTH_CONSUMER_KEY = "ZyQynwwUcoU885CixQM66gpk5";
     static public final String TWITTER_OAUTH_CONSUMER_SECRET = "Vb1cTAkmOL3NY459eIBl14FweUV3Z3Y4Z4K53fiiJCPk8QVC9a";
 
-    static public final String PREF_TW_AUTH = "twitter_auth";
-    static public final String PREF_TW_ACCESS_TOKEN = "twitter_beareraccesstoken";
-    static public final String PREF_TW_TOKEN_TYPE = "twitter_bearertokentype";
-    static public final String BUGSENSE_KEY = "4a749a4a";
-
-
 
     //Fragment Feed Types
     public static final int TYPE_YOUTUBE_PLAYLIST = 0;

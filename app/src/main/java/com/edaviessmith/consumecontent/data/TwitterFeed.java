@@ -27,6 +27,10 @@ public class TwitterFeed extends MediaFeed {
         super(feedId, name, Var.TYPE_TWITTER);
     }
 
+    public TwitterFeed(int id, int sort, String name,  String displayName, String thumbnail, String feedId, int type) {
+        super(id, sort, name, thumbnail, feedId, type);
+        this.displayName = displayName;
+    }
 
     public List<TwitterItem> getTwitterItems() {
         return twitterItems;

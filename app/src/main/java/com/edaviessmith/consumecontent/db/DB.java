@@ -55,6 +55,8 @@ public class DB extends SQLiteOpenHelper {
     ///// Database Tables //////
     static final String TABLE_GROUP = "groups";
     static final String TABLE_USER = "users";
+    static final String TABLE_YOUTUBE_CHANNEL = "youtube_channels";
+    static final String TABLE_TWITTER_FEED = "twitter_feeds";
 
     public static String ORDER_BY_SORT = DB.COL_SORT + " ASC";
     //// Database Columns /////
@@ -65,4 +67,7 @@ public class DB extends SQLiteOpenHelper {
     static final String COL_THUMBNAIL = "thumbnail";
     static final String COL_VISIBILITY = "visibility";
     static final String COL_NOTIFICATION = "notification";
+    static final String COL_TYPE = "type";
+    static final String COL_FEED_ID = "feed_id";
+    static final String COL_DISPLAY_NAME = "display_name";
 }
