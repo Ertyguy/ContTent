@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
@@ -202,11 +203,15 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         });
 
         spinnerInit = 1;
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -242,8 +247,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         twitterPage = 0;
         search = s;
         searchMessage_tv.setVisibility(View.GONE);
-        if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
-        if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
+        searchTimer(search);
         return false;
     }
 
@@ -253,11 +257,29 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         twitterPage = 0;
         search = s;
         searchMessage_tv.setVisibility(View.GONE);
-        if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
-        if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
+        searchTimer(search);
         return false;
     }
 
+
+    Handler handler = new Handler();
+    private void searchTimer(final String newText) {
+        if(handler!= null) handler.removeCallbacksAndMessages(null);
+        handler.postDelayed(runnable(newText), 800);
+    }
+
+    private Runnable runnable(final String newText) {
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
+                if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
+            }
+
+        };
+        return runnable;
+    }
 
 
     private void searchYoutube() {
@@ -387,6 +409,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
 
             UserORM.saveUser(this, editUser);
+
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -398,7 +422,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             toggleSearch(Var.SEARCH_NONE);
             return;
         }
-        moveTaskToBack(true);
+
+        super.onBackPressed();
     }
 
 
@@ -908,65 +933,67 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
                 try {
 
-                    //  Log error and clear the adapter
-                    Object json = new JSONTokener(jsonTokenStream).nextValue();
-                    if (json instanceof JSONObject) {
-                        if (Var.isJsonArray(((JSONObject) json), "errors")) {
-                            JSONArray errors = ((JSONObject) json).getJSONArray("errors");
-                            if (errors.length() > 0) {
-                                Log.d(TAG, jsonTokenStream);
+                    if(users != null) {
+                        for (twitter4j.User u : users) {
+                            TwitterFeed feed = new TwitterFeed(String.valueOf(u.getId()));
+                            feed.setDisplayName(u.getName());
+                            feed.setName("@" + u.getScreenName());
+                            feed.setThumbnail(u.getProfileImageURL());
 
-                                if (Var.isJsonString(errors.getJSONObject(0), "message")) {
-                                    String message = errors.getJSONObject(0).getString("message");
-                                    int code = errors.getJSONObject(0).getInt("code");
+                            twitterFeedSearch.add(feed);
+                        }
 
-                                    searchMessage_tv.setVisibility(View.VISIBLE);
-                                    if (code == 88) searchMessage_tv.setText(R.string.rate_limit_error);
-                                    if (code == 34) searchMessage_tv.setText(R.string.page_does_not_exist_error);
-                                    else searchMessage_tv.setText(message);
+                        searchBusy = false;
+                    } else if(jsonTokenStream != null) {
+
+                        //  Log error and clear the adapter
+                        Object json = new JSONTokener(jsonTokenStream).nextValue();
+                        if (json instanceof JSONObject) {
+                            if (Var.isJsonArray(((JSONObject) json), "errors")) {
+                                JSONArray errors = ((JSONObject) json).getJSONArray("errors");
+                                if (errors.length() > 0) {
+                                    Log.d(TAG, jsonTokenStream);
+
+                                    if (Var.isJsonString(errors.getJSONObject(0), "message")) {
+                                        String message = errors.getJSONObject(0).getString("message");
+                                        int code = errors.getJSONObject(0).getInt("code");
+
+                                        searchMessage_tv.setVisibility(View.VISIBLE);
+                                        if (code == 88)
+                                            searchMessage_tv.setText(R.string.rate_limit_error);
+                                        if (code == 34)
+                                            searchMessage_tv.setText(R.string.page_does_not_exist_error);
+                                        else searchMessage_tv.setText(message);
 
 
+                                    }
+                                }
+                            }
+                        } else if (json instanceof JSONArray) {
+
+                            if (!twitter.hasAccessToken()) {
+
+                                JSONArray results = new JSONArray(jsonTokenStream);
+                                for (int i = 0; i < results.length(); i++) {
+                                    JSONObject item = results.getJSONObject(i);
+
+                                    if (Var.isJsonString(item, "id")) {
+
+                                        TwitterFeed feed = new TwitterFeed(item.getString("id"));
+
+                                        if (Var.isJsonString(item, "name"))
+                                            feed.setDisplayName(item.getString("name"));
+                                        if (Var.isJsonString(item, "screen_name"))
+                                            feed.setName("@" + item.getString("screen_name"));
+                                        if (Var.isJsonString(item, "profile_image_url"))
+                                            feed.setThumbnail(item.getString("profile_image_url").replace("_normal", "_bigger"));
+
+                                        twitterFeedSearch.add(feed);
+                                    }
                                 }
                             }
                         }
                     }
-
-                    else if (json instanceof JSONArray) {
-
-                        if (!twitter.hasAccessToken()) {
-
-                            JSONArray results = new JSONArray(jsonTokenStream);
-                            for (int i = 0; i < results.length(); i++) {
-                                JSONObject item = results.getJSONObject(i);
-
-                                if (Var.isJsonString(item, "id")) {
-
-                                    TwitterFeed feed = new TwitterFeed(item.getString("id"));
-
-                                    if (Var.isJsonString(item, "name"))
-                                        feed.setDisplayName(item.getString("name"));
-                                    if (Var.isJsonString(item, "screen_name"))
-                                        feed.setName("@" + item.getString("screen_name"));
-                                    if (Var.isJsonString(item, "profile_image_url"))
-                                        feed.setThumbnail(item.getString("profile_image_url").replace("_normal", "_bigger"));
-
-                                    twitterFeedSearch.add(feed);
-                                }
-                            }
-                        } else {
-                            for (twitter4j.User u : users) {
-                                TwitterFeed feed = new TwitterFeed(String.valueOf(u.getId()));
-                                feed.setDisplayName(u.getName());
-                                feed.setName("@" + u.getScreenName());
-                                feed.setThumbnail(u.getProfileImageURL());
-
-                                twitterFeedSearch.add(feed);
-                            }
-
-                            searchBusy = false;
-                        }
-                    }
-
                     searchAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
                     Log.e("Tweet", "Error retrieving JSON stream" + e.getMessage());

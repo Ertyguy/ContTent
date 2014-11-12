@@ -2,7 +2,7 @@ package com.edaviessmith.consumecontent.data;
 
 public class MediaFeed {
 
-    private int id;
+    private int id = -1;
     private int sort;
     private String name;
     private String thumbnail;

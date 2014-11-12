@@ -40,6 +40,25 @@ public class TaskFragment extends Fragment {
 
         slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
         slidingTabLayout.setViewPager(viewPager);
+        slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                if(position < act.getUser().getYoutubeChannel().getYoutubeFeeds().size()) {
+                    return act.getResources().getColor(R.color.red_youtube);
+                } else if(act.getUser().getTwitterFeed() != null && position == act.getUser().getYoutubeChannel().getYoutubeFeeds().size() ) {
+                    return act.getResources().getColor(R.color.blue_twitter);
+                }
+                return act.getResources().getColor(R.color.red_light);
+
+
+            }
+
+            @Override
+            public int getDividerColor(int position) {
+                return 0;
+            }
+        });
+
 
         return view;
     }

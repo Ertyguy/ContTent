@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/action_example"
-        android:title="example"
+        android:title="Add"
         app:showAsAction="withText|ifRoom"/>
     <item
         android:id="@+id/action_settings"

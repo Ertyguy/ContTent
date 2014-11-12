@@ -35,7 +35,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="oauth" android:host="t4jsample"/>
             </intent-filter>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.edaviessmith.consumecontent.ContentActivity" />
         </activity>
+
+        <activity android:name="com.edaviessmith.consumecontent.db.AndroidDatabaseManager"  />
     </application>
 
 </manifest>

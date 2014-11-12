@@ -21,13 +21,15 @@ public class YoutubeFragment extends Fragment {
 
     private TextView feedId_tv;
 
-    public static YoutubeFragment newInstance(ContentActivity activity, YoutubeFeed youtubeFeed, int pos) {
-        Log.e(TAG, "newInstance");
+    public static YoutubeFragment newInstance(ContentActivity activity, int pos) {
+        Log.i(TAG, "newInstance");
         act = activity;
 
         youtubeFragment = new YoutubeFragment();
-        youtubeFragment.youtubeFeed = youtubeFeed;
-        youtubeFragment.pos = pos;
+
+        Bundle args = new Bundle();
+        args.putInt("pos", pos);
+        youtubeFragment.setArguments(args);
 
         return youtubeFragment;
     }
@@ -35,12 +37,14 @@ public class YoutubeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
-        view.setId(pos);
-        Log.e(TAG, "onCreateView");
 
-        //TODO getting null pointer (because Youtube feed object is null)
-        //feedId_tv = (TextView) view.findViewById(R.id.id_tv);
-        //feedId_tv.setText(youtubeFeed.feedId);
+        pos = getArguments() != null ? getArguments().getInt("pos") : -1; //Detect if the argument doesn't exist
+
+        view.setId(pos);
+        Log.i(TAG, "onCreateView");
+
+        feedId_tv = (TextView) view.findViewById(R.id.id_tv);
+        feedId_tv.setText(act.getUser().getYoutubeChannel().getYoutubeFeeds().get(pos).getFeedId());
         
         return view;
     }

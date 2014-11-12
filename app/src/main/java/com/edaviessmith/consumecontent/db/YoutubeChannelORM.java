@@ -131,10 +131,12 @@ public class YoutubeChannelORM {
     public static YoutubeChannel getYoutubeChannel(SQLiteDatabase database, int youtubeChannelId) {
 
         Cursor cursor = database.query(false, DB.TABLE_YOUTUBE_CHANNEL, null, DB.COL_ID + " = "+youtubeChannelId, null, null, null, DB.ORDER_BY_SORT, null);
+
+
         if(cursor != null && cursor.moveToFirst()) {
             YoutubeChannel youtubeChannel = cursorToYoutubeChannel(cursor);
             youtubeChannel.setYoutubeFeeds(YoutubeFeedORM.getYoutubeFeeds(database, youtubeChannelId));
-
+            Log.d(TAG, "get: " + youtubeChannel.getName());
             return youtubeChannel;
         }
 
