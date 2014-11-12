@@ -29,51 +29,67 @@ public class UserORM {
 
 
     public static List<User> getUsers(Context context) {
-
         DB databaseHelper = new DB(context);
+        List<User> users = new ArrayList<User>();
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
-        Cursor cursor = database.query(false, DB.TABLE_USER, null, null, null, null, null, DB.ORDER_BY_SORT, null);
-        List<User> memberList = new ArrayList<User>();
 
-        if(cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                User member = cursorToUser(cursor);
-                memberList.add(member);
-                cursor.moveToNext();
+        database.beginTransaction();
+        try {
+            Cursor cursor = database.query(false, DB.TABLE_USER, null, null, null, null, null, DB.ORDER_BY_SORT, null);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    User user = cursorToUser(cursor);
+
+                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+
+                    user.setYoutubeChannel((YoutubeChannelORM.getYoutubeChannel(database, user.getYoutubeChannel().getId())));
+                    user.setTwitterFeed(TwitterFeedORM.getTwitterFeed(database, user.getTwitterFeed().getId()));
+
+                    users.add(user);
+                    cursor.moveToNext();
+                }
+
             }
-            Log.i("UserORM", "Users loaded successfully.");
+            Log.i("UserORM", "Users loaded successfully :"+users.size());
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
         }
 
-        database.close();
-
-        return memberList;
+        return users;
     }
 
     public static List<User> getNotificationUsers(Context context) {
-
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
+        database.beginTransaction();
+        try {
 
-        Cursor cursor = database.query(false, DB.TABLE_USER, null, DB.COL_NOTIFICATION + " == ?", new String[]{String.valueOf(1)}, null, null, DB.ORDER_BY_SORT, null);
+            Cursor cursor = database.query(false, DB.TABLE_USER, null, DB.COL_NOTIFICATION + " == ?", new String[]{String.valueOf(1)}, null, null, DB.ORDER_BY_SORT, null);
 
-        Log.i("UserORM", "Loaded " + cursor.getCount() + " Users...");
-        List<User> memberList = new ArrayList<User>();
+            Log.i("UserORM", "Loaded " + cursor.getCount() + " Users...");
+            List<User> memberList = new ArrayList<User>();
 
-        if(cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                User member = cursorToUser(cursor);
-                memberList.add(member);
-                cursor.moveToNext();
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    User member = cursorToUser(cursor);
+                    memberList.add(member);
+                    cursor.moveToNext();
+                }
+                Log.i("UserORM", "Users loaded successfully.");
             }
-            Log.i("UserORM", "Users loaded successfully.");
+        }catch (Exception e) {
+            database.endTransaction();
+            e.printStackTrace();
         }
 
-        database.close();
-
-        return memberList;
+        return null;
     }
 
 
@@ -134,9 +150,8 @@ public class UserORM {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
-
+        database.beginTransaction();
         try {
-            database.beginTransaction();
 
             user.getYoutubeChannel().setId(YoutubeChannelORM.saveYoutubeChannel(database, user.getYoutubeChannel()));
             user.getTwitterFeed().setId(TwitterFeedORM.saveTwitterFeed(database, user.getTwitterFeed()));
@@ -154,7 +169,11 @@ public class UserORM {
             Log.d(TAG, "User saved with id:" + user.getId());
         }catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            database.endTransaction();
+            database.close();
         }
+
     }
 
 

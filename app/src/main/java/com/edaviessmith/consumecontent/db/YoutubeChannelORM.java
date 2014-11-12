@@ -128,6 +128,19 @@ public class YoutubeChannelORM {
         }
     }
 
+    public static YoutubeChannel getYoutubeChannel(SQLiteDatabase database, int youtubeChannelId) {
+
+        Cursor cursor = database.query(false, DB.TABLE_YOUTUBE_CHANNEL, null, DB.COL_ID + " = "+youtubeChannelId, null, null, null, DB.ORDER_BY_SORT, null);
+        if(cursor != null && cursor.moveToFirst()) {
+            YoutubeChannel youtubeChannel = cursorToYoutubeChannel(cursor);
+            youtubeChannel.setYoutubeFeeds(YoutubeFeedORM.getYoutubeFeeds(database, youtubeChannelId));
+
+            return youtubeChannel;
+        }
+
+        return null;
+    }
+
     public static int saveYoutubeChannel(SQLiteDatabase database, YoutubeChannel youtubeChannel) {
 
         if(Var.isValid(youtubeChannel.getId())) {
@@ -144,8 +157,6 @@ public class YoutubeChannelORM {
         }
 
     }
-
-
 
     private static ContentValues youtubeChannelToContentValues(YoutubeChannel youtubeChannel, boolean includeId) {
         ContentValues values = new ContentValues();

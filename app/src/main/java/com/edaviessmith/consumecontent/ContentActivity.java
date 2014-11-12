@@ -5,20 +5,19 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.edaviessmith.consumecontent.data.MediaFeed;
-import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
-import com.edaviessmith.consumecontent.data.YoutubeFeed;
+import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.view.TaskFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ContentActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+    private static String TAG = "ContentActivity";
 	/**
 	 * Fragment managing the behaviors, interactions and presentation of the
 	 * navigation drawer.
@@ -42,7 +41,9 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		mTitle = getTitle();
 		
 		
-		users = new ArrayList<User>() {{
+		users = UserORM.getUsers(this);
+        Log.d(TAG, "users: "+users.size());
+		/*new ArrayList<User>() {{
 		
 			add(new User("Adam", new ArrayList<MediaFeed>() {{
 				add(new YoutubeFeed("Feedid1","Youtube Activity"));
@@ -56,17 +57,17 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
                 add(new TwitterFeed("Twitter Feed3"));
 			}}));
 			
-			/*add(new User("Chris", new ArrayList<MediaFeed>() {{
+			*//*add(new User("Chris", new ArrayList<MediaFeed>() {{
 				add(new MediaFeed(Var.TYPE_REDDIT, "Reddit Feed"));
-			}}));*/
-		}};
+			}}));*//*
+		}};*/
 		
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), users);
 		
 		FragmentManager fragmentManager = getSupportFragmentManager();
 	    taskFragment = (TaskFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
-	    taskFragment = TaskFragment.newInstance(this, users.get(0));
+	    taskFragment = TaskFragment.newInstance(this);
 	    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
 	}
 
@@ -74,13 +75,18 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	public void onNavigationDrawerItemSelected(int position) {
 		// update the main content by replacing fragments
 		if(users != null) {
+            userPos = position;
 			FragmentManager fragmentManager = getSupportFragmentManager();
 		    taskFragment = (TaskFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
-		    taskFragment = TaskFragment.newInstance(this, users.get(position));
+		    taskFragment = TaskFragment.newInstance(this);
 		    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
 		}
 		
 	}
+    int userPos;
+    public User getUser() {
+        return (userPos < users.size() ? users.get(userPos): null);
+    }
 
 
 	public void restoreActionBar() {

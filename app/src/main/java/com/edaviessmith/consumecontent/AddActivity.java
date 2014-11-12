@@ -76,6 +76,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     EditText userName_edt;
     Spinner userPicture_sp;
     SpinnerTrigger group_sp;
+    SwitchCompat notification_sw;
     IconAdapter iconAdapter;
     int spinnerInit, spinnerSelect;
     int searchMode = Var.SEARCH_NONE;
@@ -152,7 +153,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         userPicture_sp = (Spinner) header.findViewById(R.id.user_picture_sp);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
         group_sp = (SpinnerTrigger) header.findViewById(R.id.group_sp);
-
+        notification_sw = (SwitchCompat) header.findViewById(R.id.notification_sw);
         youtube_v = header.findViewById(R.id.youtube_v);
         twitter_v = header.findViewById(R.id.twitter_v);
         youtube_v.setOnClickListener(this);
@@ -380,6 +381,11 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         int id = item.getItemId();
 
         if(id == R.id.action_save) {
+            editUser.setName(userName_edt.getText().toString().trim());
+            editUser.setNotification(notification_sw.isChecked());
+            editUser.setThumbnail((String) userPicture_sp.getSelectedItem());
+
+
             UserORM.saveUser(this, editUser);
         }
 

@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 
 import com.edaviessmith.consumecontent.ContentActivity;
 import com.edaviessmith.consumecontent.R;
-import com.edaviessmith.consumecontent.data.User;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -21,13 +20,12 @@ public class TaskFragment extends Fragment {
     public FragmentStateCachePagerAdapter adapterViewPager;
     public SlidingTabLayout slidingTabLayout;
     static ContentActivity act;
-    User user;
 
 
-    public static TaskFragment newInstance(ContentActivity act, User user) {
+    public static TaskFragment newInstance(ContentActivity act) {
         TaskFragment.act = act;
         TaskFragment fragment = new TaskFragment();
-        fragment.user = user;
+
         return fragment;
     }
 
@@ -37,7 +35,7 @@ public class TaskFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_content, container, false);
 
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
-        adapterViewPager = new PagerAdapter(act, user);
+        adapterViewPager = new PagerAdapter(act, act.getUser());
         viewPager.setAdapter(adapterViewPager);
 
         slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);

@@ -130,6 +130,18 @@ public class TwitterFeedORM {
     }
 
 
+    public static TwitterFeed getTwitterFeed(SQLiteDatabase database, int twitterFeedId) {
+
+        Cursor cursor = database.query(false, DB.TABLE_TWITTER_FEED, null,  DB.COL_ID + " = " + twitterFeedId, null, null, null, null, null);
+        if(cursor != null && cursor.moveToFirst()) {
+            TwitterFeed twitterFeed = cursorToTwitterFeed(cursor);
+
+            return twitterFeed;
+        }
+
+        return null;
+    }
+
     public static int saveTwitterFeed(SQLiteDatabase database, TwitterFeed twitterFeed) {
 
         if(Var.isValid(twitterFeed.getId())) {

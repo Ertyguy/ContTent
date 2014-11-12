@@ -131,15 +131,35 @@ public class YoutubeFeedORM {
         }
     }*/
 
+    public static List<YoutubeFeed> getYoutubeFeeds(SQLiteDatabase database, int youtubeChannelId) {
+        List<YoutubeFeed> youtubeFeeds = new ArrayList<YoutubeFeed>();
+
+        Cursor cursor = database.query(false, DB.TABLE_YOUTUBE_FEED, null, DB.COL_YOUTBUE_CHANNEL + " == " + youtubeChannelId, null, null, null, DB.ORDER_BY_SORT, null);
+
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                YoutubeFeed youtubeFeed = cursorToYoutubeFeed(cursor);
+                youtubeFeeds.add(youtubeFeed);
+                cursor.moveToNext();
+            }
+            Log.i(TAG, "YoutubeFeeds loaded successfully.");
+        }
+
+        return youtubeFeeds;
+
+    }
+
     public static void saveYoutubeFeeds(SQLiteDatabase database, List<YoutubeFeed> youtubeFeeds, int youtubeChannelId) {
 
-        for(YoutubeFeed youtubeFeed : youtubeFeeds) {
-            saveYoutubeFeed(database, youtubeFeed, youtubeChannelId);
+        for(int i=0; i< youtubeFeeds.size(); i++) {
+            saveYoutubeFeed(database, youtubeFeeds.get(i), youtubeChannelId, i);
         }
     }
 
-    public static void saveYoutubeFeed(SQLiteDatabase database, YoutubeFeed youtubeFeed, int youtubeChannelId) {
+    public static void saveYoutubeFeed(SQLiteDatabase database, YoutubeFeed youtubeFeed, int youtubeChannelId, int sort) {
 
+        youtubeFeed.setSort(sort);
         if(Var.isValid(youtubeFeed.getId())) {
             database.update(DB.TABLE_YOUTUBE_FEED, youtubeFeedToContentValues(youtubeFeed, youtubeChannelId, false), DB.COL_ID + " = " + youtubeFeed.getId(), null);
         } else {
@@ -172,5 +192,6 @@ public class YoutubeFeedORM {
                                  cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
                                  cursor.getInt(cursor.getColumnIndex(DB.COL_VISIBILITY)) == 1);
     }
+
 
 }

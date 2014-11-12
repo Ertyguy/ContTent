@@ -25,6 +25,24 @@ public class GroupORM {
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_GROUP;
 
 
+    public static List<Group> getUserGroups(SQLiteDatabase database, int userId) {
+
+        Cursor cursor = database.rawQuery("SELECT G.* FROM "+DB.TABLE_GROUP+" AS G INNER JOIN "+DB.TABLE_GROUP_USER+" GU on (G."+DB.COL_ID+" = GU."+DB.COL_GROUP+")", null) ;
+        List<Group> groups = new ArrayList<Group>();
+
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                groups.add(cursorToGroup(cursor));
+                cursor.moveToNext();
+            }
+            Log.i("UserORM", "Groups loaded successfully for user "+userId);
+        }
+
+        return groups;
+    }
+
+
     public static List<Group> getGroups(Context context) {
 
         DB databaseHelper = new DB(context);
