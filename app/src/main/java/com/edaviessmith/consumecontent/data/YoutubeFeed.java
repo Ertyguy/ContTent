@@ -3,6 +3,7 @@ package com.edaviessmith.consumecontent.data;
 
 import com.edaviessmith.consumecontent.util.Var;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class YoutubeFeed extends MediaFeed {
@@ -29,6 +30,9 @@ public class YoutubeFeed extends MediaFeed {
     public YoutubeFeed(int id, int sort, String name, String thumbnail, String feedId, int type, boolean isVisible) {
         super(id, sort, name, thumbnail, feedId, type);
         this.isVisible = isVisible;
+        youtubeItems = new ArrayList<YoutubeItem>();
+        for(int i=0; i<10; i++)
+            youtubeItems.add(new YoutubeItem());
     }
 
     public List<YoutubeItem> getYoutubeItems() {

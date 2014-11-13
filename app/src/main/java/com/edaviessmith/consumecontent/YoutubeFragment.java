@@ -54,7 +54,7 @@ public class YoutubeFragment extends Fragment {
         feed_rv.setLayoutManager(new LinearLayoutManager(act));
         feed_rv.setItemAnimator(new DefaultItemAnimator());
 
-        itemAdapter = new YoutubeItemAdapter(getFeed().getYoutubeItems(), R.layout.item_youtube, act);
+        itemAdapter = new YoutubeItemAdapter(getFeed().getYoutubeItems(), act);
         feed_rv.setAdapter(itemAdapter);
 
         return view;
@@ -67,24 +67,22 @@ public class YoutubeFragment extends Fragment {
     public static class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder>{
 
         private List<YoutubeItem> items;
-        private int rowLayout;
         private Context mContext;
 
-        public YoutubeItemAdapter(List<YoutubeItem> items, int rowLayout, Context context) {
+        public YoutubeItemAdapter(List<YoutubeItem> items,  Context context) {
             this.items = items;
-            this.rowLayout = rowLayout;
             this.mContext = context;
         }
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            View v = LayoutInflater.from(viewGroup.getContext()).inflate(rowLayout, viewGroup, false);
+            View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube, viewGroup, false);
             return new ViewHolder(v);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int i) {
-            viewHolder.title_tv.setText(items.get(i).getTitle());
+            //viewHolder.title_tv.setText(items.get(i).getTitle());
 
             //viewHolder.countryImage.setImageDrawable(mContext.getDrawable(country.getImageResourceId(mContext)));
         }
