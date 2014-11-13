@@ -205,6 +205,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         spinnerInit = 1;
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        getSupportActionBar().setTitle("Add User");
     }
 
 
@@ -411,6 +413,13 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             UserORM.saveUser(this, editUser);
 
             finish();
+        }
+
+        if(id == android.R.id.home) {
+            if(searchMode != Var.SEARCH_NONE) {
+                toggleSearch(Var.SEARCH_NONE);
+                return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -632,7 +641,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if(convertView == null) {
                 convertView = inflater.inflate(R.layout.item_youtube_feed, parent, false);
                 holder = new ViewHolder();
-                holder.image_iv = (ImageView) convertView.findViewById(R.id.image_iv);
+                holder.image_iv = (ImageView) convertView.findViewById(R.id.thumbnail_iv);
                 holder.name_tv = (TextView) convertView.findViewById(R.id.name_tv);
                 holder.visible_sw = (SwitchCompat) convertView.findViewById(R.id.visible_sw);
 
@@ -706,7 +715,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if(convertView == null) {
                 convertView = inflater.inflate((getItemViewType(position) == 0 ? R.layout.item_youtube_search: R.layout.item_twitter_search), parent, false);
                 holder = new ViewHolder();
-                holder.image_iv = (ImageView) convertView.findViewById(R.id.image_iv);
+                holder.image_iv = (ImageView) convertView.findViewById(R.id.thumbnail_iv);
                 holder.name_tv = (TextView) convertView.findViewById(R.id.name_tv);
                 holder.screenName_tv = (TextView) convertView.findViewById(R.id.screen_name_tv);
                 convertView.setTag(holder);

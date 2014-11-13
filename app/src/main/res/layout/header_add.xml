@@ -9,7 +9,8 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp">
 
 
         <Spinner
@@ -50,43 +51,18 @@
             android:layout_alignLeft="@+id/user_name_edt"
             android:layout_alignStart="@+id/user_name_edt"
             android:layout_below="@+id/user_name_edt"
+            style="@style/Base.Widget.AppCompat.Spinner"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true" />
 
 
     </RelativeLayout>
-    <LinearLayout
-        android:id="@+id/notification_v"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:layout_marginTop="5dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/notification_sw"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
-            android:gravity="center_vertical"
-            android:text="@string/all_notifications"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/youtube_v"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:layout_marginTop="5dp"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -141,13 +117,38 @@
     </LinearLayout>
 
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/notification_v"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="5dp"
         android:layout_marginTop="5dp"
+        android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
-        android:text="@string/feeds"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:orientation="horizontal">
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/notification_sw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:gravity="center_vertical"
+            android:text="@string/all_notifications"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="5dp"
+        android:gravity="center_vertical"
+        android:background="@color/primary_dark" />
 
 </LinearLayout>

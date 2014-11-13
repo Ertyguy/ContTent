@@ -2,8 +2,8 @@
 <resources>
 
     <color name="primary">#607D8B</color>
-    <color name="primary_dark">#37474F</color>
-    <color name="accent">#90A4AE</color>
+    <color name="primary_dark">#455A64</color>
+    <color name="accent">#80DEEA</color>
 
     <color name="blue_twitter">#55acee</color>
     <color name="red_youtube">#D50000</color>

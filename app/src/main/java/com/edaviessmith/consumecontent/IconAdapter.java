@@ -59,7 +59,7 @@ public class IconAdapter  extends BaseAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.item_image, parent, false);
             holder = new ViewHolder();
-            holder.image_iv = (ImageView) convertView.findViewById(R.id.image_iv);
+            holder.image_iv = (ImageView) convertView.findViewById(R.id.thumbnail_iv);
 
             convertView.setTag(holder);
         } else {

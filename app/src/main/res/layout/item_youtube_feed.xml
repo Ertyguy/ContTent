@@ -8,7 +8,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/image_iv"
+        android:id="@+id/thumbnail_iv"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:src="@drawable/ic_youtube_icon"
@@ -26,8 +26,8 @@
         android:id="@+id/name_tv"
         android:layout_marginLeft="10dp"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/image_iv"
-        android:layout_toEndOf="@+id/image_iv"
+        android:layout_toRightOf="@+id/thumbnail_iv"
+        android:layout_toEndOf="@+id/thumbnail_iv"
         android:textColor="@android:color/black" />
 
 
@@ -35,7 +35,7 @@
         android:id="@+id/visible_sw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/image_iv"
+        android:layout_below="@+id/thumbnail_iv"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
