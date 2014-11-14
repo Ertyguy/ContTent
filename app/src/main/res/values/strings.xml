@@ -8,6 +8,8 @@
     <string name="user_name">User Name</string>
     <string name="all_notifications">All Notifications</string>
     <string name="youtube_channel">Youtube Channel</string>
+    <string name="search_youtube">Search Youtube</string>
+    <string name="search_twitter">Search Twitter</string>
     <string name="find_youtube_channel">Find Youtube Channel</string>
     <string name="twitter_handle">Twitter Handle</string>
     <string name="find_twitter_handle">Find Twitter Handle</string>

@@ -7,6 +7,7 @@ import com.edaviessmith.consumecontent.PlaceholderFragment;
 import com.edaviessmith.consumecontent.TwitterFragment;
 import com.edaviessmith.consumecontent.YoutubeFragment;
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.util.Var;
 
 public class PagerAdapter extends FragmentStateCachePagerAdapter {
 
@@ -24,20 +25,20 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     @Override
     public int getCount() {
 
-        if(user == null || user.getYoutubeChannel() == null || user.getYoutubeChannel().getYoutubeFeeds() == null) return 0;
-        return user.getYoutubeChannel().getYoutubeFeeds().size() + (user.getTwitterFeed() != null? 1: 0);
+        if(user == null || user.getMediaFeed() == null) return 0;
+        return user.getMediaFeed().size();
     }
 
     // Returns the fragment to display for that page
     @Override
     public Fragment getItem(int position) {
-        if(position < user.getYoutubeChannel().getYoutubeFeeds().size()) {
-            return YoutubeFragment.newInstance(act, position);
-        } else if(user.getTwitterFeed() != null && position == user.getYoutubeChannel().getYoutubeFeeds().size() ) {
-            return TwitterFragment.newInstance(act, position);
-        } else {
-            return PlaceholderFragment.newInstance(position, "Placeholder (nothing to see here)");
+
+        switch(act.getUser().getMediaFeed().get(position).getType()) {
+            case Var.TYPE_YOUTUBE_PLAYLIST:case Var.TYPE_YOUTUBE_ACTIVTY: return YoutubeFragment.newInstance(act, position);
+            case Var.TYPE_TWITTER: return TwitterFragment.newInstance(act, position);
+            default: return PlaceholderFragment.newInstance(position, "Placeholder (nothing to see here)");
         }
+
 
     }
 
@@ -46,13 +47,11 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     // Returns the page title for the top indicator
     @Override
     public CharSequence getPageTitle(int position) {
-        if(position < user.getYoutubeChannel().getYoutubeFeeds().size()) {
-            return user.getYoutubeChannel().getYoutubeFeeds().get(position).getName();
-        } else if(user.getTwitterFeed() != null && position == user.getYoutubeChannel().getYoutubeFeeds().size() ) {
-            return "Twitter";//user.getTwitterFeed().getName();
-        } else {
-            return "Placeholder (nothing to see here)";
-        }
+
+        if(position < user.getMediaFeed().size())  return act.getUser().getMediaFeed().get(position).getName();
+
+        return "Placeholder (nothing to see here)";
+
     }
 
 }

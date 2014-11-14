@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import com.edaviessmith.consumecontent.ContentActivity;
 import com.edaviessmith.consumecontent.R;
+import com.edaviessmith.consumecontent.util.Var;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -43,12 +44,18 @@ public class TaskFragment extends Fragment {
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                if(position < act.getUser().getYoutubeChannel().getYoutubeFeeds().size()) {
+                if(act.getUser().getMediaFeed().get(position).getType() == Var.TYPE_YOUTUBE_PLAYLIST || act.getUser().getMediaFeed().get(position).getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
+                    return act.getResources().getColor(R.color.red_youtube);
+                }else if(act.getUser().getMediaFeed().get(position).getType() == Var.TYPE_TWITTER) {
+                    return act.getResources().getColor(R.color.blue_twitter);
+                }
+
+                /*if(position < act.getUser().getYoutubeChannel().getYoutubeFeeds().size()) {
                     return act.getResources().getColor(R.color.red_youtube);
                 } else if(act.getUser().getTwitterFeed() != null && position == act.getUser().getYoutubeChannel().getYoutubeFeeds().size() ) {
                     return act.getResources().getColor(R.color.blue_twitter);
-                }
-                return act.getResources().getColor(R.color.red_light);
+                }*/
+                return act.getResources().getColor(R.color.accent);
 
 
             }

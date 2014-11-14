@@ -3,12 +3,15 @@
 
     <color name="primary">#607D8B</color>
     <color name="primary_dark">#455A64</color>
-    <color name="accent">#80DEEA</color>
+    <color name="accent">#8D6E63</color>
 
     <color name="blue_twitter">#55acee</color>
     <color name="red_youtube">#D50000</color>
 
     <color name="red_light">#ffbc3333</color>
 
-
+    <drawable name="accent">#8D6E63</drawable>
+    <drawable name="white">#ffffffff</drawable>
+    <drawable name="light_gray">#ffd4d4d4</drawable>
+    <drawable name="gray">#ffababab</drawable>
 </resources>

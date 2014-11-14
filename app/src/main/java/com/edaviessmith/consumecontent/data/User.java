@@ -5,9 +5,10 @@ import java.util.List;
 
 public class User extends Content{
 
-    //TODO feed list is in youtubechannel now
-	public List<MediaFeed> media;
 
+	public List<MediaFeed> mediaFeed;
+
+    //TODO: @Deprecated  channel and feed are back to mediaFeed items again
     private YoutubeChannel youtubeChannel;
     private TwitterFeed twitterFeed;
 
@@ -16,43 +17,37 @@ public class User extends Content{
     private List<Group> groups; //TODO need to thoroughly hash out this relationship
 
     public User () {
-        youtubeChannel = new YoutubeChannel();
-        twitterFeed = new TwitterFeed();
+        //youtubeChannel = new YoutubeChannel();
+        //twitterFeed = new TwitterFeed();
+        mediaFeed = new ArrayList<MediaFeed>();
         groups = new ArrayList<Group>();
         isNotification = true;
     }
 
-    //Depricated
-    public User (String name, List<MediaFeed> media) {
-		setName(name);
-		this.media = media;
-	}
-
-    public User(int id, int sort, String name, String thumbnail, int youtubeChannelId, int twitterFeedId, boolean isNotification) {
+    public User(int id, int sort, String name, String thumbnail, /*int youtubeChannelId, int twitterFeedId,*/ boolean isNotification) {
         super(id, sort, name, thumbnail);
         setNotification(isNotification);
 
-        youtubeChannel = new YoutubeChannel(youtubeChannelId);
-        twitterFeed = new TwitterFeed(twitterFeedId);
+        /*youtubeChannel = new YoutubeChannel(youtubeChannelId);
+        twitterFeed = new TwitterFeed(twitterFeedId);*/
     }
 
-
+    @Deprecated
     public YoutubeChannel getYoutubeChannel() {
         return youtubeChannel;
     }
-
+    @Deprecated
     public void setYoutubeChannel(YoutubeChannel youtubeChannel) {
         this.youtubeChannel = youtubeChannel;
     }
-
+    @Deprecated
     public TwitterFeed getTwitterFeed() {
         return twitterFeed;
     }
-
+    @Deprecated
     public void setTwitterFeed(TwitterFeed twitterFeed) {
         this.twitterFeed = twitterFeed;
     }
-
 
     public boolean isNotification() {
         return isNotification;
@@ -68,5 +63,13 @@ public class User extends Content{
 
     public void setGroups(List<Group> groups) {
         this.groups = groups;
+    }
+
+    public List<MediaFeed> getMediaFeed() {
+        return mediaFeed;
+    }
+
+    public void setMediaFeed(List<MediaFeed> mediaFeed) {
+        this.mediaFeed = mediaFeed;
     }
 }

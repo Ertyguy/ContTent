@@ -37,8 +37,10 @@ public class Var {
 
     //Searching users
     public static final int SEARCH_NONE = 0;
-    public static final int SEARCH_YOUTUBE = 1;
-    public static final int SEARCH_TWITTER = 2;
+    public static final int SEARCH_OPTIONS = 1;
+    public static final int SEARCH_YOUTUBE = 2;
+    public static final int SEARCH_YT_CHANNEL = 3;
+    public static final int SEARCH_TWITTER = 4;
 
 
     //Util functions

@@ -34,4 +34,9 @@ public class YoutubeChannel extends MediaFeed {
     public void setYoutubeFeeds(List<YoutubeFeed> youtubeFeeds) {
         this.youtubeFeeds = youtubeFeeds;
     }
+
+    public String toString() {
+        return "YoutubeChannel ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";
+    }
+
 }

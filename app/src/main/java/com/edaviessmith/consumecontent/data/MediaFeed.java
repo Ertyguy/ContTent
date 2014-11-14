@@ -7,7 +7,8 @@ public class MediaFeed {
     private String name;
     private String thumbnail;
 
-    private String feedId; //Also used for channelId
+    private String channelHandle;
+    private String feedId;
     private int type;
 
     public MediaFeed() { }
@@ -42,6 +43,16 @@ public class MediaFeed {
         this.sort = sort;
         this.name = name;
         this.thumbnail = thumbnail;
+        this.feedId = feedId;
+        this.type = type;
+    }
+
+    public MediaFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type) {
+        this.id = id;
+        this.sort = sort;
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.channelHandle = channelHandle;
         this.feedId = feedId;
         this.type = type;
     }
@@ -84,6 +95,14 @@ public class MediaFeed {
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
+    }
+
+    public String getChannelHandle() {
+        return channelHandle;
+    }
+
+    public void setChannelHandle(String channelHandle) {
+        this.channelHandle = channelHandle;
     }
 
     public int getType() {

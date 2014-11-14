@@ -2,6 +2,7 @@
 <RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/selector_accent"
     android:padding="10dp">
 
 
@@ -22,10 +23,10 @@
         android:id="@+id/name_tv"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:layout_centerVertical="true"
+        android:text="Playlist Title"
         android:layout_toRightOf="@+id/thumbnail_iv"
-        android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@android:color/white" />
+        android:layout_toEndOf="@+id/thumbnail_iv" />
 
 </RelativeLayout>

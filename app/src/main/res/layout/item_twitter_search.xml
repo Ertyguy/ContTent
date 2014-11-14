@@ -11,7 +11,7 @@
         android:id="@+id/thumbnail_iv"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:src="@drawable/ic_youtube_icon"
+        android:src="@drawable/ic_twitter_icon"
         android:layout_marginRight="20dp"
         android:layout_marginEnd="20dp" />
 
@@ -26,8 +26,7 @@
         android:gravity="center_vertical"
         android:layout_alignTop="@+id/thumbnail_iv"
         android:layout_toRightOf="@+id/thumbnail_iv"
-        android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@android:color/white" />
+        android:layout_toEndOf="@+id/thumbnail_iv" />
 
     <TextView
         android:layout_width="match_parent"
@@ -41,6 +40,6 @@
         android:layout_below="@+id/name_tv"
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@android:color/secondary_text_dark" />
+        android:textColor="@android:color/secondary_text_light" />
 
 </RelativeLayout>

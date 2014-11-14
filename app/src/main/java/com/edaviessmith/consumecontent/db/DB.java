@@ -28,9 +28,10 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(GroupORM.SQL_CREATE_TABLE);
         db.execSQL(UserORM.SQL_CREATE_TABLE);
         db.execSQL(GroupUserORM.SQL_CREATE_TABLE);
-        db.execSQL(YoutubeChannelORM.SQL_CREATE_TABLE);
-        db.execSQL(TwitterFeedORM.SQL_CREATE_TABLE);
-        db.execSQL(YoutubeFeedORM.SQL_CREATE_TABLE);
+        db.execSQL(MediaFeedORM.SQL_CREATE_TABLE);
+        //db.execSQL(YoutubeChannelORM.SQL_CREATE_TABLE);
+        //db.execSQL(TwitterFeedORM.SQL_CREATE_TABLE);
+        //db.execSQL(YoutubeFeedORM.SQL_CREATE_TABLE);
 
     }
 
@@ -39,9 +40,10 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(GroupORM.SQL_DROP_TABLE);
         db.execSQL(UserORM.SQL_DROP_TABLE);
         db.execSQL(GroupUserORM.SQL_DROP_TABLE);
-        db.execSQL(YoutubeChannelORM.SQL_DROP_TABLE);
-        db.execSQL(TwitterFeedORM.SQL_DROP_TABLE);
-        db.execSQL(YoutubeFeedORM.SQL_DROP_TABLE);
+        db.execSQL(MediaFeedORM.SQL_DROP_TABLE);
+        //db.execSQL(YoutubeChannelORM.SQL_DROP_TABLE);
+        //db.execSQL(TwitterFeedORM.SQL_DROP_TABLE);
+        //db.execSQL(YoutubeFeedORM.SQL_DROP_TABLE);
 
 
 
@@ -63,9 +65,8 @@ public class DB extends SQLiteOpenHelper {
     static final String TABLE_GROUP = "groups";
     static final String TABLE_USER = "users";
     static final String TABLE_GROUP_USER = "groups_users"; //Many to Many
-    static final String TABLE_YOUTUBE_CHANNEL = "youtube_channels";
-    static final String TABLE_TWITTER_FEED = "twitter_feeds";
-    static final String TABLE_YOUTUBE_FEED = "youtube_feeds";
+    static final String TABLE_MEDIA_FEED = "media_feeds";
+
 
     public static String ORDER_BY_SORT = DB.COL_SORT + " ASC";
     //// Database Columns /////
@@ -78,13 +79,11 @@ public class DB extends SQLiteOpenHelper {
     static final String COL_NOTIFICATION = "notification";
     static final String COL_TYPE = "type";
     static final String COL_FEED_ID = "feed_id";
-    static final String COL_DISPLAY_NAME = "display_name";
+    static final String COL_CHANNEL_HANDLE = "channel_handle";  //ChannelId or TwitterHandle
 
     //Foreign id keys
     static final String COL_GROUP = "group_id";
     static final String COL_USER = "user_id";
-    static final String COL_YOUTBUE_CHANNEL = "youtube_channel_id";
-    static final String COL_TWITTER_FEED = "twitter_feed_id";
 
 
 

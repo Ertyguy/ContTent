@@ -24,7 +24,6 @@ public class YoutubeFragment extends Fragment {
     private static String TAG = "YoutubeFragment";
     private static YoutubeFragment youtubeFragment;
     private static ContentActivity act;
-    private YoutubeFeed youtubeFeed;
     private int pos;
 
     private TextView feedId_tv;
@@ -60,8 +59,10 @@ public class YoutubeFragment extends Fragment {
         return view;
     }
 
+    YoutubeFeed youtubeFeed;
     private YoutubeFeed getFeed() {
-        return act.getUser().getYoutubeChannel().getYoutubeFeeds().get(pos);
+        if(youtubeFeed == null) youtubeFeed = new YoutubeFeed(act.getUser().getMediaFeed().get(pos));
+        return youtubeFeed;
     }
 
     public static class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder>{

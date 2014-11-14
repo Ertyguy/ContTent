@@ -31,6 +31,12 @@ public class YoutubeFeed extends MediaFeed {
         super(id, sort, name, thumbnail, feedId, type);
         this.isVisible = isVisible;
         youtubeItems = new ArrayList<YoutubeItem>();
+
+    }
+
+    public YoutubeFeed(MediaFeed mediaFeed) {
+        super(mediaFeed.getId(), mediaFeed.getSort(), mediaFeed.getName(), mediaFeed.getThumbnail(), mediaFeed.getChannelHandle(), mediaFeed.getFeedId(), mediaFeed.getType());
+        youtubeItems = new ArrayList<YoutubeItem>();
         for(int i=0; i<10; i++)
             youtubeItems.add(new YoutubeItem());
     }
@@ -46,5 +52,10 @@ public class YoutubeFeed extends MediaFeed {
     public boolean isVisible() {return isVisible; }
 
     public void setVisible(boolean isVisible) {this.isVisible = isVisible; }
+
+
+    public String toString() {
+        return "YoutubeFeed ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";
+    }
 
 }

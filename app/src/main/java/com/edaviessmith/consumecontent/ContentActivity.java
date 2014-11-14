@@ -53,6 +53,13 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
 	}
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        users = UserORM.getUsers(this);
+
+    }
+
 	@Override
 	public void onNavigationDrawerItemSelected(int position) {
 		// update the main content by replacing fragments

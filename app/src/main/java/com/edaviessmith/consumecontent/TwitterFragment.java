@@ -40,7 +40,7 @@ public class TwitterFragment extends Fragment {
         Log.i(TAG, "onCreateView");
 
         feedId_tv = (TextView) view.findViewById(R.id.id_tv);
-        feedId_tv.setText(act.getUser().getTwitterFeed().getFeedId());
+        //feedId_tv.setText(act.getUser().getTwitterFeed().getFeedId());
 
         return view;
     }
