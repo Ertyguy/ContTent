@@ -108,14 +108,14 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     private void toggleSearch(int searchMode) {
         this.searchMode = searchMode;
 
-        search_v.setVisibility((searchMode == Var.SEARCH_NONE) ? View.GONE: View.VISIBLE);
+        search_v.setVisibility(searchModePreSearch() ? View.GONE: View.VISIBLE);
         searchTwitter_v.setVisibility((searchMode == Var.SEARCH_TWITTER && !twitter.hasAccessToken()) ? View.VISIBLE: View.GONE);
         searchDiv_v.setVisibility((searchMode == Var.SEARCH_TWITTER && twitter.hasAccessToken()) ? View.GONE: View.VISIBLE);
         youtube_ll.setVisibility((searchMode == Var.SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
         twitter_ll.setVisibility((searchMode == Var.SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
         channel_v.setVisibility((searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
         action_fab.setVisibility((searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
-        search_fab.setVisibility((searchMode == Var.SEARCH_NONE || searchMode == Var.SEARCH_OPTIONS || searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE : View.GONE);
+        search_fab.setVisibility((searchModePreSearch() || searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE : View.GONE);
         search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_YT_CHANNEL
                 ? R.drawable.ic_add_white_18dp
                 : R.drawable.ic_search_white_24dp));
@@ -143,8 +143,16 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             saveItem.setVisible(false);
             searchItem.setVisible(true);
             searchView.requestFocusFromTouch();
-
         }
+        if (searchModePreSearch()) {
+            search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_NONE
+                    ? R.drawable.ic_search_white_24dp
+                    : R.drawable.ic_close_white_36dp));
+        }
+    }
+
+    private boolean searchModePreSearch() {
+        return (searchMode == Var.SEARCH_NONE || searchMode == Var.SEARCH_OPTIONS);
     }
 
     private void clearSearchOptions() {
@@ -180,7 +188,11 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         group_sp = (SpinnerTrigger) header.findViewById(R.id.group_sp);
         notification_sw = (SwitchCompat) header.findViewById(R.id.notification_sw);
         search_fab = (Fab) header.findViewById(R.id.search_fab);
+        youtube_fab = (Fab) header.findViewById(R.id.youtube_fab);
+        twitter_fab = (Fab) header.findViewById(R.id.twitter_fab);
 
+        youtube_ll = (LinearLayout) header.findViewById(R.id.youtube_ll);
+        twitter_ll = (LinearLayout) header.findViewById(R.id.twitter_ll);
 
         groupAdapter = new GroupAdapter(this, groups);
         group_sp.setAdapter(groupAdapter);
@@ -212,11 +224,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //userPicture_sp.setOnItemSelectedListener(this);
 
         action_fab = (Fab) findViewById(R.id.action_fab);
-        youtube_fab = (Fab) findViewById(R.id.youtube_fab);
-        twitter_fab = (Fab) findViewById(R.id.twitter_fab);
 
-        youtube_ll = (LinearLayout) findViewById(R.id.youtube_ll);
-        twitter_ll = (LinearLayout) findViewById(R.id.twitter_ll);
 
         action_fab.setOnClickListener(this);
         search_fab.setOnClickListener(this);
@@ -407,6 +415,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         Log.d(TAG, "onclick "+(v == action_fab) +", "+ searchMode);
         if(v == search_fab) {
             if(searchMode == Var.SEARCH_NONE) toggleSearch(Var.SEARCH_OPTIONS);
+            else if(searchMode == Var.SEARCH_OPTIONS) toggleSearch(Var.SEARCH_NONE);
         }
 
         if(v == action_fab) {
