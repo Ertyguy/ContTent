@@ -38,7 +38,7 @@ import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
-import com.edaviessmith.consumecontent.util.TwitterAuthListener;
+import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
@@ -61,7 +61,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     String TAG = "AddActivity";
 
     SearchView searchView;
-    MenuItem searchItem, saveItem;
+    MenuItem searchItem;
+
     ListView search_lv, feed_lv;
     SearchAdapter searchAdapter;
     FeedAdapter feedAdapter;
@@ -70,32 +71,26 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     List<TwitterFeed> twitterFeedSearch;
     List<Group> groups;
     List<String> userPictureThumbnails;
-    View search_v;
-    View searchTwitter_v, searchDiv_v, channel_v;
+    View search_v, searchTwitter_v, searchDiv_v, channel_v;
 
     final static int maxResults = 10;
 
     LinearLayout youtube_ll, twitter_ll;
-    TextView searchMessage_tv, name_tv; //youtubeName_tv, twitterHandle_tv,
+    TextView searchMessage_tv, name_tv, searchTwitterLogin_tv; //youtubeName_tv, twitterHandle_tv,
     ImageView thumbnail_iv;
     EditText userName_edt;
     Spinner userPicture_sp;
     SpinnerTrigger group_sp;
     SwitchCompat notification_sw;
     IconAdapter iconAdapter;
-    int spinnerInit, spinnerSelect;
-    int searchMode = Var.SEARCH_NONE;
+    int spinnerInit, spinnerSelect, twitterPage, searchMode = Var.SEARCH_NONE;
     SearchView.SearchAutoComplete search_edt;
     String search, pageToken;
-    int twitterPage;
     boolean searchBusy;
 
     Fab search_fab, youtube_fab, twitter_fab, action_fab;
     User editUser;
 
-
-    //SocialAuthAdapter adapter;
-    private TextView searchTwitterLogin_tv;
 
     private ImageLoader imageLoader;
     private SearchYoutubeTask searchTask;
@@ -114,7 +109,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         youtube_ll.setVisibility((searchMode == Var.SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
         twitter_ll.setVisibility((searchMode == Var.SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
         channel_v.setVisibility((searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
-        action_fab.setVisibility((searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
         search_fab.setVisibility((searchModePreSearch() || searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE : View.GONE);
         search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_YT_CHANNEL
                 ? R.drawable.ic_add_white_18dp
@@ -124,25 +118,29 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         search_lv.setChoiceMode((searchMode == Var.SEARCH_YT_CHANNEL) ? ListView.CHOICE_MODE_MULTIPLE : ListView.CHOICE_MODE_SINGLE);
 
         if(searchMode == Var.SEARCH_NONE) {
-            dismissSearch();
+            if(searchItem != null) {
+                dismissSearch();
+                search_edt.setText("");
+                searchItem.setVisible(false);
+            }
 
-            search_edt.setText("");
-            searchItem.setVisible(false);
-            saveItem.setVisible(true);
-
+            action_fab.setVisibility((editUser.getMediaFeed().size() > 0) ? View.VISIBLE: View.GONE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             youtubeChannelSearch.clear();
             twitterFeedSearch.clear();
             searchAdapter.notifyDataSetChanged();
+
         } if(searchMode == Var.SEARCH_YT_CHANNEL) {
+            action_fab.setVisibility(View.VISIBLE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             clearSearchOptions();
         } else if(searchMode == Var.SEARCH_YOUTUBE || searchMode == Var.SEARCH_TWITTER) {
-            search_edt.setHint((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
-            searchView.setIconified(false);
-            saveItem.setVisible(false);
-            searchItem.setVisible(true);
-            searchView.requestFocusFromTouch();
+            if(searchItem != null) {
+                search_edt.setHint((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
+                searchView.setIconified(false);
+                searchItem.setVisible(true);
+                searchView.requestFocusFromTouch();
+            }
         }
         if (searchModePreSearch()) {
             search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_NONE
@@ -234,7 +232,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //twitter_ll.setOnTouchListener(this);
 
         twitter = new TwitterUtil(this);
-        twitter.setListener(new TwitterAuthListener() {
+        twitter.setListener(new Listener() {
             @Override
             public void onError(String value) {
                 Toast.makeText(AddActivity.this, "Login Failed", Toast.LENGTH_LONG).show();
@@ -253,6 +251,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getSupportActionBar().setTitle("Add User");
+        toggleSearch(Var.SEARCH_NONE);
     }
 
 
@@ -268,9 +267,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add, menu);
 
-        saveItem = menu.findItem(R.id.action_save);
         searchItem = menu.findItem(R.id.action_search);
-
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         if (searchView != null) {
             searchView.setOnQueryTextListener(this);
@@ -310,7 +307,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
 
-    //TODO handler sometimes fails when typing fast
+    //TODO handler sometimes fails when typing fast (haven't seen lately)
     Handler handler = new Handler();
     private void searchTimer() {
         if(handler != null) handler.removeCallbacksAndMessages(null);
@@ -376,7 +373,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         }
 
         if(searchMode == Var.SEARCH_TWITTER) {
-            editUser.getMediaFeed().add(twitterFeedSearch.get(position - 1));
+            editUser.getMediaFeed().add( twitterFeedSearch.get(position - 1));
             addThumbnail(twitterFeedSearch.get(position - 1).getThumbnail());
 
             if(Var.isEmpty(userName_edt.getText().toString())) userName_edt.setText(twitterFeedSearch.get(position - 1).getDisplayName());
@@ -424,6 +421,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 for (int i = 0; i < checked.size(); i++) {
                     if(checked.valueAt(i) == true) {
                         YoutubeFeed youtubeFeed = (YoutubeFeed) search_lv.getItemAtPosition(checked.keyAt(i));
+                        youtubeFeed.setChannelHandle(searchChannel.getFeedId());
                         editUser.getMediaFeed().add(youtubeFeed);
                     }
                 }
@@ -432,6 +430,16 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 clearSearchOptions();
 
                 toggleSearch(Var.SEARCH_NONE);
+            }
+            else if(searchMode == Var.SEARCH_NONE) {
+
+                editUser.setName(userName_edt.getText().toString().trim());
+                editUser.setNotification(notification_sw.isChecked());
+                editUser.setThumbnail((String) userPicture_sp.getSelectedItem());
+
+                UserORM.saveUser(this, editUser);
+
+                finish();
             }
         }
         if(v == youtube_ll) toggleSearch(Var.SEARCH_YOUTUBE);
@@ -453,8 +461,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
     private void dismissSearch() {
-        InputMethodManager imm =  (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+        if(searchView != null)
+            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+
     }
 
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -468,17 +477,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        if(id == R.id.action_save) {
-            editUser.setName(userName_edt.getText().toString().trim());
-            editUser.setNotification(notification_sw.isChecked());
-            editUser.setThumbnail((String) userPicture_sp.getSelectedItem());
-
-
-            UserORM.saveUser(this, editUser);
-
-            finish();
-        }
 
         if(id == android.R.id.home) {
             if(searchMode != Var.SEARCH_NONE) {
@@ -1024,7 +1022,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                         for (twitter4j.User u : users) {
                             TwitterFeed feed = new TwitterFeed(String.valueOf(u.getId()));
                             feed.setDisplayName(u.getName());
-                            feed.setName("@" + u.getScreenName());
+                            feed.setChannelHandle("@" + u.getScreenName());
                             feed.setThumbnail(u.getProfileImageURL());
 
                             twitterFeedSearch.add(feed);
@@ -1067,11 +1065,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                                     if (Var.isJsonString(item, "id")) {
 
                                         TwitterFeed feed = new TwitterFeed(item.getString("id"));
-
                                         if (Var.isJsonString(item, "name"))
                                             feed.setDisplayName(item.getString("name"));
                                         if (Var.isJsonString(item, "screen_name"))
-                                            feed.setName("@" + item.getString("screen_name"));
+                                            feed.setChannelHandle("@" + item.getString("screen_name"));
                                         if (Var.isJsonString(item, "profile_image_url"))
                                             feed.setThumbnail(item.getString("profile_image_url").replace("_normal", "_bigger"));
 

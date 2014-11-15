@@ -24,14 +24,14 @@ public final class TwitterDialog extends Dialog {
 
     private static final FrameLayout.LayoutParams FILL = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
     private final String url;
-    private final TwitterAuthListener listener;
+    private final Listener listener;
     private ProgressDialog spinner;
     private WebView webView;
     private TextView title;
     private boolean progressDialogRunning = false;
     private Context context;
 
-    public TwitterDialog(Context context, String url, TwitterAuthListener listener) {
+    public TwitterDialog(Context context, String url, Listener listener) {
         super(context);
         this.context = context;
         this.url = url;

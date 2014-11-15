@@ -1,5 +1,8 @@
 package com.edaviessmith.consumecontent.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MediaFeed {
 
     private int id = -1;
@@ -10,6 +13,8 @@ public class MediaFeed {
     private String channelHandle;
     private String feedId;
     private int type;
+
+    private List items;
 
     public MediaFeed() { }
 
@@ -22,6 +27,8 @@ public class MediaFeed {
         this.feedId = feedId;
         this.name = name;
         this.type = type;
+
+        this.items = new ArrayList();
     }
 
     public MediaFeed(int id, int sort, String name, String feedId, String thumbnail) {
@@ -30,12 +37,15 @@ public class MediaFeed {
         this.name = name;
         this.feedId = feedId;
         this.thumbnail = thumbnail;
+
     }
 
     public MediaFeed(String name, String feedId, String thumbnail) {
         this.name = name;
         this.feedId = feedId;
         this.thumbnail = thumbnail;
+
+        this.items = new ArrayList();
     }
 
     public MediaFeed(int id, int sort, String name, String thumbnail, String feedId, int type) {
@@ -45,6 +55,8 @@ public class MediaFeed {
         this.thumbnail = thumbnail;
         this.feedId = feedId;
         this.type = type;
+
+        this.items = new ArrayList();
     }
 
     public MediaFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type) {
@@ -55,6 +67,8 @@ public class MediaFeed {
         this.channelHandle = channelHandle;
         this.feedId = feedId;
         this.type = type;
+        this.items = new ArrayList();
+
     }
 
     public int getId() {
@@ -111,5 +125,13 @@ public class MediaFeed {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public List getItems() {
+        return items;
+    }
+
+    public void setItems(List items) {
+        this.items = items;
     }
 }

@@ -3,12 +3,11 @@ package com.edaviessmith.consumecontent.data;
 
 import com.edaviessmith.consumecontent.util.Var;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class YoutubeFeed extends MediaFeed {
 
-    private List<YoutubeItem> youtubeItems;
+    //private List<YoutubeItem> items;
 
     private boolean isVisible;
 
@@ -30,28 +29,30 @@ public class YoutubeFeed extends MediaFeed {
     public YoutubeFeed(int id, int sort, String name, String thumbnail, String feedId, int type, boolean isVisible) {
         super(id, sort, name, thumbnail, feedId, type);
         this.isVisible = isVisible;
-        youtubeItems = new ArrayList<YoutubeItem>();
+        //items = new ArrayList<YoutubeItem>();
 
     }
 
     public YoutubeFeed(MediaFeed mediaFeed) {
         super(mediaFeed.getId(), mediaFeed.getSort(), mediaFeed.getName(), mediaFeed.getThumbnail(), mediaFeed.getChannelHandle(), mediaFeed.getFeedId(), mediaFeed.getType());
-        youtubeItems = new ArrayList<YoutubeItem>();
+        //items = new ArrayList<YoutubeItem>();
         for(int i=0; i<10; i++)
-            youtubeItems.add(new YoutubeItem());
+            getItems().add(new YoutubeItem());
     }
 
-    public List<YoutubeItem> getYoutubeItems() {
-        return youtubeItems;
+    public List<YoutubeItem> getItems() {
+        return (List<YoutubeItem>) super.getItems();
     }
 
-    public void setYoutubeItems(List<YoutubeItem> youtubeItems) {
-        this.youtubeItems = youtubeItems;
+    public void setItems(List youtubeItems) {
+        super.setItems(youtubeItems);
     }
 
     public boolean isVisible() {return isVisible; }
 
     public void setVisible(boolean isVisible) {this.isVisible = isVisible; }
+
+
 
 
     public String toString() {

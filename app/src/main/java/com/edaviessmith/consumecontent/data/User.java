@@ -8,17 +8,11 @@ public class User extends Content{
 
 	public List<MediaFeed> mediaFeed;
 
-    //TODO: @Deprecated  channel and feed are back to mediaFeed items again
-    private YoutubeChannel youtubeChannel;
-    private TwitterFeed twitterFeed;
-
     private boolean isNotification;
 
     private List<Group> groups; //TODO need to thoroughly hash out this relationship
 
     public User () {
-        //youtubeChannel = new YoutubeChannel();
-        //twitterFeed = new TwitterFeed();
         mediaFeed = new ArrayList<MediaFeed>();
         groups = new ArrayList<Group>();
         isNotification = true;
@@ -28,26 +22,8 @@ public class User extends Content{
         super(id, sort, name, thumbnail);
         setNotification(isNotification);
 
-        /*youtubeChannel = new YoutubeChannel(youtubeChannelId);
-        twitterFeed = new TwitterFeed(twitterFeedId);*/
     }
 
-    @Deprecated
-    public YoutubeChannel getYoutubeChannel() {
-        return youtubeChannel;
-    }
-    @Deprecated
-    public void setYoutubeChannel(YoutubeChannel youtubeChannel) {
-        this.youtubeChannel = youtubeChannel;
-    }
-    @Deprecated
-    public TwitterFeed getTwitterFeed() {
-        return twitterFeed;
-    }
-    @Deprecated
-    public void setTwitterFeed(TwitterFeed twitterFeed) {
-        this.twitterFeed = twitterFeed;
-    }
 
     public boolean isNotification() {
         return isNotification;

@@ -3,15 +3,12 @@ package com.edaviessmith.consumecontent.data;
 
 import com.edaviessmith.consumecontent.util.Var;
 
-import java.util.List;
-
 public class TwitterFeed extends MediaFeed {
 
 
-    public List<TwitterItem> twitterItems;
+    //public List<TwitterItem> twitterItems;
 
     public String displayName;
-
 
     public TwitterFeed() {
         setType(Var.TYPE_TWITTER);
@@ -38,13 +35,6 @@ public class TwitterFeed extends MediaFeed {
         this.displayName = displayName;
     }
 
-    public List<TwitterItem> getTwitterItems() {
-        return twitterItems;
-    }
-
-    public void setTwitterItems(List<TwitterItem> twitterItems) {
-        this.twitterItems = twitterItems;
-    }
 
     public String getDisplayName() {
         return displayName;

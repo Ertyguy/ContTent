@@ -29,9 +29,8 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(UserORM.SQL_CREATE_TABLE);
         db.execSQL(GroupUserORM.SQL_CREATE_TABLE);
         db.execSQL(MediaFeedORM.SQL_CREATE_TABLE);
-        //db.execSQL(YoutubeChannelORM.SQL_CREATE_TABLE);
-        //db.execSQL(TwitterFeedORM.SQL_CREATE_TABLE);
-        //db.execSQL(YoutubeFeedORM.SQL_CREATE_TABLE);
+        db.execSQL(YoutubeItemORM.SQL_CREATE_TABLE);
+        db.execSQL(TwitterItemORM.SQL_CREATE_TABLE);
 
     }
 
@@ -41,11 +40,8 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(UserORM.SQL_DROP_TABLE);
         db.execSQL(GroupUserORM.SQL_DROP_TABLE);
         db.execSQL(MediaFeedORM.SQL_DROP_TABLE);
-        //db.execSQL(YoutubeChannelORM.SQL_DROP_TABLE);
-        //db.execSQL(TwitterFeedORM.SQL_DROP_TABLE);
-        //db.execSQL(YoutubeFeedORM.SQL_DROP_TABLE);
-
-
+        db.execSQL(YoutubeItemORM.SQL_DROP_TABLE);
+        db.execSQL(TwitterItemORM.SQL_DROP_TABLE);
 
         if(oldVersion <= 1) {
             //addNewMember(db, 3);
@@ -64,11 +60,14 @@ public class DB extends SQLiteOpenHelper {
     ///// Database Tables //////
     static final String TABLE_GROUP = "groups";
     static final String TABLE_USER = "users";
-    static final String TABLE_GROUP_USER = "groups_users"; //Many to Many
+    static final String TABLE_GROUP_USER = "groups_users";  //Many to Many
     static final String TABLE_MEDIA_FEED = "media_feeds";
+    static final String TABLE_YOUTUBE_ITEM = "youtube_items";
+    static final String TABLE_TWITTER_ITEM = "twitter_items";
 
 
     public static String ORDER_BY_SORT = DB.COL_SORT + " ASC";
+    public static String ORDER_BY_DATE = DB.COL_DATE + " ASC";
     //// Database Columns /////
 
     static final String COL_ID = "id";
@@ -76,6 +75,7 @@ public class DB extends SQLiteOpenHelper {
     static final String COL_NAME = "name";
     static final String COL_THUMBNAIL = "thumbnail";
     static final String COL_VISIBILITY = "visibility";
+
     static final String COL_NOTIFICATION = "notification";
     static final String COL_TYPE = "type";
     static final String COL_FEED_ID = "feed_id";
@@ -84,7 +84,21 @@ public class DB extends SQLiteOpenHelper {
     //Foreign id keys
     static final String COL_GROUP = "group_id";
     static final String COL_USER = "user_id";
+    static final String COL_MEDIA_FEED = "media_feed_id";
 
+
+    static final String COL_TITLE = "title";
+    static final String COL_DATE =  "date";
+    static final String COL_IMAGE_MED = "image_med";
+    static final String COL_IMAGE_HIGH = "image_high";
+
+    static final String COL_VIDEO_ID = "video_id";
+    static final String COL_LENGTH = "length";
+    static final String COL_VIEWS = "views";
+    static final String COL_STATUS = "status";
+    static final String COL_TWEET_ID = "tweet_id";
+
+    static final int PAGE_SIZE = 20; //Number of items to save
 
 
 

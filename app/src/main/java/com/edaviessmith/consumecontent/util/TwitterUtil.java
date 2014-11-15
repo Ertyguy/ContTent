@@ -33,7 +33,7 @@ public final class TwitterUtil {
     private final CommonsHttpOAuthConsumer httpOauthConsumer;
     private final OAuthProvider httpOauthProvider;
     private final ProgressDialog progressDialog;
-    private TwitterAuthListener listener;
+    private Listener listener;
     private AccessToken accessToken;
     private String bearerToken;
 
@@ -58,7 +58,7 @@ public final class TwitterUtil {
         configureToken();
     }
 
-    public void setListener(TwitterAuthListener listener) {
+    public void setListener(Listener listener) {
         this.listener = listener;
     }
 
@@ -167,7 +167,7 @@ public final class TwitterUtil {
     }
 
     public void showLoginDialog(String url) {
-        final TwitterAuthListener listener = new TwitterAuthListener() {
+        final Listener listener = new Listener() {
             @Override
             public void onComplete(String value) {
                 processToken(value);
@@ -181,24 +181,8 @@ public final class TwitterUtil {
         new TwitterDialog(context, url, listener).show();
     }
 
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            progressDialog.dismiss();
-
-            if (msg.what == 1) {
-                if (msg.arg1 == 1) listener.onError("Error getting request token");
-                else listener.onError("Error getting access token");
-            } else {
-                if (msg.arg1 == 1) showLoginDialog((String) msg.obj);
-                else listener.onComplete("");
-            }
-        }
-    };
-
 
     ////      Application authentication        ////
-
     public String getBearerToken() {
 
         if(bearerToken != null) return bearerToken;
@@ -220,4 +204,19 @@ public final class TwitterUtil {
         return bearerToken;
     }
 
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            progressDialog.dismiss();
+
+            if (msg.what == 1) {
+                if (msg.arg1 == 1) listener.onError("Error getting request token");
+                else listener.onError("Error getting access token");
+            } else {
+                if (msg.arg1 == 1) showLoginDialog((String) msg.obj);
+                else listener.onComplete("");
+            }
+        }
+    };
 }

@@ -22,6 +22,7 @@ public class MediaFeedORM {
             DB.COL_NAME   	        + " TEXT, " +
             DB.COL_THUMBNAIL 	    + " TEXT, " +
             DB.COL_CHANNEL_HANDLE	+ " TEXT ," +
+            //TODO twitterFeed display name is not handled (design decision required)
             DB.COL_FEED_ID          + " TEXT, " +
             DB.COL_TYPE		        + " INTEGER, " +
             "FOREIGN KEY("+DB.COL_USER +") REFERENCES "+DB.TABLE_USER+"("+DB.COL_ID+")" +");";

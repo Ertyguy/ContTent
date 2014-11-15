@@ -2,6 +2,8 @@ package com.edaviessmith.consumecontent;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +17,8 @@ import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
+import com.edaviessmith.consumecontent.db.YoutubeItemORM;
+import com.edaviessmith.consumecontent.util.Listener;
 
 import java.util.List;
 
@@ -26,7 +30,8 @@ public class YoutubeFragment extends Fragment {
     private static ContentActivity act;
     private int pos;
 
-    private TextView feedId_tv;
+
+    private Listener listener;
     private RecyclerView feed_rv;
     private YoutubeItemAdapter itemAdapter;
 
@@ -43,6 +48,22 @@ public class YoutubeFragment extends Fragment {
         return youtubeFragment;
     }
 
+    public YoutubeFragment() {
+
+        listener = new Listener() {
+            @Override
+            public void onComplete(String value) {
+                /* complete action*/
+            }
+            @Override
+            public void onError(String value) {
+                Log.e(TAG, "listener error "+value);
+            }
+        };
+
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
@@ -53,16 +74,34 @@ public class YoutubeFragment extends Fragment {
         feed_rv.setLayoutManager(new LinearLayoutManager(act));
         feed_rv.setItemAnimator(new DefaultItemAnimator());
 
-        itemAdapter = new YoutubeItemAdapter(getFeed().getYoutubeItems(), act);
+        getLocalItems();
+
+        //handler.sendMessage(handler.obtainMessage(what, 1, 0, authUrl));
+
+        itemAdapter = new YoutubeItemAdapter(getFeed().getItems(), act);
         feed_rv.setAdapter(itemAdapter);
 
         return view;
     }
 
-    YoutubeFeed youtubeFeed;
+    public void getLocalItems() {
+
+
+        new Thread() {
+            @Override
+            public void run() {
+
+                getFeed().setItems(YoutubeItemORM.getYoutubeItems(act, getFeed().getId()));
+
+                //handler.sendMessage(handler.obtainMessage(Var.HANDLER_COMPLETE, 1, 0, ""));
+            }
+        }.start();
+    }
+
+
+
     private YoutubeFeed getFeed() {
-        if(youtubeFeed == null) youtubeFeed = new YoutubeFeed(act.getUser().getMediaFeed().get(pos));
-        return youtubeFeed;
+        return (YoutubeFeed) act.getUser().getMediaFeed().get(pos);//youtubeFeed;
     }
 
     public static class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder>{
@@ -113,4 +152,19 @@ public class YoutubeFragment extends Fragment {
 
         }
     }
+
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+            if (msg.what == 1) {
+                if (msg.arg1 == 1) listener.onError("Error getting request token");
+                else listener.onError("Error getting access token");
+            } else {
+                if (msg.arg1 == 1) ;//showLoginDialog((String) msg.obj);
+                else listener.onComplete("");
+            }
+        }
+    };
 }

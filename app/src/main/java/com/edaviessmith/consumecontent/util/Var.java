@@ -42,6 +42,10 @@ public class Var {
     public static final int SEARCH_YT_CHANNEL = 3;
     public static final int SEARCH_TWITTER = 4;
 
+    public static final int HANDLER_COMPLETE = 0;
+    public static final int HANDLER_ERROR = 1;
+
+
 
     //Util functions
     public static int getPixels(int unit, float size) {

@@ -1,48 +1,24 @@
 package com.edaviessmith.consumecontent.data;
 
-public class YoutubeItem {
+public class YoutubeItem extends MediaItem{
 
-    public int id;
-    //public int memberId;
+    private String videoId;
+    private int length;
+    private String views;
+    private int status; // Used internally (watch later, new)
 
-    public String videoId;
-    public String title;
-    public long date;
-
-    public String imageMed;
-    public String imageHigh;
-
-    public YoutubeItem() { }
-
-    public YoutubeItem(String title, int date) {
-        this.title = title;
-        this.date = date;
+    public YoutubeItem() {
+        super();
     }
 
-    public YoutubeItem(int id, String videoId, String title, int date) {
-        this.id = id;
-        //this.memberId = memberId;
+    public YoutubeItem(String title, long date, String imageMed, String imageHigh, String videoId, int length, String views, int status) {
+        super(title, date, imageMed, imageHigh);
         this.videoId = videoId;
-        this.title = title;
-        this.date = date;
+        this.length = length;
+        this.views = views;
+        this.status = status;
     }
 
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-/*    public int getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(int memberId) {
-        this.memberId = memberId;
-    }*/
 
     public String getVideoId() {
         return videoId;
@@ -52,40 +28,27 @@ public class YoutubeItem {
         this.videoId = videoId;
     }
 
-    public String getTitle() {
-        return title;
+    public int getStatus() {
+        return status;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
-    public long getDate() {
-        return date;
+    public int getLength() {
+        return length;
     }
 
-    public void setDate(long date) {
-        this.date = date;
+    public void setLength(int length) {
+        this.length = length;
     }
 
-    public String getImageMed() {
-        return imageMed;
+    public String getViews() {
+        return views;
     }
 
-    public void setImageMed(String imageMed) {
-        this.imageMed = imageMed;
+    public void setViews(String views) {
+        this.views = views;
     }
-
-    public String getImageHigh() {
-        return imageHigh;
-    }
-
-    public void setImageHigh(String imageHigh) {
-        this.imageHigh = imageHigh;
-    }
-
-    public String toString() {
-        return id +", "+ videoId +", "+ title +", "+ date +", "+ imageMed +", "+ imageHigh;
-    }
-
 }
