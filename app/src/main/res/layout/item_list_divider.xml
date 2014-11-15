@@ -11,17 +11,17 @@
         android:layout_height="2dp"
         android:background="@drawable/shadow_bottom" />
 
-
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/tertiary_text_dark"
-        android:textSize="20sp"
+        android:textColor="@color/gray_accent"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:padding="12dp"
-        android:id="@+id/text_tv"
-        android:visibility="gone"/>
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="12dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/text_tv"/>
 
 
 </LinearLayout>

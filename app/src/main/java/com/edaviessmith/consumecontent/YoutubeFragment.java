@@ -1,6 +1,7 @@
 package com.edaviessmith.consumecontent;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -96,26 +97,61 @@ public class YoutubeFragment extends Fragment {
         itemAdapter = new YoutubeItemAdapter(act);
         feed_rv.setAdapter(itemAdapter);
 
+        final TypedArray styledAttributes = act.getTheme().obtainStyledAttributes( new int[] { android.R.attr.actionBarSize });
+        mActionBarHeight = styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+        feed_rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                Log.d(TAG, "onScrolled "+dy+" : "+act.getSupportActionBar().isShowing());
+                if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
+                    // toolbar.animate().translationY(-toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).start();
+                    //act.getSupportActionBar().hide();
+                } else if (dy <= -mActionBarHeight && !act.getSupportActionBar().isShowing()) {
+                    //act.getSupportActionBar().show();
+                }
+            }
+        });
+
+
         return view;
     }
+
+    float mActionBarHeight;
+
+
 
     public void getLocalItems() {
 
 
-        new Thread() {
-            @Override
-            public void run() {
+        if(getFeed().getItems() == null || getFeed().getItems().size() == 0) {
+            new Thread() {
+                @Override
+                public void run() {
 
+                    final List<YoutubeItem> localItems = YoutubeItemORM.getYoutubeItems(act, getFeed().getId());
 
-                getFeed().setItems(YoutubeItemORM.getYoutubeItems(act, getFeed().getId()));
-                itemAdapter.notifyDataSetChanged();
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getFeed().setItems(localItems);
+                            itemAdapter.notifyDataSetChanged();
+                        }
+                    });
 
-                new GetFeedAsyncTask().execute();
+                    new GetFeedAsyncTask().execute();
 
-
-                //handler.sendMessage(handler.obtainMessage(Var.HANDLER_COMPLETE, 1, 0, ""));
-            }
-        }.start();
+                    //handler.sendMessage(handler.obtainMessage(Var.HANDLER_COMPLETE, 1, 0, ""));
+                }
+            }.start();
+        }
     }
 
 
@@ -130,7 +166,8 @@ public class YoutubeFragment extends Fragment {
 
     public class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder>{
 
-
+        private final int TYPE_DIV = 0;
+        private final int TYPE_ITEM = 1;
         private Context mContext;
 
         public YoutubeItemAdapter( Context context) {
@@ -140,25 +177,59 @@ public class YoutubeFragment extends Fragment {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube, viewGroup, false);
+            View v = null;
+            if(i == TYPE_DIV) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube_divider, viewGroup, false);
+            else if(i == TYPE_ITEM) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube, viewGroup, false);
+
             return new ViewHolder(v);
         }
 
         @Override
+        public int getItemViewType(int position) {
+            if(position == 0) return TYPE_DIV;
+            int[] prevItemCat = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(position - 1)).getDate());
+            int[] itemCat = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(position)).getDate());
+            Log.d(TAG, "getItemViewType  "+position+ " - "+ prevItemCat[0] + "!= "+itemCat[0]);
+            if((prevItemCat[0] == Var.DATE_MONTH && itemCat[0] == Var.DATE_MONTH && prevItemCat[1] != itemCat[1]) || (prevItemCat[0] != itemCat[0])) return TYPE_DIV;
+            //TODO account for different months as well
+            return TYPE_ITEM;
+        }
+
+
+
+        @Override
         public void onBindViewHolder(ViewHolder viewHolder, int i) {
-            YoutubeItem item = (YoutubeItem) getFeed().getItems().get(i);
-            //viewHolder.title_tv.setText(items.get(i).getTitle());
+            if(getFeed().getItems().size() > i) {
+                Log.d(TAG, "onBindViewHolder "+ getFeed().getItems().size());
+                YoutubeItem item = (YoutubeItem) getFeed().getItems().get(i);
+                //viewHolder.title_tv.setText(items.get(i).getTitle());
 
-            //viewHolder.countryImage.setImageDrawable(mContext.getDrawable(country.getImageResourceId(mContext)));
-            imageLoader.DisplayImage(item.getImageMed(), viewHolder.thumbnail_iv);
-            viewHolder.title_tv.setText(item.getTitle());
+                //viewHolder.countryImage.setImageDrawable(mContext.getDrawable(country.getImageResourceId(mContext)));
+                imageLoader.DisplayImage(item.getImageMed(), viewHolder.thumbnail_iv);
+                viewHolder.title_tv.setText(item.getTitle());
 
+                if(getItemViewType(i) == TYPE_DIV) {
+                    int[] dateCats = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(i)).getDate());
+                    String dividerTitle = "";
+                    switch(dateCats[0]) {
+                        case Var.DATE_TODAY: dividerTitle = "Today"; break;
+                        case Var.DATE_YESTERDAY: dividerTitle = "Yesterday"; break;
+                        case Var.DATE_THIS_WEEK: dividerTitle = "This Week"; break;
+                        case Var.DATE_LAST_WEEK: dividerTitle = "Last Week"; break;
+                        case Var.DATE_MONTH: dividerTitle = Var.MONTHS[dateCats[1]];
+                            if(dateCats.length == 3) dividerTitle += " "+dateCats[2]; //Optional year
+                            break;
+                    }
+                    viewHolder.div_tv.setText(dividerTitle);
+                }
 
+            }
 
         }
 
         @Override
         public int getItemCount() {
+            Log.d(TAG, "getItemCount "+ (getFeed().getItems() == null));
             return getFeed().getItems() == null ? 0 : getFeed().getItems().size();
         }
 
@@ -167,8 +238,9 @@ public class YoutubeFragment extends Fragment {
             public TextView title_tv;
             public TextView length_tv;
             public TextView views_tv;
-            public TextView date_tv;
             public TextView status_tv;
+
+            public TextView div_tv;
 
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -176,12 +248,15 @@ public class YoutubeFragment extends Fragment {
                 title_tv = (TextView) itemView.findViewById(R.id.title_tv);
                 length_tv = (TextView) itemView.findViewById(R.id.length_tv);
                 views_tv = (TextView) itemView.findViewById(R.id.views_tv);
-                date_tv = (TextView) itemView.findViewById(R.id.date_tv);
                 status_tv = (TextView) itemView.findViewById(R.id.status_tv);
+
+                div_tv = (TextView) itemView.findViewById(R.id.text_tv);
             }
 
         }
     }
+
+
 
 
     private Handler handler = new Handler() {

@@ -20,6 +20,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class Var {
 
@@ -158,5 +161,78 @@ public class Var {
 
     public static boolean isValid(int i) { //Check if integer has been set
         return i != -1;
+    } //TODO should this be in the DB class?
+
+    public static String getTimeSince(long publishedDate) {
+        String date = "";
+
+        if(publishedDate <= 0) {
+            //date = AppInstance.getContext().getResources().getString(R.string.loading_date);
+        } else {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(publishedDate*1000);
+
+            Calendar now = Calendar.getInstance();
+            SimpleDateFormat s;
+            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+                date = "Today at ";
+                s =  new SimpleDateFormat("h:mm a", Locale.getDefault());
+            } else {
+                if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.DAY_OF_YEAR))+1) == now.get(Calendar.DAY_OF_YEAR)) {
+                    return "Yesterday";
+                }
+                s = new SimpleDateFormat("MMMM d", Locale.getDefault());
+
+            }
+            date += s.format(publishedDate*1000);
+        }
+
+        return date;
+
     }
+
+    public static final int DATE_TODAY = 0;
+    public static final int DATE_YESTERDAY = 1;
+    public static final int DATE_THIS_WEEK = 2;
+    public static final int DATE_LAST_WEEK = 3;
+    public static final int DATE_MONTH = 4; //Divide by individual month
+    public static final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
+    //Used to divide media list by time segments (today, yesterday, this week, last week this month)
+    //Second return integer is for month value
+    //Third return integer is for year value
+    public static int[] getTimeCategory(long publishedDate) {
+
+        if(publishedDate > 0) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(publishedDate*1000);
+
+            Calendar now = Calendar.getInstance();
+            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+               return new int[] {Var.DATE_TODAY};
+            } else {
+                if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.DAY_OF_YEAR))+1) == now.get(Calendar.DAY_OF_YEAR)) {
+                    return new int[] {Var.DATE_YESTERDAY};
+                } else {
+                    if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
+                        return new int[] {Var.DATE_THIS_WEEK};
+                    } else {
+                        if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.WEEK_OF_YEAR)+1)) == now.get(Calendar.WEEK_OF_YEAR)) {
+                            return new int[] {Var.DATE_LAST_WEEK};
+                        } else {
+                            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) ) {
+                                return new int[] {Var.DATE_MONTH, cal.get(Calendar.MONTH)};
+                            } else {
+                                return new int[]{Var.DATE_MONTH, cal.get(Calendar.MONTH), cal.get(Calendar.YEAR)};
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new int[] {Var.DATE_TODAY};
+    }
+
+
 }

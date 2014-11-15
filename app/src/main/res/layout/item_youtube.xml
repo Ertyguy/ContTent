@@ -14,8 +14,8 @@
         <ImageView
             android:id="@+id/thumbnail_iv"
             android:layout_width="96dp"
-            android:layout_height="54dp"
-            android:scaleType="fitCenter"
+            android:layout_height="53dp"
+            android:scaleType="centerCrop"
             android:contentDescription="@null"
             android:src="@drawable/ic_youtube_icon"
             android:layout_marginRight="10dp"
@@ -30,9 +30,8 @@
             android:layout_toRightOf="@+id/thumbnail_iv"
             android:layout_toEndOf="@+id/thumbnail_iv"
             android:minLines="2"
-            android:ellipsize="end"
-            android:layout_toLeftOf="@+id/date_tv"
-            android:layout_toStartOf="@+id/date_tv" />
+            android:maxLines="2"
+            android:ellipsize="end"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -57,10 +56,11 @@
             android:layout_height="wrap_content"
             android:text="10K views"
             android:id="@+id/views_tv"
+            android:textColor="@android:color/darker_gray"
             android:layout_toEndOf="@+id/thumbnail_iv"
             android:layout_alignBottom="@+id/thumbnail_iv"
             android:layout_toRightOf="@+id/thumbnail_iv" />
-
+<!--
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
             android:textSize="10sp"
             android:layout_alignParentTop="true"
             android:layout_alignRight="@+id/status_tv"
-            android:layout_alignEnd="@+id/status_tv" />
+            android:layout_alignEnd="@+id/status_tv" />-->
 
         <TextView
             android:layout_width="wrap_content"

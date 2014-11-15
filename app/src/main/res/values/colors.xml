@@ -5,7 +5,8 @@
     <color name="primary_dark">#455A64</color>
     <color name="accent">#FB8C00</color>
 
-    <color name="gray">#ffcccccc</color>
+    <color name="gray">#ffe6e6e6</color>
+    <color name="gray_accent">#ff9c9c9c</color>
 
     <color name="blue_twitter">#55acee</color>
     <color name="red_youtube">#D50000</color>
