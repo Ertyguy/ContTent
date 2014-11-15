@@ -134,4 +134,10 @@ public class MediaFeed {
     public void setItems(List items) {
         this.items = items;
     }
+
+
+    public String toString() {
+        return "MediaFeed ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";
+    }
+
 }
