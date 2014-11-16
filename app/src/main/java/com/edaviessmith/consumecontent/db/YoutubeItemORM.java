@@ -17,14 +17,18 @@ public class YoutubeItemORM {
 
     public static String SQL_CREATE_TABLE = "CREATE TABLE "+ DB.TABLE_YOUTUBE_ITEM +" (" +
             //DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+      //I beleive this won't hinder anything (probably)
-            DB.COL_MEDIA_FEED        + " INTEGER, " +
-            DB.COL_TITLE            + " TEXT ," +
+            DB.COL_MEDIA_FEED       + " INTEGER, " +
+            DB.COL_TYPE             + " TEXT ," +
+            DB.COL_VIDEO_ID         + " TEXT ," +
             DB.COL_DATE             + " INTEGER, " +
+            DB.COL_TITLE            + " TEXT ," +
+            DB.COL_DESCRIPTION      + " TEXT ," +
+            DB.COL_DURATION         + " TEXT, " +
             DB.COL_IMAGE_MED        + " TEXT ," +
             DB.COL_IMAGE_HIGH       + " TEXT ," +
-            DB.COL_VIDEO_ID         + " TEXT ," +
-            DB.COL_LENGTH           + " INTEGER, " +
             DB.COL_VIEWS            + " INTEGER, " +
+            DB.COL_LIKES            + " INTEGER, " +
+            DB.COL_DISLIKES         + " INTEGER, " +
             DB.COL_STATUS           + " INTEGER, " +
             DB.COL_SORT             + " INTEGER, " +    //Used to minimize updates
             "FOREIGN KEY("+DB.COL_MEDIA_FEED +") REFERENCES "+DB.TABLE_MEDIA_FEED+"("+DB.COL_ID+")" +");";
@@ -79,14 +83,18 @@ public class YoutubeItemORM {
     private static ContentValues youtubeItemToContentValues(YoutubeItem youtubeItem, int userId, int sort) {
         ContentValues values = new ContentValues();
         values.put(DB.COL_MEDIA_FEED, userId);
-        values.put(DB.COL_TITLE, youtubeItem.getTitle());
-        values.put(DB.COL_DATE, youtubeItem.getDate());
-        values.put(DB.COL_IMAGE_MED, youtubeItem.getImageMed());
-        values.put(DB.COL_IMAGE_HIGH, youtubeItem.getImageHigh());
-        values.put(DB.COL_VIDEO_ID, youtubeItem.getVideoId());
-        values.put(DB.COL_LENGTH, youtubeItem.getLength());
-        values.put(DB.COL_VIEWS, youtubeItem.getViews());
-        values.put(DB.COL_STATUS, youtubeItem.getStatus());
+        values.put(DB.COL_TYPE       , youtubeItem.getType());
+        values.put(DB.COL_VIDEO_ID   , youtubeItem.getVideoId());
+        values.put(DB.COL_DATE       , youtubeItem.getDate());
+        values.put(DB.COL_TITLE      , youtubeItem.getTitle());
+        values.put(DB.COL_DESCRIPTION, youtubeItem.getDescription());
+        values.put(DB.COL_DURATION   , youtubeItem.getDuration());
+        values.put(DB.COL_IMAGE_MED  , youtubeItem.getImageMed());
+        values.put(DB.COL_IMAGE_HIGH , youtubeItem.getImageHigh());
+        values.put(DB.COL_VIEWS      , youtubeItem.getViews());
+        values.put(DB.COL_LIKES      , youtubeItem.getLikes());
+        values.put(DB.COL_DISLIKES   , youtubeItem.getDislikes());
+        values.put(DB.COL_STATUS     , youtubeItem.getStatus());
         values.put(DB.COL_SORT, sort);
         return values;
     }
@@ -97,8 +105,12 @@ public class YoutubeItemORM {
                                cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_MED)),
                                cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_HIGH)),
                                cursor.getString(cursor.getColumnIndex(DB.COL_VIDEO_ID)),
-                               cursor.getInt(cursor.getColumnIndex(DB.COL_LENGTH)),
-                               cursor.getString(cursor.getColumnIndex(DB.COL_VIEWS)),
+                               cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
+                               cursor.getString(cursor.getColumnIndex(DB.COL_DESCRIPTION)),
+                               cursor.getString(cursor.getColumnIndex(DB.COL_DURATION)),
+                               cursor.getInt(cursor.getColumnIndex(DB.COL_VIEWS)),
+                               cursor.getInt(cursor.getColumnIndex(DB.COL_LIKES)),
+                               cursor.getInt(cursor.getColumnIndex(DB.COL_DISLIKES)),
                                cursor.getInt(cursor.getColumnIndex(DB.COL_STATUS)) );
     }
 

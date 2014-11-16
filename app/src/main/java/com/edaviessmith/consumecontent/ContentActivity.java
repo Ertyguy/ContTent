@@ -6,13 +6,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
 import com.edaviessmith.consumecontent.db.UserORM;
-import com.edaviessmith.consumecontent.view.TaskFragment;
+import com.edaviessmith.consumecontent.util.ImageLoader;
 
 import java.util.List;
 
@@ -33,13 +34,20 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	private static final String TAG_TASK_FRAGMENT = "task_fragment";
 	private TaskFragment taskFragment;
 	private List<User> users;
+    Toolbar toolbar;
+    ImageLoader imageLoader;
 	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_content);
 
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.inflateMenu(R.menu.menu_add);
+
 		mTitle = getTitle();
+        imageLoader = new ImageLoader(this);
 		
 		
 		users = UserORM.getUsers(this);
@@ -51,6 +59,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	    taskFragment = (TaskFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
 	    taskFragment = TaskFragment.newInstance(this);
 	    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
+
+
 	}
 
     @Override
@@ -93,7 +103,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 			restoreActionBar();
 			return true;
 		}*/
-        getMenuInflater().inflate(R.menu.content, menu);
+        //getMenuInflater().inflate(R.menu.content, menu);
 
 		return super.onCreateOptionsMenu(menu);
 	}

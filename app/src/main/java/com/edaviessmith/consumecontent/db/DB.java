@@ -93,8 +93,11 @@ public class DB extends SQLiteOpenHelper {
     static final String COL_IMAGE_HIGH = "image_high";
 
     static final String COL_VIDEO_ID = "video_id";
-    static final String COL_LENGTH = "length";
+    static final String COL_DESCRIPTION = "description";
+    static final String COL_DURATION = "duration";
     static final String COL_VIEWS = "views";
+    static final String COL_LIKES = "likes";
+    static final String COL_DISLIKES = "dislikes";
     static final String COL_STATUS = "status";
     static final String COL_TWEET_ID = "tweet_id";
 

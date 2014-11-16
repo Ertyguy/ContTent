@@ -1,7 +1,7 @@
 package com.edaviessmith.consumecontent;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
-import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
@@ -32,8 +31,10 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class YoutubeFragment extends Fragment {
@@ -90,16 +91,16 @@ public class YoutubeFragment extends Fragment {
         feed_rv.setLayoutManager(new LinearLayoutManager(act));
         feed_rv.setItemAnimator(new DefaultItemAnimator());
 
-        getLocalItems();
+
 
         //handler.sendMessage(handler.obtainMessage(what, 1, 0, authUrl));
 
         itemAdapter = new YoutubeItemAdapter(act);
         feed_rv.setAdapter(itemAdapter);
 
-        final TypedArray styledAttributes = act.getTheme().obtainStyledAttributes( new int[] { android.R.attr.actionBarSize });
-        mActionBarHeight = styledAttributes.getDimension(0, 0);
-        styledAttributes.recycle();
+        //final TypedArray styledAttributes = act.getTheme().obtainStyledAttributes( new int[] { android.R.attr.actionBarSize });
+        //mActionBarHeight = styledAttributes.getDimension(0, 0);
+        //styledAttributes.recycle();
         feed_rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -107,16 +108,19 @@ public class YoutubeFragment extends Fragment {
 
             }
 
+            @SuppressLint("NewApi")
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 Log.d(TAG, "onScrolled "+dy+" : "+act.getSupportActionBar().isShowing());
-                if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
-                    // toolbar.animate().translationY(-toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).start();
+                //TODO much thinking needed to hide toolbar on scroll
+                //if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
+                if (android.os.Build.VERSION.SDK_INT >= 12) ;
+                     //act.toolbar.animate().translationY(-act.toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).start();
                     //act.getSupportActionBar().hide();
-                } else if (dy <= -mActionBarHeight && !act.getSupportActionBar().isShowing()) {
+                //} else if (dy <= -mActionBarHeight && !act.getSupportActionBar().isShowing()) {
                     //act.getSupportActionBar().show();
-                }
+                //}
             }
         });
 
@@ -124,9 +128,11 @@ public class YoutubeFragment extends Fragment {
         return view;
     }
 
-    float mActionBarHeight;
-
-
+    @Override
+    public void onStart() {
+        super.onStart();
+        getLocalItems();
+    }
 
     public void getLocalItems() {
 
@@ -141,12 +147,14 @@ public class YoutubeFragment extends Fragment {
                     act.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d(TAG,"adding local items "+localItems.size());
                             getFeed().setItems(localItems);
                             itemAdapter.notifyDataSetChanged();
+                            new GetFeedAsyncTask().execute();
                         }
                     });
 
-                    new GetFeedAsyncTask().execute();
+
 
                     //handler.sendMessage(handler.obtainMessage(Var.HANDLER_COMPLETE, 1, 0, ""));
                 }
@@ -159,8 +167,6 @@ public class YoutubeFragment extends Fragment {
 
 
     private MediaFeed getFeed() {
-        Log.i(TAG, "getFeed "+pos + ", "+((MediaFeed)act.getUser().getMediaFeed().get(pos)).toString());
-
         return act.getUser().getMediaFeed().get(pos);//youtubeFeed;
     }
 
@@ -189,7 +195,6 @@ public class YoutubeFragment extends Fragment {
             if(position == 0) return TYPE_DIV;
             int[] prevItemCat = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(position - 1)).getDate());
             int[] itemCat = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(position)).getDate());
-            Log.d(TAG, "getItemViewType  "+position+ " - "+ prevItemCat[0] + "!= "+itemCat[0]);
             if((prevItemCat[0] == Var.DATE_MONTH && itemCat[0] == Var.DATE_MONTH && prevItemCat[1] != itemCat[1]) || (prevItemCat[0] != itemCat[0])) return TYPE_DIV;
             //TODO account for different months as well
             return TYPE_ITEM;
@@ -200,13 +205,12 @@ public class YoutubeFragment extends Fragment {
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int i) {
             if(getFeed().getItems().size() > i) {
-                Log.d(TAG, "onBindViewHolder "+ getFeed().getItems().size());
                 YoutubeItem item = (YoutubeItem) getFeed().getItems().get(i);
-                //viewHolder.title_tv.setText(items.get(i).getTitle());
 
-                //viewHolder.countryImage.setImageDrawable(mContext.getDrawable(country.getImageResourceId(mContext)));
                 imageLoader.DisplayImage(item.getImageMed(), viewHolder.thumbnail_iv);
                 viewHolder.title_tv.setText(item.getTitle());
+                viewHolder.length_tv.setText(item.getDuration());
+                viewHolder.views_tv.setText(item.getViews()+" Views");
 
                 if(getItemViewType(i) == TYPE_DIV) {
                     int[] dateCats = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(i)).getDate());
@@ -229,7 +233,6 @@ public class YoutubeFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            Log.d(TAG, "getItemCount "+ (getFeed().getItems() == null));
             return getFeed().getItems() == null ? 0 : getFeed().getItems().size();
         }
 
@@ -277,18 +280,22 @@ public class YoutubeFragment extends Fragment {
 
     private class GetFeedAsyncTask extends AsyncTask<Void, Void, String> {
 
+        final List<YoutubeItem> youtubeItems = new ArrayList<YoutubeItem>();
+
         @Override
         protected String doInBackground(Void... params) {
             searchBusy = true;
             try {
 
-                //searchChannel.getYoutubeFeeds().clear();
-                List<YoutubeItem> youtubeItems = new ArrayList<YoutubeItem>();
+                final Map<String, YoutubeItem> youtubeItemMap = new HashMap<String, YoutubeItem>();
 
                 //TODO check the internet connection here
-                String playlistURL = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId="+URLEncoder.encode(getFeed().getFeedId(), "UTF-8")+"&key=" + Var.DEVELOPER_KEY;
-                String videos = "";
-                String playlistItems = Var.HTTPGet(playlistURL);
+
+                String url = null;
+                if(getFeed().getType() == Var.TYPE_YOUTUBE_PLAYLIST) url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId="+URLEncoder.encode(getFeed().getFeedId(), "UTF-8")+"&key=" + Var.DEVELOPER_KEY;
+                if(getFeed().getType() == Var.TYPE_YOUTUBE_ACTIVTY) url = "https://www.googleapis.com/youtube/v3/activities?part=contentDetails&channelId="+URLEncoder.encode(getFeed().getChannelHandle(), "UTF-8")+"&maxResults=20&key=" + Var.DEVELOPER_KEY;
+                StringBuilder videos = new StringBuilder();
+                String playlistItems = Var.HTTPGet(url);
 
                 JSONObject res = new JSONObject(playlistItems);
                 if (Var.isJsonArray(res, "items")) {
@@ -299,100 +306,157 @@ public class YoutubeFragment extends Fragment {
                         JSONObject item = items.getJSONObject(i);
                         YoutubeItem youtubeItem = new YoutubeItem();
 
+                        //Playlist Feed
                         if (Var.isJsonObject(item, "snippet")) {
                             JSONObject snippet = item.getJSONObject("snippet");
-
                             if (Var.isJsonObject(snippet, "resourceId")) {
                                 JSONObject resourceId = snippet.getJSONObject("resourceId");
-                                if (Var.isJsonString(resourceId, "videoId")) {                   //Video Title
+                                if (Var.isJsonString(resourceId, "videoId")) {
                                     youtubeItem.setVideoId(resourceId.getString("videoId"));
+                                    youtubeItem.setType(Var.TYPE_UPLOAD);
                                 }
-                            }
-
-                            if (Var.isJsonString(snippet, "title")) {
-                                youtubeItem.setTitle(snippet.getString("title"));
-                            }
-
-                            if (Var.isJsonObject(snippet, "thumbnails")) {                      //Video Thumbnails
-                                JSONObject thumbnails = snippet.getJSONObject("thumbnails");
-                                if (Var.isJsonObject(thumbnails, "medium")) {
-                                    JSONObject def = thumbnails.getJSONObject("medium");
-                                    if (Var.isJsonString(def, "url")) {
-                                        youtubeItem.setImageMed(def.getString("url"));
-                                    }
-                                }
-                                if (Var.isJsonObject(thumbnails, "high")) {
-                                    JSONObject def = thumbnails.getJSONObject("high");
-                                    if (Var.isJsonString(def, "url")) {
-                                        youtubeItem.setImageMed(def.getString("url"));
-                                    }
-                                }
-                            }
-
-                            if (Var.isJsonString(snippet, "publishedAt")) {
-                                String published = snippet.getString("publishedAt");
-
-                                long dateInMilli = formatter.parse(published).getTime();
-                                youtubeItem.setDate(dateInMilli/1000);
                             }
                         }
 
-                        youtubeItems.add(youtubeItem);
+                        //Activity Feed
+                        if (Var.isJsonObject(item, "contentDetails")) {
+                            JSONObject contentDetails = item.getJSONObject("contentDetails");
+
+                            if (Var.isJsonObject(contentDetails, "upload")) {
+                                JSONObject upload = contentDetails.getJSONObject("upload");
+                                if (Var.isJsonString(upload, "videoId")) {
+                                    youtubeItem.setVideoId(upload.getString("videoId"));
+                                    youtubeItem.setType(Var.TYPE_UPLOAD);
+                                }
+                            }
+
+                            if (Var.isJsonObject(contentDetails, "like")) {
+                                JSONObject like = contentDetails.getJSONObject("like");
+                                if (Var.isJsonString(like, "videoId")) {
+                                    youtubeItem.setVideoId(like.getString("videoId"));
+                                    youtubeItem.setType(Var.TYPE_LIKE);
+                                }
+                            }
+
+                            if (Var.isJsonObject(contentDetails, "favorite")) {
+                                JSONObject favorite = contentDetails.getJSONObject("favorite");
+                                if (Var.isJsonString(favorite, "videoId")) {
+                                    youtubeItem.setVideoId(favorite.getString("videoId"));
+                                    youtubeItem.setType(Var.TYPE_FAVORITE);
+                                }
+                            }
+
+                            if (Var.isJsonObject(contentDetails, "playlistItem")) {
+                                JSONObject playlistItem = contentDetails.getJSONObject("playlistItem");
+                                if (Var.isJsonObject(playlistItem, "resourceId")) {
+                                    JSONObject resourceId = playlistItem.getJSONObject("resourceId");
+                                    if (Var.isJsonString(resourceId, "videoId")) {
+                                        youtubeItem.setVideoId(resourceId.getString("videoId"));
+                                        youtubeItem.setType(Var.TYPE_ADD_TO_PLAYLIST);
+                                    }
+                                    //"playlistId": string,
+                                    //"playlistItemId": string
+                                }
+                            }
+
+                            /* "comment": {  //Other possible activity types
+                              "resourceId": {
+                                "kind": string,
+                                "videoId": string,
+                                "channelId": string,
+                              }
+                            },
+                            "subscription": {
+                              "resourceId": {
+                                "kind": string,
+                                "channelId": string,
+                              }
+                            } */
+                        }
+
+                        youtubeItemMap.put(youtubeItem.getVideoId(), youtubeItem);
+                        videos.append(((videos.length() == 0) ? "":",") + youtubeItem.getVideoId());
                     }
                 }
 
-                getFeed().setItems(youtubeItems);
-                act.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
 
+                String videosUrl = "https://www.googleapis.com/youtube/v3/videos?part=snippet%2C+contentDetails%2C+statistics&id="+ URLEncoder.encode(videos.toString(), "UTF-8") + "&key=" + Var.DEVELOPER_KEY;
+                String videoResponse = Var.HTTPGet(videosUrl);
 
-                if(true) return null;
-
-                //TODO should make a second call to get more information
-
-                String playlistUrl = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&id="+ URLEncoder.encode(videos, "UTF-8") + "&fields=items(id%2Csnippet)&key=" + Var.DEVELOPER_KEY;
-                String playlist = Var.HTTPGet(playlistUrl);
-
-                JSONObject play = new JSONObject(playlist);
+                JSONObject play = new JSONObject(videoResponse);
                 if (Var.isJsonArray(play, "items")) {
                     JSONArray items = play.getJSONArray("items");
                     for (int i = 0; i < items.length(); i++) {
                         JSONObject item = items.getJSONObject(i);
 
 
-                        if(Var.isJsonString(item, "id")) {                                  //Feed Id
-                            YoutubeFeed feed = new YoutubeFeed(item.getString("id"));
-                            feed.setType(Var.TYPE_YOUTUBE_PLAYLIST);
+                        if(Var.isJsonString(item, "id")) {
+                            YoutubeItem youtubeItem = youtubeItemMap.get(item.getString("id"));
 
-                            if (Var.isJsonObject(item, "snippet")) {                        //Feed Name
+                            if (Var.isJsonObject(item, "snippet")) {
                                 JSONObject snippet = item.getJSONObject("snippet");
+
                                 if (Var.isJsonString(snippet, "title")) {
-                                    if(snippet.getString("title").startsWith("Upload")) feed.setName("Uploads");
-                                    else feed.setName(snippet.getString("title"));
+                                    youtubeItem.setTitle(snippet.getString("title"));
+                                }
+                                if (Var.isJsonString(snippet, "description")) {
+                                    youtubeItem.setDescription(snippet.getString("description"));
                                 }
 
-                                if (Var.isJsonObject(snippet, "thumbnails")) {              //Feed Thumbnail
+
+                                if (Var.isJsonObject(snippet, "thumbnails")) {                      //Video Thumbnails
                                     JSONObject thumbnails = snippet.getJSONObject("thumbnails");
-                                    if (Var.isJsonObject(thumbnails, "default")) {
-                                        JSONObject def = thumbnails.getJSONObject("default");
+                                    if (Var.isJsonObject(thumbnails, "medium")) {
+                                        JSONObject def = thumbnails.getJSONObject("medium");
                                         if (Var.isJsonString(def, "url")) {
-                                            feed.setThumbnail(def.getString("url"));
+                                            youtubeItem.setImageMed(def.getString("url"));
+                                        }
+                                    }
+                                    if (Var.isJsonObject(thumbnails, "high")) {
+                                        JSONObject def = thumbnails.getJSONObject("high");
+                                        if (Var.isJsonString(def, "url")) {
+                                            youtubeItem.setImageMed(def.getString("url"));
                                         }
                                     }
                                 }
+
+                                if (Var.isJsonString(snippet, "publishedAt")) {
+                                    String published = snippet.getString("publishedAt");
+
+                                    long dateInMilli = formatter.parse(published).getTime();
+                                    youtubeItem.setDate(dateInMilli / 1000);
+                                }
+
+                                if (Var.isJsonObject(item, "contentDetails")) {
+                                    JSONObject contentDetails = item.getJSONObject("contentDetails");
+                                    if (Var.isJsonString(contentDetails, "duration")) {
+                                        youtubeItem.setLength(Var.getStringFromDuration(contentDetails.getString("duration")));
+                                    }
+                                }
+
+                                if (Var.isJsonObject(item, "statistics")) {
+                                    JSONObject statistics = item.getJSONObject("statistics");
+                                    if (Var.isJsonString(statistics, "viewCount")) {
+                                        youtubeItem.setViews(statistics.getInt("viewCount"));
+                                    }
+                                    if (Var.isJsonString(statistics, "likeCount")) {
+                                        youtubeItem.setLikes(statistics.getInt("likeCount"));
+                                    }
+                                    if (Var.isJsonString(statistics, "dislikeCount")) {
+                                        youtubeItem.setDislikes(statistics.getInt("dislikeCount"));
+                                    }
+                                    //Also Favorite and Comment count
+                                }
+
                             }
 
-                           // searchChannel.getYoutubeFeeds().add(feed);
+                            youtubeItems.add(youtubeItem);
+                            // searchChannel.getYoutubeFeeds().add(feed);
 
-                            Log.d(TAG,"youtube feed added "+feed.getName());
+                            Log.d(TAG,"youtube feed added "+youtubeItem.getVideoId());
                         }
                     }
 
-                    //searchChannel.getYoutubeFeeds().add(new YoutubeFeed()); //Activity
                 }
 
             } catch (Throwable t) {
@@ -403,7 +467,8 @@ public class YoutubeFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String result) {
-            //searchAdapter.notifyDataSetChanged();
+            Log.d(TAG,"adding youtube items "+youtubeItems.size());
+            getFeed().setItems(youtubeItems);
             itemAdapter.notifyDataSetChanged();
         }
     }

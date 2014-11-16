@@ -20,8 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class Var {
@@ -38,6 +40,12 @@ public class Var {
     public static final int TYPE_TWITTER = 2;
     //public static final int TYPE_REDDIT  = 3;
 
+    //Youtube Item Types
+    public static final int TYPE_UPLOAD = 0;
+    public static final int TYPE_LIKE = 1;
+    public static final int TYPE_FAVORITE = 2;
+    public static final int TYPE_ADD_TO_PLAYLIST = 3;
+
     //Searching users
     public static final int SEARCH_NONE = 0;
     public static final int SEARCH_OPTIONS = 1;
@@ -48,6 +56,9 @@ public class Var {
     public static final int HANDLER_COMPLETE = 0;
     public static final int HANDLER_ERROR = 1;
 
+    //Format Youtube Video length into (00:00)
+    static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
+    static SimpleDateFormat lengthHour =  new SimpleDateFormat("h:mm:ss", Locale.getDefault());
 
 
     //Util functions
@@ -232,6 +243,21 @@ public class Var {
         }
 
         return new int[] {Var.DATE_TODAY};
+    }
+
+
+    public static String getStringFromDuration(String youtubeDuration) {
+        String formatDate = "'PT'";
+        if(youtubeDuration.contains("H")) formatDate += "h'H'";
+        if(youtubeDuration.contains("M")) formatDate += "mm'M'";
+        DateFormat df = new SimpleDateFormat(formatDate+"ss'S'");
+        try {
+            Date d = df.parse(youtubeDuration);
+            if(d.getTime() < 3600000) return length.format(d); //Only show hour if that long
+            else return lengthHour.format(d);
+        }
+        catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 
 

@@ -6,9 +6,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -25,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,7 +60,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     String TAG = "AddActivity";
 
     SearchView searchView;
-    MenuItem searchItem;
 
     ListView search_lv, feed_lv;
     SearchAdapter searchAdapter;
@@ -84,7 +82,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     SwitchCompat notification_sw;
     IconAdapter iconAdapter;
     int spinnerInit, spinnerSelect, twitterPage, searchMode = Var.SEARCH_NONE;
-    SearchView.SearchAutoComplete search_edt;
     String search, pageToken;
     boolean searchBusy;
 
@@ -118,11 +115,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         search_lv.setChoiceMode((searchMode == Var.SEARCH_YT_CHANNEL) ? ListView.CHOICE_MODE_MULTIPLE : ListView.CHOICE_MODE_SINGLE);
 
         if(searchMode == Var.SEARCH_NONE) {
-            if(searchItem != null) {
-                dismissSearch();
-                search_edt.setText("");
-                searchItem.setVisible(false);
-            }
+            dismissSearch();
+            searchView.setQuery("", false);
+            searchView.setVisibility(View.GONE);
 
             action_fab.setVisibility((editUser.getMediaFeed().size() > 0) ? View.VISIBLE: View.GONE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -131,16 +126,17 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             searchAdapter.notifyDataSetChanged();
 
         } if(searchMode == Var.SEARCH_YT_CHANNEL) {
+            dismissSearch();
             action_fab.setVisibility(View.VISIBLE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             clearSearchOptions();
         } else if(searchMode == Var.SEARCH_YOUTUBE || searchMode == Var.SEARCH_TWITTER) {
-            if(searchItem != null) {
-                search_edt.setHint((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
+            //if(searchItem != null) {
+                searchView.setQueryHint(getResources().getString((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter));
                 searchView.setIconified(false);
-                searchItem.setVisible(true);
+                searchView.setVisibility(View.VISIBLE);
                 searchView.requestFocusFromTouch();
-            }
+            //}
         }
         if (searchModePreSearch()) {
             search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_NONE
@@ -197,6 +193,16 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         group_sp.setOnItemSelectedListener(this);
 
         //Search
+        searchView = (SearchView) findViewById(R.id.action_search); //MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                toggleSearch(Var.SEARCH_NONE);  return false;
+            }
+        });
+
+
         search_v = findViewById(R.id.search_v);
         search_v.setOnClickListener(this);
         channel_v = searchHeader.findViewById(R.id.channel_v);
@@ -248,9 +254,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         spinnerInit = 1;
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setTitle("Add User");
 
-        getSupportActionBar().setTitle("Add User");
         toggleSearch(Var.SEARCH_NONE);
     }
 
@@ -265,23 +271,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
+        //getMenuInflater().inflate(R.menu.menu_add, menu);
 
-        searchItem = menu.findItem(R.id.action_search);
-        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        if (searchView != null) {
-            searchView.setOnQueryTextListener(this);
-            search_edt = (SearchView.SearchAutoComplete) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        //searchItem = menu.findItem(R.id.action_search);
 
-        }
-
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                toggleSearch(Var.SEARCH_NONE);
-                return false;
-            }
-        });
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -632,6 +625,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                         if(Var.isJsonString(item, "id")) {                                  //Feed Id
                             YoutubeFeed feed = new YoutubeFeed(item.getString("id"));
                             feed.setType(Var.TYPE_YOUTUBE_PLAYLIST);
+                            feed.setChannelHandle(searchChannel.getFeedId());
 
                             if (Var.isJsonObject(item, "snippet")) {                        //Feed Name
                                 JSONObject snippet = item.getJSONObject("snippet");
@@ -657,7 +651,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                         }
                     }
 
-                    searchChannel.getYoutubeFeeds().add(new YoutubeFeed()); //Activity
+                    YoutubeFeed activityFeed = new YoutubeFeed();
+                    activityFeed.setChannelHandle(searchChannel.getFeedId());
+                    searchChannel.getYoutubeFeeds().add(activityFeed); //Activity
                 }
 
             } catch (Throwable t) {

@@ -23,6 +23,7 @@
         android:textSize="20sp"
         android:maxLines="1"
         android:ellipsize="end"
+        android:textColor="@color/dark_gray"
         android:gravity="center_vertical"
         android:layout_alignTop="@+id/thumbnail_iv"
         android:layout_toRightOf="@+id/thumbnail_iv"
@@ -40,6 +41,6 @@
         android:layout_below="@+id/name_tv"
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@android:color/secondary_text_light" />
+        android:textColor="@color/gray_accent" />
 
 </RelativeLayout>

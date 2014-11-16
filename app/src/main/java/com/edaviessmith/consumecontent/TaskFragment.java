@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.view;
+package com.edaviessmith.consumecontent;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,9 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.edaviessmith.consumecontent.ContentActivity;
-import com.edaviessmith.consumecontent.R;
 import com.edaviessmith.consumecontent.util.Var;
+import com.edaviessmith.consumecontent.view.FragmentStateCachePagerAdapter;
+import com.edaviessmith.consumecontent.view.PagerAdapter;
+import com.edaviessmith.consumecontent.view.SlidingTabLayout;
 
 /**
  * A placeholder fragment containing a simple view.

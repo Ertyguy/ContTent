@@ -36,7 +36,7 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@android:color/black" />
+        android:textColor="@color/dark_gray" />
 
 
     <android.support.v7.widget.SwitchCompat
@@ -56,8 +56,10 @@
         android:id="@+id/visible_text"
         android:layout_alignLeft="@+id/name_tv"
         android:layout_alignStart="@+id/name_tv"
-        android:textColor="@android:color/black"
+        android:textColor="@color/dark_gray"
         android:layout_alignBottom="@+id/visible_sw"
         android:layout_alignTop="@+id/visible_sw"/>
     </RelativeLayout>
+
+    <View style="@style/shadow_bottom"/>
 </LinearLayout>

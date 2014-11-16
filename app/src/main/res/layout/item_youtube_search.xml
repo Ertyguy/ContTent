@@ -24,6 +24,7 @@
         android:maxLines="1"
         android:ellipsize="end"
         android:textSize="24sp"
+        android:textColor="@color/dark_gray"
         android:layout_centerVertical="true"
         android:text="Playlist Title"
         android:layout_toRightOf="@+id/thumbnail_iv"

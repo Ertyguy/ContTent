@@ -38,6 +38,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="25dp"
+            android:textColor="@color/dark_gray"
             android:layout_marginStart="25dp"
             android:layout_toEndOf="@+id/user_picture_sp"
             android:layout_toRightOf="@+id/user_picture_sp"
@@ -74,6 +75,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
             android:gravity="center_vertical"
+            android:textColor="@color/dark_gray"
             android:text="@string/all_notifications"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 

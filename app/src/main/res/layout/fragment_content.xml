@@ -5,7 +5,6 @@
     android:orientation="vertical"
     tools:context="com.edaviessmith.consumecontent.TaskFragment" >
 
-
     <com.edaviessmith.consumecontent.view.SlidingTabLayout
         android:id="@+id/sliding_tabs"
         android:background="@color/primary"
