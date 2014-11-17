@@ -29,7 +29,8 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
         initialize(Var.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
 
             @Override
-            public void onInitializationFailure(YouTubePlayer.Provider arg0, YouTubeInitializationResult arg1) { }
+            public void onInitializationFailure(YouTubePlayer.Provider arg0, YouTubeInitializationResult arg1) {
+            }
 
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
@@ -49,4 +50,6 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
     public void onYouTubeVideoPaused() {
         activePlayer.pause();
     }
+
+
 }

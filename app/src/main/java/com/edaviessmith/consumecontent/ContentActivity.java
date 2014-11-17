@@ -104,6 +104,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     public void startVideo(String url) {
         videoPlayerFragment = VideoPlayerFragment.newInstance(url);
         getSupportFragmentManager().beginTransaction().replace(R.id.video_v, videoPlayerFragment).commit();
+
         videoPlayerFragment.init();
     }
 

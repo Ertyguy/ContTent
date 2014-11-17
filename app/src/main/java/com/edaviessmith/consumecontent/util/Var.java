@@ -72,6 +72,9 @@ public class Var {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         return (int) TypedValue.applyDimension(unit, size, metrics);
     }
+    public static int getDp(int px)  {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+    }
 
     public static boolean isTypeYoutube(int type) {
         return type == Var.TYPE_YOUTUBE_PLAYLIST || type == Var.TYPE_YOUTUBE_ACTIVTY;

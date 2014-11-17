@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.edaviessmith.consumecontent.R;
@@ -34,6 +35,7 @@ public class VideoPlayerLayout extends RelativeLayout {
     private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 200);
     private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 101);
 
+    private static final float Y_MIN_VELOCITY = 1300;
 
     public VideoPlayerLayout(Context context) {
         this(context, null);
@@ -53,23 +55,64 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     public VideoPlayerLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        viewDragHelper = ViewDragHelper.create(this, 1f, new DragHelperCallback());
+        viewDragHelper = ViewDragHelper.create(this, 0.001f, new DragHelperCallback());
     }
 
     public void maximize() {
         smoothSlideTo(0f);
     }
+    public void minimize() {
+        smoothSlideTo(1f);
+    }
+boolean isMinimized;
+/*
+
+    public void minimize() {
+        RelativeLayout.LayoutParams playerParams = (RelativeLayout.LayoutParams) header_v.getLayoutParams();
+        playerParams.width = playerMinWidth;
+        playerParams.height = playerMinHeight;
+        RelativeLayout.LayoutParams containerParams = (RelativeLayout.LayoutParams)player_v.getLayoutParams();
+        containerParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        containerParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        containerParams.bottomMargin = 5;//getResources().getDimensionPixelSize(R.dimen.player_minimized_margin);
+        containerParams.rightMargin = 5;//getResources().getDimensionPixelSize(R.dimen.player_minimized_margin);
+        header_v.requestLayout();
+        player_v.requestLayout();
+        isMinimized = true;
+    }
+
+    public void maximize() {
+        RelativeLayout.LayoutParams playerParams =  (RelativeLayout.LayoutParams) header_v.getLayoutParams();
+        playerParams.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+        playerParams.height = playerHeight;
+
+        RelativeLayout.LayoutParams containerParams = (RelativeLayout.LayoutParams)header_v.getLayoutParams();
+        containerParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,0);
+        containerParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT,0);
+        containerParams.bottomMargin = 0;
+        containerParams.rightMargin = 0;
+        header_v.requestLayout();
+        player_v.requestLayout();
+        isMinimized = false;
+    }
+*/
+
+
 
     boolean smoothSlideTo(float slideOffset) {
         final int topBound = getPaddingTop();
+
+        int x = (int) (slideOffset * (getWidth() - playerMinWidth));
         int y = (int) (topBound + slideOffset * dragRange);
 
-        if (viewDragHelper.smoothSlideViewTo(header_v, header_v.getLeft(), y)) {
+        if (viewDragHelper.smoothSlideViewTo(header_v, x, y)) {
             ViewCompat.postInvalidateOnAnimation(this);
             return true;
         }
         return false;
     }
+
+
 
     private class DragHelperCallback extends ViewDragHelper.Callback {
 
@@ -83,30 +126,35 @@ public class VideoPlayerLayout extends RelativeLayout {
             top = t;
             dragOffset = ((float) top / dragRange);
 
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) header_v.getLayoutParams();
-            params.width = (int) (1 / (1 - dragOffset)) * playerMinWidth; //((1 - dragOffset / 2) * playerWidth);
-            //params.height = (int) dragOffset * playerHeight; //((1 - dragOffset / 2) * playerHeight);
-
-            Log.d(TAG, "viewPositionChanged: " + params.height + " offset: " + dragOffset + " - " + playerWidth);
-
-            /*
-            header_v.setPivotX(header_v.getWidth());
-            header_v.setPivotY(header_v.getHeight());
-            header_v.setScaleX(1 - dragOffset / 2);
-            header_v.setScaleY(1 - dragOffset / 2);
-            */
             description_v.setAlpha(1 - dragOffset);
 
+            header_v.invalidate();
+            header_v.requestLayout();
             requestLayout();
         }
 
         @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            int top = getPaddingTop();
-            if (yvel > 0 || (yvel == 0 && dragOffset > 0.5f)) {
+        public void onViewReleased(View releasedChild, float xVel, float yVel) {
+            super.onViewReleased(releasedChild, xVel, yVel);
+
+            if (yVel < 0 && yVel <= -Y_MIN_VELOCITY) {
+                maximize();
+            } else if (yVel > 0 && yVel >= Y_MIN_VELOCITY) {
+                minimize();
+            } else {
+                if (dragOffset < 0.5f) {
+                    maximize();
+                } else {
+                    minimize();
+                }
+            }
+
+            /*int top = getPaddingTop();
+
+            if (yVel > 0 || (yVel == 0 && dragOffset > 0.5f)) {
                 top += dragRange;
             }
-            viewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), top);
+            viewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), top);*/
         }
 
         @Override
@@ -193,11 +241,12 @@ public class VideoPlayerLayout extends RelativeLayout {
                 final float dy = y - initialY;
                 final int slop = viewDragHelper.getTouchSlop();
                 if (dx * dx + dy * dy < slop * slop && isHeaderViewUnder) {
-                    if (dragOffset == 0) {
-                        return smoothSlideTo(1f); //Should do nothing
+                    if (dragOffset >= 0.5f) {
+                        minimize();//smoothSlideTo(1f); //Should do nothing
                     } else {
-                        smoothSlideTo(0f);
+                        maximize();//smoothSlideTo(0f);
                     }
+                    return true;
                 }
                 break;
             }
@@ -231,8 +280,8 @@ public class VideoPlayerLayout extends RelativeLayout {
     @Override
     protected void onLayout(boolean changed, int left, int t, int right, int bottom) {
         if(playerWidth == 0 && playerHeight == 0) {
-            playerWidth = player_v.getMeasuredWidth();
-            playerHeight = (int) (player_v.getMeasuredWidth() / 1.6666f) - 1;
+            playerWidth = header_v.getMeasuredWidth();
+            playerHeight = (int) (header_v.getMeasuredWidth() / (16f / 9f));
         }
 
 
@@ -240,7 +289,19 @@ public class VideoPlayerLayout extends RelativeLayout {
 
 
         //header_v.layout(playerWidth - header_v.getMeasuredWidth(), this.top, playerWidth, this.top + header_v.getMeasuredHeight());
-        header_v.layout(playerWidth - header_v.getMeasuredWidth(), top, right, top + header_v.getMeasuredHeight());
+        int width = (int) ( playerMinWidth + ((playerWidth - playerMinWidth) * (1 - dragOffset)));  //(int) (1 / (1 - dragOffset)) * playerMinWidth;
+        int height = (int) (width  / (16f / 9f));
+        header_v.getLayoutParams().width = width;
+        header_v.getLayoutParams().height = height;
+        Log.d(TAG, "layout drag vars: "+Var.getDp(width));
+        header_v.layout(playerWidth - width, top, right, top + height);
+        for(int i=0; i<((ViewGroup)header_v).getChildCount();i++) {
+            View v = ((ViewGroup)header_v).getChildAt(i);
+            v.layout(0, 0, width, height);
+            Log.e(TAG, "child: "+Var.getDp(((ViewGroup) header_v).getChildAt(i).getWidth()));
+            //v.requestLayout();
+            //v.invalidate();
+        }
 
         description_v.layout(0, top + header_v.getMeasuredHeight(), right, top + bottom);
     }
