@@ -5,7 +5,6 @@ import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,7 +66,8 @@ public class VideoPlayerLayout extends RelativeLayout {
         expand(header_v);
     }
     public void minimize() {
-        smoothSlideTo(1f);
+        //smoothSlideTo(1f);
+        collapse(header_v);
     }
 boolean isMinimized;
 /*
@@ -109,19 +109,10 @@ boolean isMinimized;
         Animation a = new Animation() {
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
-                float perc = (interpolatedTime * (1 - initialOffset)) + initialOffset;// Current pos to ending percentage
-
-                Log.d(TAG,"animating "+(playerMinWidth + ((playerWidth - playerMinWidth) * (perc))) );
-
-
-                headerWidth = (int) ((playerMinWidth + ((playerWidth - playerMinWidth) * (perc))) );
-                headerHeight = (int) (headerWidth / (16f / 9f));
-
-                top = (int) (dragRange *  perc);
-                dragOffset = ((float) top / dragRange);
-
+                dragOffset = 1 - ((interpolatedTime * (initialOffset)) + (1 - initialOffset));// Current pos to ending percentage
+                top = (int) (dragRange *  dragOffset);
+                //Log.d(TAG,"animating "+(playerMinWidth + ((playerWidth - playerMinWidth) * (dragOffset))) );
                 v.requestLayout();
-
             }
 
             @Override
@@ -134,31 +125,26 @@ boolean isMinimized;
             @Override public void onAnimationRepeat(Animation animation) { }
 
             @Override public void onAnimationEnd(Animation animation) {
-                animating = false;
-                dragOffset = 0;
                 v.clearAnimation();
+                v.requestLayout();
             }
         });
 
 
-        a.setDuration(1000);
+        a.setDuration(400);
         v.startAnimation(a);
-        animating = true;
-        Log.d(TAG,"start animating ");
     }
 
-    public static void collapse(final View v) {
-        final int initialHeight = v.getMeasuredHeight();
+    public void collapse(final View v) {
+        final float initialOffset = dragOffset;
 
         Animation a = new Animation() {
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
-                    v.setVisibility(View.GONE);
-                }else{
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
+                dragOffset = ((interpolatedTime * (1 - initialOffset)) + initialOffset);// Current pos to ending percentage
+                top = (int) (dragRange *  dragOffset);
+                //Log.d(TAG,"animating "+(playerMinWidth + ((playerWidth - playerMinWidth) * (dragOffset))) );
+                v.requestLayout();
             }
 
             @Override
@@ -166,9 +152,18 @@ boolean isMinimized;
                 return true;
             }
         };
+        a.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationStart(Animation animation) { }
+            @Override public void onAnimationRepeat(Animation animation) { }
 
-        // 1dp/ms
-        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+            @Override public void onAnimationEnd(Animation animation) {
+                v.clearAnimation();
+                v.requestLayout();
+            }
+        });
+
+
+        a.setDuration(400);
         v.startAnimation(a);
     }
 
@@ -358,16 +353,11 @@ boolean isMinimized;
             playerWidth = header_v.getMeasuredWidth();
             playerHeight = (int) (header_v.getMeasuredWidth() / (16f / 9f));
         }
-
-
         dragRange = getHeight() - header_v.getHeight();
 
+        headerWidth = (int) (playerMinWidth + ((playerWidth - playerMinWidth) * (1 - dragOffset)));  //(int) (1 / (1 - dragOffset)) * playerMinWidth;
+        headerHeight = (int) (headerWidth / (16f / 9f));
 
-        //header_v.layout(playerWidth - header_v.getMeasuredWidth(), this.top, playerWidth, this.top + header_v.getMeasuredHeight());
-        if(!animating) {
-            headerWidth = (int) (playerMinWidth + ((playerWidth - playerMinWidth) * (1 - dragOffset)));  //(int) (1 / (1 - dragOffset)) * playerMinWidth;
-            headerHeight = (int) (headerWidth / (16f / 9f));
-        }
         header_v.getLayoutParams().width = headerWidth;
         header_v.getLayoutParams().height = headerHeight;
         //Log.d(TAG, "layout drag vars: "+Var.getDp(width));
