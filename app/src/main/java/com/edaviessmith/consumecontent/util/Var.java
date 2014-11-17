@@ -1,6 +1,9 @@
 package com.edaviessmith.consumecontent.util;
 
+import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -25,8 +28,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class Var {
+    static final String TAG = "Var";
 
     //APIs
     static public final String DEVELOPER_KEY = "AIzaSyCfyVwQZCgFDgt-s02mPbpYgVgA_m-r7jI";
@@ -58,8 +63,9 @@ public class Var {
 
     //Format Youtube Video length into (00:00)
     static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
-    static SimpleDateFormat lengthHour =  new SimpleDateFormat("h:mm:ss", Locale.getDefault());
+    static SimpleDateFormat lengthHour =  new SimpleDateFormat("k:mm:ss", Locale.getDefault());
 
+    public static int SCROLL_OFFSET = 5; //Number of items before next request
 
     //Util functions
     public static int getPixels(int unit, float size) {
@@ -67,6 +73,9 @@ public class Var {
         return (int) TypedValue.applyDimension(unit, size, metrics);
     }
 
+    public static boolean isTypeYoutube(int type) {
+        return type == Var.TYPE_YOUTUBE_PLAYLIST || type == Var.TYPE_YOUTUBE_ACTIVTY;
+    }
 
     public static String HTTPGet(String url) {
         return HTTPGet(new HttpGet(url));
@@ -167,7 +176,7 @@ public class Var {
 
 
     public static boolean isEmpty(String s) {
-        return (s != null && (s.toString().trim().isEmpty()));
+        return (s == null || (s.toString().trim().isEmpty()));
     }
 
     public static boolean isValid(int i) { //Check if integer has been set
@@ -250,15 +259,33 @@ public class Var {
         String formatDate = "'PT'";
         if(youtubeDuration.contains("H")) formatDate += "h'H'";
         if(youtubeDuration.contains("M")) formatDate += "mm'M'";
-        DateFormat df = new SimpleDateFormat(formatDate+"ss'S'");
+        if(youtubeDuration.contains("S")) formatDate += "ss'S'";
+        DateFormat df = new SimpleDateFormat(formatDate);
         try {
             Date d = df.parse(youtubeDuration);
-            if(d.getTime() < 3600000) return length.format(d); //Only show hour if that long
+            if((d.getTime() + TimeZone.getDefault().getRawOffset()) < 3600000) return length.format(d); //Only show hour if that long  //Remove stupid default local (+5 for me)
             else return lengthHour.format(d);
         }
         catch (Exception e) { e.printStackTrace(); }
         return null;
     }
 
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
+
+    public static String displayViews(int views) {
+
+        if(views > 1000000) {
+            return (views / 1000000) + "M views";
+        } else if(views > 1000) {
+            return (views / 1000) + "K views";
+        } else {
+            return (views == 301? views+"+": views) + " views";
+        }
+
+    }
 }

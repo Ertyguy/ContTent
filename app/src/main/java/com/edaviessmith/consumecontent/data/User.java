@@ -6,19 +6,19 @@ import java.util.List;
 public class User extends Content{
 
 
-	public List<MediaFeed> mediaFeed;
+	public List mediaFeed;
 
     private boolean isNotification;
 
     private List<Group> groups; //TODO need to thoroughly hash out this relationship
 
     public User () {
-        mediaFeed = new ArrayList<MediaFeed>();
+        mediaFeed = new ArrayList();
         groups = new ArrayList<Group>();
         isNotification = true;
     }
 
-    public User(int id, int sort, String name, String thumbnail, /*int youtubeChannelId, int twitterFeedId,*/ boolean isNotification) {
+    public User(int id, int sort, String name, String thumbnail, boolean isNotification) {
         super(id, sort, name, thumbnail);
         setNotification(isNotification);
 
@@ -41,11 +41,11 @@ public class User extends Content{
         this.groups = groups;
     }
 
-    public List<MediaFeed> getMediaFeed() {
+    public List getMediaFeed() {
         return mediaFeed;
     }
 
-    public void setMediaFeed(List<MediaFeed> mediaFeed) {
+    public void setMediaFeed(List mediaFeed) {
         this.mediaFeed = mediaFeed;
     }
 }

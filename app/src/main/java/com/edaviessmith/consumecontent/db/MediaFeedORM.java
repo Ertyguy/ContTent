@@ -2,11 +2,13 @@ package com.edaviessmith.consumecontent.db;
 
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class MediaFeedORM {
             DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
             DB.COL_USER             + " INTEGER, " +
             DB.COL_SORT             + " INTEGER, " +
+            //TODO add a last_update field (to not overtax the feed requests)
             DB.COL_NAME   	        + " TEXT, " +
             DB.COL_THUMBNAIL 	    + " TEXT, " +
             DB.COL_CHANNEL_HANDLE	+ " TEXT ," +
@@ -31,15 +34,18 @@ public class MediaFeedORM {
 
     
     
-    public static List<MediaFeed> getMediaFeeds(SQLiteDatabase database, int userId) {
-        List<MediaFeed> mediaFeeds = new ArrayList<MediaFeed>();
+    public static List getMediaFeeds(SQLiteDatabase database, int userId) {
+        List mediaFeeds = new ArrayList();
 
         Cursor cursor = database.query(false, DB.TABLE_MEDIA_FEED, null, DB.COL_USER + " = " + userId, null, null, null, DB.ORDER_BY_SORT, null);
 
         if(cursor.getCount() > 0) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                mediaFeeds.add(cursorToMediaFeed(cursor));
+                int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
+
+                if(Var.isTypeYoutube(type)) mediaFeeds.add((YoutubeFeed) cursorToMediaFeed(cursor, type));
+                else mediaFeeds.add((MediaFeed) cursorToMediaFeed(cursor, type));
                 cursor.moveToNext();
             }
             Log.i(TAG, "MediaFeeds loaded successfully.");
@@ -53,7 +59,8 @@ public class MediaFeedORM {
 
         Cursor cursor = database.query(false, DB.TABLE_MEDIA_FEED, null,  DB.COL_ID + " = " + mediaFeedId, null, null, null, null, null);
         if(cursor != null && cursor.moveToFirst()) {
-            MediaFeed mediaFeed = cursorToMediaFeed(cursor);
+            int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
+            MediaFeed mediaFeed = (MediaFeed) cursorToMediaFeed(cursor, type);
 
             return mediaFeed;
         }
@@ -61,6 +68,28 @@ public class MediaFeedORM {
         return null;
     }
 
+    public static void saveMediaItems(Context context, MediaFeed mediaFeed) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+
+            //TODO update last_updated field
+
+            if(mediaFeed.getType() == Var.TYPE_YOUTUBE_ACTIVTY || mediaFeed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
+                YoutubeItemORM.saveYoutubeItems(database, mediaFeed.getItems(), mediaFeed.getId());
+            }
+
+            database.setTransactionSuccessful();
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+            database.close();
+        }
+    }
 
     public static void saveMediaFeeds(SQLiteDatabase database, List<MediaFeed> mediaFeeds, int youtubeChannelId) {
         for(int i=0; i< mediaFeeds.size(); i++) {
@@ -92,7 +121,19 @@ public class MediaFeedORM {
         return values;
     }
 
-    private static MediaFeed cursorToMediaFeed(Cursor cursor) {
+    private static Object cursorToMediaFeed(Cursor cursor, int type) {
+        if(Var.isTypeYoutube(type)) {
+            return new YoutubeFeed(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
+                    cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
+                    cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)));
+        }
+
+        //TODO return TwitterFeed
+
         return new MediaFeed(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
                                  cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
                                  cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),

@@ -6,6 +6,7 @@ import com.edaviessmith.consumecontent.ContentActivity;
 import com.edaviessmith.consumecontent.PlaceholderFragment;
 import com.edaviessmith.consumecontent.TwitterFragment;
 import com.edaviessmith.consumecontent.YoutubeFragment;
+import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.util.Var;
 
@@ -32,14 +33,13 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     // Returns the fragment to display for that page
     @Override
     public Fragment getItem(int position) {
-
-        switch(act.getUser().getMediaFeed().get(position).getType()) {
-            case Var.TYPE_YOUTUBE_PLAYLIST:case Var.TYPE_YOUTUBE_ACTIVTY: return YoutubeFragment.newInstance(act, position);
-            case Var.TYPE_TWITTER: return TwitterFragment.newInstance(act, position);
-            default: return PlaceholderFragment.newInstance(position, "Placeholder (nothing to see here)");
+        int type = ((MediaFeed) act.getUser().getMediaFeed().get(position)).getType();
+        if(Var.isTypeYoutube(type)) {
+            return YoutubeFragment.newInstance(act, position);
+        } else if(type == Var.TYPE_TWITTER) {
+            return TwitterFragment.newInstance(act, position);
         }
-
-
+        return PlaceholderFragment.newInstance(position, "Placeholder (nothing to see here)");
     }
 
 
@@ -48,7 +48,7 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
 
-        if(position < user.getMediaFeed().size())  return act.getUser().getMediaFeed().get(position).getName();
+        if(position < user.getMediaFeed().size())  return ((MediaFeed) act.getUser().getMediaFeed().get(position)).getName();
 
         return "Placeholder (nothing to see here)";
 

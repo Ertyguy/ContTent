@@ -9,11 +9,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.view.VideoPlayerFragment;
 
 import java.util.List;
 
@@ -36,7 +39,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	private List<User> users;
     Toolbar toolbar;
     ImageLoader imageLoader;
-	  
+    ImageView actionSettings;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,21 +48,29 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.inflateMenu(R.menu.menu_add);
+
 
 		mTitle = getTitle();
         imageLoader = new ImageLoader(this);
-		
-		
+
+
 		users = UserORM.getUsers(this);
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), users);
-		
+
 		FragmentManager fragmentManager = getSupportFragmentManager();
 	    taskFragment = (TaskFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
 	    taskFragment = TaskFragment.newInstance(this);
 	    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
+
+        actionSettings = (ImageView) findViewById(R.id.action_settings);
+        actionSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
+            }
+        });
 
 
 	}
@@ -80,11 +92,19 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		    taskFragment = TaskFragment.newInstance(this);
 		    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
 		}
-		
+
 	}
+
     int userPos;
     public User getUser() {
         return (userPos < users.size() ? users.get(userPos): null);
+    }
+
+    VideoPlayerFragment videoPlayerFragment;
+    public void startVideo(String url) {
+        videoPlayerFragment = VideoPlayerFragment.newInstance(url);
+        getSupportFragmentManager().beginTransaction().replace(R.id.video_v, videoPlayerFragment).commit();
+        videoPlayerFragment.init();
     }
 
 

@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -23,7 +26,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,10 +58,15 @@ import twitter4j.ResponseList;
 
 
 public class AddActivity extends ActionBarActivity implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener, View.OnClickListener,
-                                                              AbsListView.OnScrollListener, SearchView.OnQueryTextListener {
+                                                              AbsListView.OnScrollListener/*, SearchView.OnQueryTextListener*/ {
     String TAG = "AddActivity";
 
-    SearchView searchView;
+    //SearchView searchView;
+    View search_rl;
+    EditText search_edt;
+    ImageView clearSearch_iv;
+
+    Toolbar toolbar;
 
     ListView search_lv, feed_lv;
     SearchAdapter searchAdapter;
@@ -116,8 +123,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         if(searchMode == Var.SEARCH_NONE) {
             dismissSearch();
-            searchView.setQuery("", false);
-            searchView.setVisibility(View.GONE);
+            //searchView.setQuery("", false);
+            //searchView.setVisibility(View.GONE);
+            search_rl.setVisibility(View.GONE);
+            search_edt.getText().clear();
 
             action_fab.setVisibility((editUser.getMediaFeed().size() > 0) ? View.VISIBLE: View.GONE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -132,10 +141,13 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             clearSearchOptions();
         } else if(searchMode == Var.SEARCH_YOUTUBE || searchMode == Var.SEARCH_TWITTER) {
             //if(searchItem != null) {
-                searchView.setQueryHint(getResources().getString((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter));
-                searchView.setIconified(false);
-                searchView.setVisibility(View.VISIBLE);
-                searchView.requestFocusFromTouch();
+                //searchView.setQueryHint(getResources().getString((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter));
+                //searchView.setIconified(false);
+                //searchView.setVisibility(View.VISIBLE);
+                //searchView.requestFocusFromTouch();
+            search_edt.setHint((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
+            search_rl.setVisibility(View.VISIBLE);
+            search_rl.requestFocus();
             //}
         }
         if (searchModePreSearch()) {
@@ -163,6 +175,11 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         youtubeChannelSearch = new ArrayList<YoutubeChannel>();
         twitterFeedSearch = new ArrayList<TwitterFeed>();
         userPictureThumbnails = new ArrayList<String>();
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         groups = GroupORM.getVisibleGroups(this);
 
@@ -193,14 +210,30 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         group_sp.setOnItemSelectedListener(this);
 
         //Search
-        searchView = (SearchView) findViewById(R.id.action_search); //MenuItemCompat.getActionView(searchItem);
+        search_rl = findViewById(R.id.search_rl);
+        search_edt = (EditText) findViewById(R.id.search_edt);
+        search_edt.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            @Override public void afterTextChanged(Editable s) {
+                pageToken = null;
+                twitterPage = 0;
+                search = s.toString();
+                searchMessage_tv.setVisibility(View.GONE);
+                searchTimer();
+            }
+        });
+        clearSearch_iv = (ImageView) findViewById(R.id.clear_iv);
+        clearSearch_iv.setOnClickListener(this);
+
+        /*searchView = (SearchView) findViewById(R.id.action_search); //MenuItemCompat.getActionView(searchItem);
         searchView.setOnQueryTextListener(this);
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
                 toggleSearch(Var.SEARCH_NONE);  return false;
             }
-        });
+        });*/
 
 
         search_v = findViewById(R.id.search_v);
@@ -278,7 +311,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         return super.onCreateOptionsMenu(menu);
     }
-
+/*
     @Override
     public boolean onQueryTextSubmit(String s) {
         pageToken = null;
@@ -297,7 +330,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         searchMessage_tv.setVisibility(View.GONE);
         searchTimer();
         return false;
-    }
+    }*/
 
 
     //TODO handler sometimes fails when typing fast (haven't seen lately)
@@ -445,6 +478,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             searchTwitter_v.setVisibility(View.GONE);
             searchDiv_v.setVisibility(View.GONE);
         }
+        if(v == clearSearch_iv) search_edt.getText().clear();
     }
 
 
@@ -454,8 +488,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
     private void dismissSearch() {
-        if(searchView != null)
-            ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(search_edt.getWindowToken(), 0);
 
     }
 
@@ -687,7 +720,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         @Override
         public MediaFeed getItem(int position) {
-            return editUser.getMediaFeed().get(position);
+            return (MediaFeed) editUser.getMediaFeed().get(position);
         }
 
         @Override

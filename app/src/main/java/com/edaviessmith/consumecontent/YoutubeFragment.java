@@ -1,6 +1,5 @@
 package com.edaviessmith.consumecontent;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,7 +17,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
+import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Listener;
@@ -31,6 +32,9 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -48,6 +52,9 @@ public class YoutubeFragment extends Fragment {
     private Listener listener;
     private RecyclerView feed_rv;
     private YoutubeItemAdapter itemAdapter;
+
+    private boolean isSearchBusy; //Only make a single request to API
+    private boolean isFirstPage; //Only save first request to the database
 
     DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
 
@@ -80,6 +87,8 @@ public class YoutubeFragment extends Fragment {
 
     }
 
+    LinearLayoutManager linearLayoutManager;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
@@ -88,7 +97,8 @@ public class YoutubeFragment extends Fragment {
         imageLoader = new ImageLoader(act);
 
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
-        feed_rv.setLayoutManager(new LinearLayoutManager(act));
+        linearLayoutManager = new LinearLayoutManager(act);
+        feed_rv.setLayoutManager(linearLayoutManager);
         feed_rv.setItemAnimator(new DefaultItemAnimator());
 
 
@@ -97,22 +107,23 @@ public class YoutubeFragment extends Fragment {
 
         itemAdapter = new YoutubeItemAdapter(act);
         feed_rv.setAdapter(itemAdapter);
-
-        //final TypedArray styledAttributes = act.getTheme().obtainStyledAttributes( new int[] { android.R.attr.actionBarSize });
-        //mActionBarHeight = styledAttributes.getDimension(0, 0);
-        //styledAttributes.recycle();
         feed_rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-
             }
 
-            @SuppressLint("NewApi")
+            //@SuppressLint("NewApi")
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                Log.d(TAG, "onScrolled "+dy+" : "+act.getSupportActionBar().isShowing());
+
+                if(!isSearchBusy && linearLayoutManager.findLastVisibleItemPosition() > linearLayoutManager.getItemCount() - Var.SCROLL_OFFSET) {
+                    new GetFeedAsyncTask().execute();
+                    Log.d(TAG,"onScrolled getFeed called");
+                }
+
+                Log.d(TAG, "onScrolled " + dy + " : " + act.getSupportActionBar().isShowing());
                 //TODO much thinking needed to hide toolbar on scroll
                 //if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
                 if (android.os.Build.VERSION.SDK_INT >= 12) ;
@@ -138,6 +149,7 @@ public class YoutubeFragment extends Fragment {
 
 
         if(getFeed().getItems() == null || getFeed().getItems().size() == 0) {
+            isFirstPage = true; //Nothing in feed set first page to true
             new Thread() {
                 @Override
                 public void run() {
@@ -154,23 +166,33 @@ public class YoutubeFragment extends Fragment {
                         }
                     });
 
-
-
                     //handler.sendMessage(handler.obtainMessage(Var.HANDLER_COMPLETE, 1, 0, ""));
                 }
             }.start();
         }
     }
 
+    private void saveItems(final MediaFeed mediaFeed) {
+        new Thread() {
+            @Override
+            public void run() {
+                if(mediaFeed.getItems().size() > 0) MediaFeedORM.saveMediaItems(act, mediaFeed);
+            }
+        }.start();
 
 
-
-
-    private MediaFeed getFeed() {
-        return act.getUser().getMediaFeed().get(pos);//youtubeFeed;
     }
 
-    public class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder>{
+
+    private YoutubeFeed getFeed() {
+        return (YoutubeFeed) act.getUser().getMediaFeed().get(pos);//youtubeFeed;
+    }
+
+
+
+    static SimpleDateFormat dateFormat =  new SimpleDateFormat("MMM d HH:mm", Locale.getDefault());
+
+    public class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder> implements View.OnClickListener{
 
         private final int TYPE_DIV = 0;
         private final int TYPE_ITEM = 1;
@@ -186,7 +208,7 @@ public class YoutubeFragment extends Fragment {
             View v = null;
             if(i == TYPE_DIV) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube_divider, viewGroup, false);
             else if(i == TYPE_ITEM) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube, viewGroup, false);
-
+            v.setOnClickListener(this);
             return new ViewHolder(v);
         }
 
@@ -200,7 +222,12 @@ public class YoutubeFragment extends Fragment {
             return TYPE_ITEM;
         }
 
-
+        @Override
+        public void onClick(final View view) {
+            int itemPosition = feed_rv.getChildPosition(view);
+            act.startVideo(getFeed().getItems().get(itemPosition).getVideoId());
+            //Toast.makeText(mContext, item, Toast.LENGTH_LONG).show();
+        }
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int i) {
@@ -210,7 +237,8 @@ public class YoutubeFragment extends Fragment {
                 imageLoader.DisplayImage(item.getImageMed(), viewHolder.thumbnail_iv);
                 viewHolder.title_tv.setText(item.getTitle());
                 viewHolder.length_tv.setText(item.getDuration());
-                viewHolder.views_tv.setText(item.getViews()+" Views");
+                //viewHolder.views_tv.setText(Var.displayViews(item.getViews()));
+                viewHolder.views_tv.setText(dateFormat.format(new Date(item.getDate() * 1000)));
 
                 if(getItemViewType(i) == TYPE_DIV) {
                     int[] dateCats = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(i)).getDate());
@@ -235,6 +263,7 @@ public class YoutubeFragment extends Fragment {
         public int getItemCount() {
             return getFeed().getItems() == null ? 0 : getFeed().getItems().size();
         }
+
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public ImageView thumbnail_iv;
@@ -276,7 +305,6 @@ public class YoutubeFragment extends Fragment {
         }
     };
 
-    boolean searchBusy;
 
     private class GetFeedAsyncTask extends AsyncTask<Void, Void, String> {
 
@@ -284,20 +312,34 @@ public class YoutubeFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... params) {
-            searchBusy = true;
+            isSearchBusy = true;
             try {
 
                 final Map<String, YoutubeItem> youtubeItemMap = new HashMap<String, YoutubeItem>();
 
-                //TODO check the internet connection here
+                //TODO make this a beautiful toast like Chrome
+                if (!Var.isNetworkAvailable(act)) return null;
 
                 String url = null;
-                if(getFeed().getType() == Var.TYPE_YOUTUBE_PLAYLIST) url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId="+URLEncoder.encode(getFeed().getFeedId(), "UTF-8")+"&key=" + Var.DEVELOPER_KEY;
-                if(getFeed().getType() == Var.TYPE_YOUTUBE_ACTIVTY) url = "https://www.googleapis.com/youtube/v3/activities?part=contentDetails&channelId="+URLEncoder.encode(getFeed().getChannelHandle(), "UTF-8")+"&maxResults=20&key=" + Var.DEVELOPER_KEY;
+
+                if (getFeed().getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
+                    String fields = "";//"&fields=items%2Fsnippet%2CnextPageToken";
+                    url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet" + fields + "&maxResults=20&playlistId=" + URLEncoder.encode(getFeed().getFeedId(), "UTF-8") + "&key=" + Var.DEVELOPER_KEY;
+                }
+                if (getFeed().getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
+                    String fields = "";//"&fields=items(contentDetails%2Csnippet)%2CnextPageToken";
+                    url = "https://www.googleapis.com/youtube/v3/activities?part=snippet%2C+contentDetails"+fields+"&channelId=" + URLEncoder.encode(getFeed().getChannelHandle(), "UTF-8") + "&maxResults=20&key=" + Var.DEVELOPER_KEY;
+                }
+                if(!Var.isEmpty(getFeed().getNextPageToken())) url+= "&pageToken="+ getFeed().getNextPageToken();
+                else isFirstPage = false;
                 StringBuilder videos = new StringBuilder();
                 String playlistItems = Var.HTTPGet(url);
 
                 JSONObject res = new JSONObject(playlistItems);
+                if (Var.isJsonString(res, "nextPageToken")) {
+                    getFeed().setNextPageToken(res.getString("nextPageToken"));
+                }
+
                 if (Var.isJsonArray(res, "items")) {
                     JSONArray items = res.getJSONArray("items");
 
@@ -315,6 +357,10 @@ public class YoutubeFragment extends Fragment {
                                     youtubeItem.setVideoId(resourceId.getString("videoId"));
                                     youtubeItem.setType(Var.TYPE_UPLOAD);
                                 }
+                            }
+                            //Debug
+                            if (Var.isJsonString(snippet, "title")) {
+                                Log.d(TAG, "checking for Korra "+ (snippet.getString("title")));
                             }
                         }
 
@@ -358,20 +404,9 @@ public class YoutubeFragment extends Fragment {
                                     //"playlistItemId": string
                                 }
                             }
-
-                            /* "comment": {  //Other possible activity types
-                              "resourceId": {
-                                "kind": string,
-                                "videoId": string,
-                                "channelId": string,
-                              }
-                            },
-                            "subscription": {
-                              "resourceId": {
-                                "kind": string,
-                                "channelId": string,
-                              }
-                            } */
+                            //Other possible activity types
+                            /* "comment": { "resourceId": { "kind": string, "videoId": string, "channelId": string, } },
+                            "subscription": { "resourceId": {  "kind": string, "channelId": string, }  } */
                         }
 
                         youtubeItemMap.put(youtubeItem.getVideoId(), youtubeItem);
@@ -460,16 +495,28 @@ public class YoutubeFragment extends Fragment {
                 }
 
             } catch (Throwable t) {
+                Log.e(TAG, "getFeed failed");
                 t.printStackTrace();
             }
+
+            Collections.sort(youtubeItems, new Comparator<YoutubeItem>() {
+                public int compare(YoutubeItem m1, YoutubeItem m2) {
+                    return (int) ((m2.getDate()) - (m1.getDate()) );
+                }
+            });
+
             return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
             Log.d(TAG,"adding youtube items "+youtubeItems.size());
-            getFeed().setItems(youtubeItems);
+            getFeed().addItems(youtubeItems);
             itemAdapter.notifyDataSetChanged();
+            isSearchBusy = false;
+            if(isFirstPage) saveItems(getFeed());
         }
     }
+
+
 }

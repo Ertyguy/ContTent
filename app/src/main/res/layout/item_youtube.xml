@@ -9,7 +9,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:paddingLeft="20dp"
+        android:paddingTop="25dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="25dp">
 
         <ImageView
             android:id="@+id/thumbnail_iv"
@@ -42,8 +45,7 @@
             android:layout_alignBottom="@+id/thumbnail_iv"
             android:layout_alignRight="@+id/thumbnail_iv"
             android:layout_alignEnd="@+id/thumbnail_iv"
-            android:textSize="10sp"
-            android:layout_margin="2dp"
+            android:textSize="12sp"
             android:textColor="@android:color/white"
             android:padding="2dp"
             android:shadowColor="@android:color/black"
@@ -60,7 +62,8 @@
             android:textColor="@color/gray_accent"
             android:layout_toEndOf="@+id/thumbnail_iv"
             android:layout_alignBottom="@+id/thumbnail_iv"
-            android:layout_toRightOf="@+id/thumbnail_iv" />
+            android:layout_toRightOf="@+id/thumbnail_iv"
+            android:textSize="12sp" />
 <!--
         <TextView
             android:layout_width="wrap_content"

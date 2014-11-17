@@ -18,7 +18,15 @@
             android:background="@color/primary"
             android:minHeight="@dimen/abc_action_bar_default_height_material"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/action_settings"
+                android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
+
+        </android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:id="@+id/container"
@@ -26,7 +34,37 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/toolbar"/>
 
+
+        <com.edaviessmith.consumecontent.view.VideoPlayerLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:id="@+id/header_v">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/dark_gray"
+                    android:id="@+id/video_v" />
+
+                </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/description_v"
+                android:tag="desc"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffb5aeaf"/>
+
+        </com.edaviessmith.consumecontent.view.VideoPlayerLayout>
+
+
     </RelativeLayout>
+
 
     <fragment
         android:id="@+id/navigation_drawer"

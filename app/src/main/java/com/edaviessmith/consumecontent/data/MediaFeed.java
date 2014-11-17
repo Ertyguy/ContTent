@@ -9,12 +9,13 @@ public class MediaFeed {
     private int sort;
     private String name;
     private String thumbnail;
-
     private String channelHandle;
     private String feedId;
     private int type;
 
     private List items;
+
+    private String nextPageToken;
 
     public MediaFeed() { }
 
@@ -135,6 +136,13 @@ public class MediaFeed {
         this.items = items;
     }
 
+    public String getNextPageToken() {
+        return nextPageToken;
+    }
+
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
+    }
 
     public String toString() {
         return "MediaFeed ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";

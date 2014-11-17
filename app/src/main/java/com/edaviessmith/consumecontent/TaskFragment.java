@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.FragmentStateCachePagerAdapter;
 import com.edaviessmith.consumecontent.view.PagerAdapter;
@@ -45,9 +46,10 @@ public class TaskFragment extends Fragment {
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                if(act.getUser().getMediaFeed().get(position).getType() == Var.TYPE_YOUTUBE_PLAYLIST || act.getUser().getMediaFeed().get(position).getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
+                int type = ((MediaFeed) act.getUser().getMediaFeed().get(position)).getType();
+                if(Var.isTypeYoutube(type)) {
                     return act.getResources().getColor(R.color.red_youtube);
-                }else if(act.getUser().getMediaFeed().get(position).getType() == Var.TYPE_TWITTER) {
+                }else if(type == Var.TYPE_TWITTER) {
                     return act.getResources().getColor(R.color.blue_twitter);
                 }
 
