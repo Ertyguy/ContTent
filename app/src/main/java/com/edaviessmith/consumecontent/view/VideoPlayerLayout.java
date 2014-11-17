@@ -53,7 +53,7 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     public VideoPlayerLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        viewDragHelper = ViewDragHelper.create(this, 0.05f, new DragHelperCallback());
+        viewDragHelper = ViewDragHelper.create(this, 1f, new DragHelperCallback());
     }
 
     public void maximize() {
@@ -79,20 +79,15 @@ public class VideoPlayerLayout extends RelativeLayout {
         }
 
         @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            VideoPlayerLayout.this.top = top;
-
-            //dragOffset = (float) top / dragRange;
-
+        public void onViewPositionChanged(View changedView, int left, int t, int dx, int dy) {
+            top = t;
+            dragOffset = ((float) top / dragRange);
 
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) header_v.getLayoutParams();
-            params.width = (int) dragRange * playerWidth; //((1 - dragOffset / 2) * playerWidth);
-            params.height = (int) dragRange * playerHeight; //((1 - dragOffset / 2) * playerHeight);
+            params.width = (int) (1 / (1 - dragOffset)) * playerMinWidth; //((1 - dragOffset / 2) * playerWidth);
+            //params.height = (int) dragOffset * playerHeight; //((1 - dragOffset / 2) * playerHeight);
 
-
-            Log.d(TAG, "viewPositionChanged: "+params.width);
-            header_v.setLayoutParams(params);
-            //header_v.requestLayout();
+            Log.d(TAG, "viewPositionChanged: " + params.height + " offset: " + dragOffset + " - " + playerWidth);
 
             /*
             header_v.setPivotX(header_v.getWidth());
@@ -199,7 +194,7 @@ public class VideoPlayerLayout extends RelativeLayout {
                 final int slop = viewDragHelper.getTouchSlop();
                 if (dx * dx + dy * dy < slop * slop && isHeaderViewUnder) {
                     if (dragOffset == 0) {
-                        return true;//smoothSlideTo(1f);
+                        return smoothSlideTo(1f); //Should do nothing
                     } else {
                         smoothSlideTo(0f);
                     }
@@ -234,20 +229,20 @@ public class VideoPlayerLayout extends RelativeLayout {
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    protected void onLayout(boolean changed, int left, int t, int right, int bottom) {
         if(playerWidth == 0 && playerHeight == 0) {
             playerWidth = player_v.getMeasuredWidth();
             playerHeight = (int) (player_v.getMeasuredWidth() / 1.6666f) - 1;
         }
 
-        dragRange = (1 / (getHeight() - header_v.getHeight())) * (playerWidth / playerMinWidth);
-//TODO 0
-        Log.d(TAG, "dragRange "+dragRange);
+
+        dragRange = getHeight() - header_v.getHeight();
 
 
-        header_v.layout(player_v.getMeasuredWidth() - header_v.getMeasuredWidth(), this.top, player_v.getMeasuredWidth(), this.top + header_v.getMeasuredHeight());
+        //header_v.layout(playerWidth - header_v.getMeasuredWidth(), this.top, playerWidth, this.top + header_v.getMeasuredHeight());
+        header_v.layout(playerWidth - header_v.getMeasuredWidth(), top, right, top + header_v.getMeasuredHeight());
 
-        description_v.layout(0, this.top + header_v.getMeasuredHeight(), right, this.top + bottom);
+        description_v.layout(0, top + header_v.getMeasuredHeight(), right, top + bottom);
     }
 
 }
