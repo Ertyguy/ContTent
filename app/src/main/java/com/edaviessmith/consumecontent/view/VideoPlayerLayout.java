@@ -9,7 +9,8 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.RelativeLayout;
 
 import com.edaviessmith.consumecontent.R;
@@ -35,6 +36,9 @@ public class VideoPlayerLayout extends RelativeLayout {
     private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 200);
     private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 101);
 
+    int headerWidth, headerHeight;
+    private boolean animating;
+
     private static final float Y_MIN_VELOCITY = 1300;
 
     public VideoPlayerLayout(Context context) {
@@ -59,7 +63,8 @@ public class VideoPlayerLayout extends RelativeLayout {
     }
 
     public void maximize() {
-        smoothSlideTo(0f);
+        //smoothSlideTo(0f);
+        expand(header_v);
     }
     public void minimize() {
         smoothSlideTo(1f);
@@ -96,6 +101,76 @@ boolean isMinimized;
         isMinimized = false;
     }
 */
+
+    public void expand(final View v) {
+
+        final float initialOffset = dragOffset;
+
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                float perc = (interpolatedTime * (1 - initialOffset)) + initialOffset;// Current pos to ending percentage
+
+                Log.d(TAG,"animating "+(playerMinWidth + ((playerWidth - playerMinWidth) * (perc))) );
+
+
+                headerWidth = (int) ((playerMinWidth + ((playerWidth - playerMinWidth) * (perc))) );
+                headerHeight = (int) (headerWidth / (16f / 9f));
+
+                top = (int) (dragRange *  perc);
+                dragOffset = ((float) top / dragRange);
+
+                v.requestLayout();
+
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+        a.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationStart(Animation animation) { }
+            @Override public void onAnimationRepeat(Animation animation) { }
+
+            @Override public void onAnimationEnd(Animation animation) {
+                animating = false;
+                dragOffset = 0;
+                v.clearAnimation();
+            }
+        });
+
+
+        a.setDuration(1000);
+        v.startAnimation(a);
+        animating = true;
+        Log.d(TAG,"start animating ");
+    }
+
+    public static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
 
 
 
@@ -289,21 +364,18 @@ boolean isMinimized;
 
 
         //header_v.layout(playerWidth - header_v.getMeasuredWidth(), this.top, playerWidth, this.top + header_v.getMeasuredHeight());
-        int width = (int) ( playerMinWidth + ((playerWidth - playerMinWidth) * (1 - dragOffset)));  //(int) (1 / (1 - dragOffset)) * playerMinWidth;
-        int height = (int) (width  / (16f / 9f));
-        header_v.getLayoutParams().width = width;
-        header_v.getLayoutParams().height = height;
-        Log.d(TAG, "layout drag vars: "+Var.getDp(width));
-        header_v.layout(playerWidth - width, top, right, top + height);
-        for(int i=0; i<((ViewGroup)header_v).getChildCount();i++) {
-            View v = ((ViewGroup)header_v).getChildAt(i);
-            v.layout(0, 0, width, height);
-            Log.e(TAG, "child: "+Var.getDp(((ViewGroup) header_v).getChildAt(i).getWidth()));
-            //v.requestLayout();
-            //v.invalidate();
+        if(!animating) {
+            headerWidth = (int) (playerMinWidth + ((playerWidth - playerMinWidth) * (1 - dragOffset)));  //(int) (1 / (1 - dragOffset)) * playerMinWidth;
+            headerHeight = (int) (headerWidth / (16f / 9f));
         }
+        header_v.getLayoutParams().width = headerWidth;
+        header_v.getLayoutParams().height = headerHeight;
+        //Log.d(TAG, "layout drag vars: "+Var.getDp(width));
+        header_v.layout(playerWidth - headerWidth, top, right, top + headerHeight);
 
         description_v.layout(0, top + header_v.getMeasuredHeight(), right, top + bottom);
     }
+
+
 
 }

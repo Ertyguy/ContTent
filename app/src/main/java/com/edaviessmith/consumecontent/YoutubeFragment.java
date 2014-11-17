@@ -358,10 +358,7 @@ public class YoutubeFragment extends Fragment {
                                     youtubeItem.setType(Var.TYPE_UPLOAD);
                                 }
                             }
-                            //Debug
-                            if (Var.isJsonString(snippet, "title")) {
-                                Log.d(TAG, "checking for Korra "+ (snippet.getString("title")));
-                            }
+
                         }
 
                         //Activity Feed
@@ -488,7 +485,7 @@ public class YoutubeFragment extends Fragment {
                             youtubeItems.add(youtubeItem);
                             // searchChannel.getYoutubeFeeds().add(feed);
 
-                            Log.d(TAG,"youtube feed added "+youtubeItem.getVideoId());
+                            //Log.d(TAG,"youtube feed added "+youtubeItem.getVideoId());
                         }
                     }
 
