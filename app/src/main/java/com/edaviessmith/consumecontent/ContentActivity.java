@@ -144,15 +144,21 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     public void setVideoPlaying(boolean isVideoPlaying) {
         this.isVideoPlaying = isVideoPlaying;
-        displayActionbar();
+        updateUIVisibility();
     }
 
     public void toggleVideoControls(boolean show) {
         if(videoPlayerFragment != null) videoPlayerFragment.toggleControls(show);
     }
 
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        updateUIVisibility();
+    }
+
     @SuppressLint("NewApi")
-    private void displayActionbar() {
+    public void updateUIVisibility() {
 
         if(!isVideoPlaying || getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             //getSherlock().getActionBar().show();

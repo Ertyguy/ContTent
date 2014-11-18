@@ -62,29 +62,36 @@
         android:layout_height="match_parent"
         android:id="@+id/video_player_v">
 
+        <View
+            android:id="@+id/shade_v"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black" />
+
         <RelativeLayout
             android:id="@+id/description_v"
             android:tag="desc"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#ffb5aeaf"/>
+            android:background="#ffb5aeaf" >
+
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="@color/dark_gray"
             android:id="@+id/header_v">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@android:color/black"
                 android:id="@+id/video_v" />
-
 
         </RelativeLayout>
 
-
-
     </com.edaviessmith.consumecontent.view.VideoPlayerLayout>
+
 </RelativeLayout>

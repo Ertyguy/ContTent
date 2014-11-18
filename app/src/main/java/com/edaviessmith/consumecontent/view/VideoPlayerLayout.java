@@ -29,6 +29,7 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     private View header_v;
     private View description_v;
+    private View shade_v;
     private View player_v;
 
     private float initialX;
@@ -39,13 +40,12 @@ public class VideoPlayerLayout extends RelativeLayout {
     private float dragOffset;
 
 
-    private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 200);
-    private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 101);
+    private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 204);
+    private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 114);
 
-    private int monimizedMargin = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 3); //TODO add minimized margin
+    private int minimizedMargin = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 2);
 
     int headerWidth, headerHeight;
-    //private boolean animating;
     private boolean isMinimized;
 
     private static final float Y_MIN_VELOCITY = 1300;
@@ -63,6 +63,7 @@ public class VideoPlayerLayout extends RelativeLayout {
     protected void onFinishInflate() {
         header_v = findViewById(R.id.header_v);
         description_v = findViewById(R.id.description_v);
+        shade_v = findViewById(R.id.shade_v);
         player_v = getRootView();
 
     }
@@ -85,7 +86,6 @@ public class VideoPlayerLayout extends RelativeLayout {
         postDelayed(new Runnable() {
             @Override
             public void run() {
-                //updateDragOffset(1);
                 header_v.requestLayout();
                 requestLayout();
                 Log.d(TAG, "configuration changed");
@@ -156,6 +156,7 @@ public class VideoPlayerLayout extends RelativeLayout {
             @Override public void onAnimationEnd(Animation animation) {
                 Log.d(TAG, "minimize animation end");
                 isMinimized = true;
+                act.updateUIVisibility(); //Remove fullscreen effect
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -175,9 +176,12 @@ public class VideoPlayerLayout extends RelativeLayout {
         dragOffset = offset;
         top = (int) ((getHeight() - playerMinHeight) *  dragOffset);
 
-        description_v.setAlpha(1 - dragOffset);
+        //description_v.setAlpha(1 - dragOffset);
+        shade_v.setAlpha(1 - dragOffset);
+
         header_v.requestLayout();
         description_v.requestLayout();
+        shade_v.requestLayout();
         requestLayout();
     }
 
@@ -193,13 +197,15 @@ public class VideoPlayerLayout extends RelativeLayout {
         public void onViewPositionChanged(View changedView, int left, int t, int dx, int dy) {
             top = t;
             dragOffset = ((float) top / dragRange);
-            description_v.setAlpha(1 - dragOffset);
+            //description_v.setAlpha(1 - dragOffset);
 
+            shade_v.setAlpha(1 - dragOffset);
             act.toggleVideoControls(false);
             isMinimized = false;
 
             header_v.invalidate();
             header_v.requestLayout();
+            shade_v.requestLayout();
             requestLayout();
         }
 
@@ -287,7 +293,7 @@ public class VideoPlayerLayout extends RelativeLayout {
         }
 
         //Minimized or drag slop distance allows intercept
-        return (dragSlop) && (viewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap);
+        return (isMinimized || dragSlop) && (viewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap);
     }
 
     @Override
@@ -339,21 +345,22 @@ public class VideoPlayerLayout extends RelativeLayout {
     protected void onLayout(boolean changed, int left, int t, int right, int bottom) {
 
         headerWidth = (int) (playerMinWidth + ((right - left - playerMinWidth) * (1 - dragOffset)));
-        headerHeight = (int) Math.floor(headerWidth / (16f / 9f));
+        headerHeight = (int) (playerMinHeight + ((((right - left)/ (16f / 9f)) - playerMinHeight) * (1 - dragOffset)));//Math.floor(headerWidth / (16f / 9f));
         if(headerHeight > getMeasuredHeight()) headerHeight = getMeasuredHeight(); //Ratio is bigger than screen size
 
 
-        dragRange = (bottom - t) - playerMinHeight; // headerHeight
+        dragRange = ((bottom - t) - playerMinHeight);// - minimizedMargin * 2; // headerHeight
         Log.d(TAG, "onLayout" + " r: "+dragRange +", top:"+top+" - off"+dragOffset);
         if(isMinimized && top != dragRange) top = dragRange; //Resize minimized (for configChange)
 
 
         header_v.getLayoutParams().width = headerWidth;
         header_v.getLayoutParams().height = headerHeight;
+        header_v.setPadding((int)(minimizedMargin * dragOffset), (int)(minimizedMargin * dragOffset), (int)(minimizedMargin * dragOffset), (int)(minimizedMargin * dragOffset));
         header_v.layout(right - left - headerWidth, top, right, top + headerHeight);
 
-
-        description_v.layout(0, top + headerHeight, right, top + bottom);
+        description_v.layout(0, (int) (top + (headerHeight * (dragOffset + 1))), right, top + bottom);
+        shade_v.layout(left, t, right, bottom);
     }
 
 }

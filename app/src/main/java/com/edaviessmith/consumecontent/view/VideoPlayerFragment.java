@@ -38,6 +38,7 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
                 activePlayer = player;
+                toggleControls(false);
                 if (!wasRestored) {
                     activePlayer.loadVideo(getArguments().getString("url"), 0);
 
