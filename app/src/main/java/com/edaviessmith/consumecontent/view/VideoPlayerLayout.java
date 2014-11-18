@@ -36,7 +36,7 @@ public class VideoPlayerLayout extends RelativeLayout {
     private float initialY;
     boolean interceptTap;
     private int dragRange;
-    private int top;
+    private int top, left;
     private float dragOffset;
 
 
@@ -194,8 +194,9 @@ public class VideoPlayerLayout extends RelativeLayout {
         }
 
         @Override
-        public void onViewPositionChanged(View changedView, int left, int t, int dx, int dy) {
+        public void onViewPositionChanged(View changedView, int l, int t, int dx, int dy) {
             top = t;
+            left = l;
             dragOffset = ((float) top / dragRange);
             //description_v.setAlpha(1 - dragOffset);
 
@@ -266,23 +267,22 @@ public class VideoPlayerLayout extends RelativeLayout {
             return false;
         }
 
-        final float x = ev.getX();
-        final float y = ev.getY();
+
         boolean dragSlop = false;
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                initialX = x;
-                initialY = y;
-                interceptTap = viewDragHelper.isViewUnder(header_v, (int) x, (int) y);
+                initialX =  ev.getX();
+                initialY = ev.getY();
+                interceptTap = viewDragHelper.isViewUnder(header_v, (int)  ev.getX(), (int) ev.getY());
                 break;
             }
 
             case MotionEvent.ACTION_MOVE: {
-                final float adx = Math.abs(x - initialX);
-                final float ady = Math.abs(y - initialY);
+                final float adx = Math.abs( ev.getX() - initialX);
+                final float ady = Math.abs(ev.getY() - initialY);
                 final int slop = viewDragHelper.getTouchSlop();
-                dragSlop = (ev.getY() - initialY) > Y_MIN_DISTANCE || (ev.getY() - initialY) < -Y_MIN_DISTANCE;
+                dragSlop = ady > Y_MIN_DISTANCE;
                 //Log.d(TAG, "drag slop: "+(ev.getY() - initialY));
                 if (ady > slop && adx > ady) {
                     viewDragHelper.cancel();
@@ -342,10 +342,10 @@ public class VideoPlayerLayout extends RelativeLayout {
     }
 
     @Override
-    protected void onLayout(boolean changed, int left, int t, int right, int bottom) {
+    protected void onLayout(boolean changed, int l, int t, int right, int bottom) {
 
-        headerWidth = (int) (playerMinWidth + ((right - left - playerMinWidth) * (1 - dragOffset)));
-        headerHeight = (int) (playerMinHeight + ((((right - left)/ (16f / 9f)) - playerMinHeight) * (1 - dragOffset)));//Math.floor(headerWidth / (16f / 9f));
+        headerWidth = (int) (playerMinWidth + ((right - l - playerMinWidth) * (1 - dragOffset)));
+        headerHeight = (int) (playerMinHeight + ((((right - l)/ (16f / 9f)) - playerMinHeight) * (1 - dragOffset)));//Math.floor(headerWidth / (16f / 9f));
         if(headerHeight > getMeasuredHeight()) headerHeight = getMeasuredHeight(); //Ratio is bigger than screen size
 
 
@@ -356,11 +356,13 @@ public class VideoPlayerLayout extends RelativeLayout {
 
         header_v.getLayoutParams().width = headerWidth;
         header_v.getLayoutParams().height = headerHeight;
-        header_v.setPadding((int)(minimizedMargin * dragOffset), (int)(minimizedMargin * dragOffset), (int)(minimizedMargin * dragOffset), (int)(minimizedMargin * dragOffset));
-        header_v.layout(right - left - headerWidth, top, right, top + headerHeight);
+        header_v.setPadding((int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset));
+
+        header_v.layout(right - left - headerWidth, top, right - left, top + headerHeight);
+        //header_v.layout(right - l - headerWidth, top, right, top + headerHeight);
 
         description_v.layout(0, (int) (top + (headerHeight * (dragOffset + 1))), right, top + bottom);
-        shade_v.layout(left, t, right, bottom);
+        shade_v.layout(l, t, right, bottom);
     }
 
 }
