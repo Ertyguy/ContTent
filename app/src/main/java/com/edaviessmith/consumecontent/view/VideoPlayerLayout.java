@@ -38,13 +38,15 @@ public class VideoPlayerLayout extends RelativeLayout {
     private int top;
     private float dragOffset;
 
-    private int playerWidth, playerHeight;
+
     private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 200);
     private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 101);
 
+    private int monimizedMargin = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 3); //TODO add minimized margin
+
     int headerWidth, headerHeight;
     //private boolean animating;
-
+    private boolean isMinimized;
 
     private static final float Y_MIN_VELOCITY = 1300;
     private static final float Y_MIN_DISTANCE = 120;
@@ -77,8 +79,8 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig){
-        top = 0;
-        //dragOffset = 0;
+
+        //dragOffset = (header_v.getTop() == player_v.getTop() ? 0: 1);
 
         postDelayed(new Runnable() {
             @Override
@@ -91,7 +93,6 @@ public class VideoPlayerLayout extends RelativeLayout {
         }, 50);
 
 
-        //TODO check landscape then maximize or minimize again
     }
 
 
@@ -133,6 +134,7 @@ public class VideoPlayerLayout extends RelativeLayout {
     }
 
     public void minimize() {
+
         final float initialOffset = dragOffset;
 
         act.toggleVideoControls(false);
@@ -152,6 +154,8 @@ public class VideoPlayerLayout extends RelativeLayout {
             @Override public void onAnimationRepeat(Animation animation) { }
 
             @Override public void onAnimationEnd(Animation animation) {
+                Log.d(TAG, "minimize animation end");
+                isMinimized = true;
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -169,7 +173,7 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     void updateDragOffset(float offset) {
         dragOffset = offset;
-        top = (int) (dragRange *  dragOffset);
+        top = (int) ((getHeight() - playerMinHeight) *  dragOffset);
 
         description_v.setAlpha(1 - dragOffset);
         header_v.requestLayout();
@@ -192,6 +196,7 @@ public class VideoPlayerLayout extends RelativeLayout {
             description_v.setAlpha(1 - dragOffset);
 
             act.toggleVideoControls(false);
+            isMinimized = false;
 
             header_v.invalidate();
             header_v.requestLayout();
@@ -202,6 +207,7 @@ public class VideoPlayerLayout extends RelativeLayout {
         public void onViewReleased(View releasedChild, float xVel, float yVel) {
             super.onViewReleased(releasedChild, xVel, yVel);
 
+            Log.d(TAG, "onViewReleased" + " off"+dragOffset +" vel:"+ yVel);
             if(dragOffset > 0 && dragOffset < 1) {
                 if (yVel < 0 && yVel <= -Y_MIN_VELOCITY) {
                     maximize();
@@ -209,8 +215,10 @@ public class VideoPlayerLayout extends RelativeLayout {
                     minimize();
                 } else {
                     if (dragOffset < 0.5f) {
+                        Log.d(TAG, "maximize animation start");
                         maximize();
                     } else {
+                        Log.d(TAG, "minimize animation start");
                         minimize();
                     }
                 }
@@ -226,7 +234,8 @@ public class VideoPlayerLayout extends RelativeLayout {
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
             final int topBound = getPaddingTop();
-            final int bottomBound = getHeight() - header_v.getHeight() - header_v.getPaddingBottom();
+            //final int bottomBound = getHeight() - header_v.getHeight() - header_v.getPaddingBottom();
+            final int bottomBound = getHeight() - playerMinHeight - header_v.getPaddingBottom();
 
             final int newTop = Math.min(Math.max(top, topBound), bottomBound);
             return newTop;
@@ -268,7 +277,7 @@ public class VideoPlayerLayout extends RelativeLayout {
                 final float ady = Math.abs(y - initialY);
                 final int slop = viewDragHelper.getTouchSlop();
                 dragSlop = (ev.getY() - initialY) > Y_MIN_DISTANCE || (ev.getY() - initialY) < -Y_MIN_DISTANCE;
-                Log.d(TAG, "drag slop: "+(ev.getY() - initialY));
+                //Log.d(TAG, "drag slop: "+(ev.getY() - initialY));
                 if (ady > slop && adx > ady) {
                     viewDragHelper.cancel();
                     return false;
@@ -276,8 +285,9 @@ public class VideoPlayerLayout extends RelativeLayout {
             }
 
         }
+
         //Minimized or drag slop distance allows intercept
-        return ((header_v.getBottom() == player_v.getBottom()) || dragSlop) && (viewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap);
+        return (dragSlop) && (viewDragHelper.shouldInterceptTouchEvent(ev) || interceptTap);
     }
 
     @Override
@@ -287,15 +297,14 @@ public class VideoPlayerLayout extends RelativeLayout {
         boolean isDragViewHit = isViewHit(header_v, (int) ev.getX(), (int) ev.getY());
         boolean isSecondViewHit = isViewHit(description_v, (int) ev.getX(), (int) ev.getY());
 
-        if (header_v.getBottom() == player_v.getBottom() && ev.getAction() == MotionEvent.ACTION_DOWN) {
-            openClick = true;
-        }
-        if (openClick && ev.getAction() == MotionEvent.ACTION_UP) {
-            maximize();
-            openClick = false;
-            //Log.d(TAG, "maximizing from fake click");
-        }
 
+        if (isMinimized && ev.getAction() == MotionEvent.ACTION_UP) {
+            isMinimized = false;
+            maximize();
+            Log.d(TAG, "maximizing from fake click");
+
+            return true;
+        }
 
         if (header_v.getTop() == player_v.getTop()) {
             header_v.dispatchTouchEvent(ev);  //Allow view click
@@ -305,7 +314,6 @@ public class VideoPlayerLayout extends RelativeLayout {
         return isDragViewHit || isSecondViewHit;
 
     }
-    boolean openClick;
 
     private boolean isViewHit(View view, int x, int y) {
         int[] viewLocation = new int[2];
@@ -329,40 +337,23 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int t, int right, int bottom) {
-        //if(playerWidth == 0 || playerHeight == 0) {
 
-
-        playerWidth = right - left; //player_v.getMeasuredWidth(); //right - left;//
-        playerHeight = (int) Math.floor(playerWidth / (16f / 9f));
-
-        //Log.d(TAG, "configuration layout "+playerWidth +", "+playerHeight);
-        //}
-
-
-        headerWidth = (int) (playerMinWidth + ((playerWidth - playerMinWidth) * (1 - dragOffset)));
+        headerWidth = (int) (playerMinWidth + ((right - left - playerMinWidth) * (1 - dragOffset)));
         headerHeight = (int) Math.floor(headerWidth / (16f / 9f));
         if(headerHeight > getMeasuredHeight()) headerHeight = getMeasuredHeight(); //Ratio is bigger than screen size
 
 
-        dragRange = (bottom - t) - headerHeight;
+        dragRange = (bottom - t) - playerMinHeight; // headerHeight
+        Log.d(TAG, "onLayout" + " r: "+dragRange +", top:"+top+" - off"+dragOffset);
+        if(isMinimized && top != dragRange) top = dragRange; //Resize minimized (for configChange)
+
 
         header_v.getLayoutParams().width = headerWidth;
         header_v.getLayoutParams().height = headerHeight;
-        header_v.layout(playerWidth - headerWidth, top, right, top + headerHeight);
+        header_v.layout(right - left - headerWidth, top, right, top + headerHeight);
 
-        Log.d(TAG, "configuration layout" + " h: "+getMeasuredHeight() + ": "+headerHeight );
+
         description_v.layout(0, top + headerHeight, right, top + bottom);
-
-        /*if(description_v.getVisibility() == View.VISIBLE) {
-            if (header_v.getMeasuredHeight() == playerHeight)
-                description_v.setVisibility(View.GONE);
-
-        } else {
-            if (header_v.getMeasuredHeight() != playerHeight)
-                description_v.setVisibility(View.GONE);
-        }*/
     }
-
-
 
 }
