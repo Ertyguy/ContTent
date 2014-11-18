@@ -59,7 +59,8 @@
 
     <com.edaviessmith.consumecontent.view.VideoPlayerLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:id="@+id/video_player_v">
 
         <RelativeLayout
             android:id="@+id/description_v"
@@ -78,14 +79,9 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/dark_gray"
                 android:id="@+id/video_v" />
 
-            <!--<ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_youtube_white"
-                android:scaleType="fitCenter"/>-->
+
         </RelativeLayout>
 
 

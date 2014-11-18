@@ -1,12 +1,15 @@
 package com.edaviessmith.consumecontent;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +20,7 @@ import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.view.VideoPlayerFragment;
+import com.edaviessmith.consumecontent.view.VideoPlayerLayout;
 
 import java.util.List;
 
@@ -28,6 +32,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	 * navigation drawer.
 	 */
 	private NavigationDrawerFragment mNavigationDrawerFragment;
+    private VideoPlayerLayout videoPlayerLayout;
 
 	/**
 	 * Used to store the last screen title. For use in
@@ -41,6 +46,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     ImageLoader imageLoader;
     ImageView actionSettings;
 
+    boolean isVideoPlaying;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,6 +56,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        videoPlayerLayout = (VideoPlayerLayout) findViewById(R.id.video_player_v);
+        videoPlayerLayout.init(this); //Give the layout a reference to activity for utils
 
 		mTitle = getTitle();
         imageLoader = new ImageLoader(this);
@@ -73,7 +82,27 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         });
 
 
-	}
+        getWindow().getDecorView().setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
+                    @Override
+                    public void onSystemUiVisibilityChange(int visibility) {
+                        // Note that system bars will only be "visible" if none of the
+                        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+                        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                            // TODO: The system bars are visible. Make any desired
+                            // adjustments to your UI, such as showing the action bar or
+                            // other navigational controls.
+                        } else {
+                            // TODO: The system bars are NOT visible. Make any desired
+                            // adjustments to your UI, such as hiding the action bar or
+                            // other navigational controls.
+                        }
+                        videoPlayerLayout.invalidate();
+                        videoPlayerLayout.requestLayout();
+                        Log.d(TAG, "system ui listener resize view here");
+                    }
+                });
+
+    }
 
     @Override
     protected void onResume() {
@@ -102,10 +131,59 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     VideoPlayerFragment videoPlayerFragment;
     public void startVideo(String url) {
-        videoPlayerFragment = VideoPlayerFragment.newInstance(url);
+        videoPlayerFragment = VideoPlayerFragment.newInstance(this, url);
         getSupportFragmentManager().beginTransaction().replace(R.id.video_v, videoPlayerFragment).commit();
 
         videoPlayerFragment.init();
+    }
+
+
+    public boolean isVideoPlaying() {
+        return isVideoPlaying;
+    }
+
+    public void setVideoPlaying(boolean isVideoPlaying) {
+        this.isVideoPlaying = isVideoPlaying;
+        displayActionbar();
+    }
+
+    public void toggleVideoControls(boolean show) {
+        if(videoPlayerFragment != null) videoPlayerFragment.toggleControls(show);
+    }
+
+    @SuppressLint("NewApi")
+    private void displayActionbar() {
+
+        if(!isVideoPlaying || getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            //getSherlock().getActionBar().show();
+
+            //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            /*content_layout.setVisibility(LinearLayout.VISIBLE);
+
+            ViewGroup.LayoutParams params = youtube_video.getLayoutParams();
+            params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            youtube_video.setLayoutParams(params);*/
+
+            if (android.os.Build.VERSION.SDK_INT >= 14) {
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            }
+        }
+
+        if (isVideoPlaying && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            //getSherlock().getActionBar().hide();
+
+            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            /*content_layout.setVisibility(LinearLayout.GONE);
+
+            ViewGroup.LayoutParams params = youtube_video.getLayoutParams();
+            params.height = LinearLayout.LayoutParams.MATCH_PARENT;
+            youtube_video.setLayoutParams(params);*/
+
+            if (android.os.Build.VERSION.SDK_INT >= 14) {
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            }
+
+        }
     }
 
 
