@@ -89,4 +89,10 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
     }
 
 
+    public void toggleVideoPlayback(boolean play) {
+        if(activePlayer != null){
+            if(play) activePlayer.play();
+            else activePlayer.pause();
+        }
+    }
 }

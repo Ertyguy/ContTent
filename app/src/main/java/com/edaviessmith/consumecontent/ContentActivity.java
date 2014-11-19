@@ -135,6 +135,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         getSupportFragmentManager().beginTransaction().replace(R.id.video_v, videoPlayerFragment).commit();
 
         videoPlayerFragment.init();
+        videoPlayerLayout.open();
     }
 
 
@@ -149,6 +150,10 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     public void toggleVideoControls(boolean show) {
         if(videoPlayerFragment != null) videoPlayerFragment.toggleControls(show);
+    }
+
+    public void toggleVideoPlayback(boolean play) {
+        if(videoPlayerFragment != null) videoPlayerFragment.toggleVideoPlayback(play);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {

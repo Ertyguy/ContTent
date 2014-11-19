@@ -11,6 +11,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 import android.widget.RelativeLayout;
 
@@ -22,8 +23,8 @@ import com.edaviessmith.consumecontent.util.Var;
 public class VideoPlayerLayout extends RelativeLayout {
 
     private final String TAG = "VideoPlayerLayout";
-    private final ViewDragHelper viewDragHelper;
-    private final DragHelperCallback dragHelperCallback;
+    private  ViewDragHelper viewDragHelper;
+    private  DragHelperCallback dragHelperCallback;
 
     private ContentActivity act;
 
@@ -44,7 +45,7 @@ public class VideoPlayerLayout extends RelativeLayout {
     private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 114);
 
     private int minimizedMargin = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 2);
-
+    private int animationSpeed = 200;
 
     int headerWidth, headerHeight;
     private boolean isMinimized, isDismiss;
@@ -55,10 +56,12 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     public VideoPlayerLayout(Context context) {
         this(context, null);
+        setup();
     }
 
     public VideoPlayerLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        setup();
     }
 
     @Override
@@ -72,12 +75,17 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     public VideoPlayerLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        setup();
+    }
+
+    private void setup() {
         dragHelperCallback = new DragHelperCallback();
         viewDragHelper = ViewDragHelper.create(this, 1f, dragHelperCallback);
     }
 
     public void init(ContentActivity activity) {
         act = activity;
+
     }
 
     @Override
@@ -131,14 +139,14 @@ public class VideoPlayerLayout extends RelativeLayout {
             }
         });
 
-        a.setDuration(400);
+        a.setDuration(animationSpeed);
+        a.setInterpolator(new DecelerateInterpolator());
         header_v.startAnimation(a);
     }
 
     public void minimize() {
 
         final float initialOffset = dragOffset;
-
         act.toggleVideoControls(false);
         Animation a = new Animation() {
             @Override
@@ -171,7 +179,72 @@ public class VideoPlayerLayout extends RelativeLayout {
             }
         });
 
-        a.setDuration(400);
+        a.setDuration(animationSpeed);
+        a.setInterpolator(new DecelerateInterpolator());
+
+        header_v.startAnimation(a);
+    }
+
+
+    public void open() {
+
+        left = 0;
+        top = 0;
+        //updateDragOffset(0);
+        maximize();
+        //header_v.invalidate();
+        //invalidate();
+
+
+        /*postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+
+
+            }
+        }, 100);*/
+
+    }
+
+    public void dismiss() {
+
+        act.toggleVideoPlayback(false);
+
+        final float initialLeft = left;
+
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                header_v.setAlpha(1 - interpolatedTime);
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return false;
+            }
+        };
+
+        a.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationStart(Animation animation) { }
+            @Override public void onAnimationRepeat(Animation animation) { }
+
+            @Override public void onAnimationEnd(Animation animation) {
+                Log.d(TAG, "dismiss animation end");
+                isMinimized = true;
+                isDismiss = false;
+                header_v.setAlpha(1);
+                left = -playerMinWidth;
+                header_v.clearAnimation();
+                header_v.invalidate();
+                header_v.requestLayout();
+
+            }
+        });
+
+        a.setDuration(animationSpeed);
+        a.setInterpolator(new DecelerateInterpolator());
+
         header_v.startAnimation(a);
     }
 
@@ -238,10 +311,14 @@ public class VideoPlayerLayout extends RelativeLayout {
             }
 
             if(isDismiss) {
-                left = 0;
-                minimize();
 
                 Log.e(TAG, "releaseDismiss: "+left);
+                if(left > getWidth() / 2) {
+                    dismiss();
+                } else {
+                    left = 0;
+                    minimize();
+                }
 
             }
 
@@ -325,11 +402,10 @@ public class VideoPlayerLayout extends RelativeLayout {
 
 
         if(isMinimized && ev.getAction() == MotionEvent.ACTION_MOVE && Math.abs(ev.getX() - initialX) > Y_MIN_DISTANCE && Math.abs(ev.getY() - initialY) < Y_MIN_DISTANCE) {
-
-            Log.d(TAG, "dragging bottom: min:"+isMinimized +" pos "+left);
+            //Log.d(TAG, "dragging bottom: min:"+isMinimized +" pos "+left);
             isDismiss = true;
             left = (int) (initialX - ev.getX());
-            //left = (int) ((getWidth() - ev.getX()) - (playerMinWidth * 0.75f));
+            return true;
         }
 
         if (!isDismiss && isMinimized && ev.getAction() == MotionEvent.ACTION_UP) {
@@ -378,8 +454,11 @@ public class VideoPlayerLayout extends RelativeLayout {
 
 
         dragRange = ((bottom - t) - playerMinHeight);// - minimizedMargin * 2; // headerHeight
-        //Log.d(TAG, "onLayout" + " r: "+dragRange +", top:"+top+" - off"+dragOffset);
-        if(isMinimized && top != dragRange) top = dragRange; //Resize minimized (for configChange)
+        Log.d(TAG, "onLayout" + " range: "+dragRange +", top:"+top+" header:"+headerHeight);
+        if(isMinimized && top != dragRange) {
+
+            top = dragRange; //Resize minimized (for configChange)
+        }
 
 
         header_v.getLayoutParams().width = headerWidth;
