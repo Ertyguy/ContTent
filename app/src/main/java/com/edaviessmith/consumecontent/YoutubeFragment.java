@@ -29,15 +29,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 
@@ -56,7 +52,7 @@ public class YoutubeFragment extends Fragment {
     private boolean isSearchBusy; //Only make a single request to API
     private boolean isFirstPage; //Only save first request to the database
 
-    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
+
 
     public static YoutubeFragment newInstance(ContentActivity activity, int pos) {
         Log.i(TAG, "newInstance");
@@ -189,9 +185,6 @@ public class YoutubeFragment extends Fragment {
     }
 
 
-
-    static SimpleDateFormat dateFormat =  new SimpleDateFormat("MMM d HH:mm", Locale.getDefault());
-
     public class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder> implements View.OnClickListener{
 
         private final int TYPE_DIV = 0;
@@ -215,9 +208,11 @@ public class YoutubeFragment extends Fragment {
         @Override
         public int getItemViewType(int position) {
             if(position == 0) return TYPE_DIV;
-            int[] prevItemCat = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(position - 1)).getDate());
-            int[] itemCat = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(position)).getDate());
-            if((prevItemCat[0] == Var.DATE_MONTH && itemCat[0] == Var.DATE_MONTH && prevItemCat[1] != itemCat[1]) || (prevItemCat[0] != itemCat[0])) return TYPE_DIV;
+            int[] prevItemCat = Var.getTimeCategory(( getFeed().getItems().get(position - 1)).getDate());
+            int[] itemCat = Var.getTimeCategory((getFeed().getItems().get(position)).getDate());
+            if((prevItemCat[0] == Var.DATE_DAY && itemCat[0] == Var.DATE_DAY && prevItemCat[1] != itemCat[1])) return TYPE_DIV;
+            if((prevItemCat[0] == Var.DATE_MONTH && itemCat[0] == Var.DATE_MONTH && prevItemCat[1] != itemCat[1])) return TYPE_DIV;
+            if(prevItemCat[0] != itemCat[0]) return TYPE_DIV;
             //TODO account for different months as well
             return TYPE_ITEM;
         }
@@ -225,27 +220,28 @@ public class YoutubeFragment extends Fragment {
         @Override
         public void onClick(final View view) {
             int itemPosition = feed_rv.getChildPosition(view);
-            act.startVideo(getFeed().getItems().get(itemPosition).getVideoId());
+            act.startVideo(getFeed().getItems().get(itemPosition));
             //Toast.makeText(mContext, item, Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int i) {
             if(getFeed().getItems().size() > i) {
-                YoutubeItem item = (YoutubeItem) getFeed().getItems().get(i);
+                YoutubeItem item = getFeed().getItems().get(i);
 
                 imageLoader.DisplayImage(item.getImageMed(), viewHolder.thumbnail_iv);
                 viewHolder.title_tv.setText(item.getTitle());
                 viewHolder.length_tv.setText(item.getDuration());
-                //viewHolder.views_tv.setText(Var.displayViews(item.getViews()));
-                viewHolder.views_tv.setText(dateFormat.format(new Date(item.getDate() * 1000)));
+                viewHolder.views_tv.setText(Var.displayViews(item.getViews()));
+                //viewHolder.views_tv.setText(Var.simpleDate.format(new Date(item.getDate())));
 
                 if(getItemViewType(i) == TYPE_DIV) {
-                    int[] dateCats = Var.getTimeCategory(((YoutubeItem) getFeed().getItems().get(i)).getDate());
+                    int[] dateCats = Var.getTimeCategory((getFeed().getItems().get(i)).getDate());
                     String dividerTitle = "";
                     switch(dateCats[0]) {
-                        case Var.DATE_TODAY: dividerTitle = "Today"; break;
-                        case Var.DATE_YESTERDAY: dividerTitle = "Yesterday"; break;
+                        case Var.DATE_DAY:
+                            dividerTitle = (dateCats[1] > 1 ? (dateCats[1] + " ") : "") + Var.DAYS[Math.min(dateCats[1], 2)];
+                            break;
                         case Var.DATE_THIS_WEEK: dividerTitle = "This Week"; break;
                         case Var.DATE_LAST_WEEK: dividerTitle = "Last Week"; break;
                         case Var.DATE_MONTH: dividerTitle = Var.MONTHS[dateCats[1]];
@@ -455,8 +451,8 @@ public class YoutubeFragment extends Fragment {
                                 if (Var.isJsonString(snippet, "publishedAt")) {
                                     String published = snippet.getString("publishedAt");
 
-                                    long dateInMilli = formatter.parse(published).getTime();
-                                    youtubeItem.setDate(dateInMilli / 1000);
+                                    long dateInMilli = Var.stringDate.parse(published).getTime();
+                                    youtubeItem.setDate(dateInMilli);
                                 }
 
                                 if (Var.isJsonObject(item, "contentDetails")) {
@@ -508,10 +504,10 @@ public class YoutubeFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
             Log.d(TAG,"adding youtube items "+youtubeItems.size());
-            getFeed().addItems(youtubeItems);
+
+            if(getFeed().addItems(youtubeItems)) saveItems(getFeed()); //Add to list and save to database if needed
             itemAdapter.notifyDataSetChanged();
             isSearchBusy = false;
-            if(isFirstPage) saveItems(getFeed());
         }
     }
 

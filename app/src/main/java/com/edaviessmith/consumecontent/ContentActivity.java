@@ -14,14 +14,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.VideoPlayerFragment;
 import com.edaviessmith.consumecontent.view.VideoPlayerLayout;
 
+import java.util.Date;
 import java.util.List;
 
 public class ContentActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -47,6 +51,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     ImageView actionSettings;
     VideoPlayerFragment videoPlayerFragment;
 
+    TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
+
     //boolean isVideoPlaying;
 
 	@Override
@@ -57,6 +63,10 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        videoTitle_tv = (TextView) findViewById(R.id.video_title_tv);
+        videoViews_tv = (TextView) findViewById(R.id.video_views_tv);
+        videoDescription_tv = (TextView) findViewById(R.id.video_description_tv);
+        videoDate_tv = (TextView) findViewById(R.id.video_date_tv);
 
 
         videoPlayerLayout = (VideoPlayerLayout) findViewById(R.id.video_player_v);
@@ -130,12 +140,17 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     }
 
 
-    public void startVideo(String url) {
+    public void startVideo(YoutubeItem youtubeItem) {
         videoPlayerFragment = VideoPlayerFragment.newInstance(this);
         getSupportFragmentManager().beginTransaction().replace(R.id.video_v, videoPlayerFragment).commit();
 
-        videoPlayerFragment.init(url);
+        videoPlayerFragment.init(youtubeItem.getVideoId());
         videoPlayerLayout.open();
+
+        videoTitle_tv.setText(youtubeItem.getTitle());
+        videoViews_tv.setText(youtubeItem.getViews() + " views");
+        videoDescription_tv.setText(youtubeItem.getDescription());
+        videoDate_tv.setText(Var.simpleDate.format(new Date(youtubeItem.getDate())));
     }
 
 

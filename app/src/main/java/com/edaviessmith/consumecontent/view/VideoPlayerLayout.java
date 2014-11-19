@@ -71,6 +71,7 @@ public class VideoPlayerLayout extends RelativeLayout {
         shade_v = findViewById(R.id.shade_v);
         header_v.setAlpha(0);
         shade_v.setAlpha(0);
+        left = -playerMinWidth;
         player_v = getRootView();
 
 
@@ -132,6 +133,7 @@ public class VideoPlayerLayout extends RelativeLayout {
             @Override public void onAnimationEnd(Animation animation) {
                 Log.d(TAG, "maximize animation end");
                 header_v.setAlpha(1);
+                left = 0;
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -140,6 +142,7 @@ public class VideoPlayerLayout extends RelativeLayout {
                     }
                 }, 50);
                 header_v.clearAnimation();
+                header_v.requestLayout();
             }
         });
 
@@ -231,6 +234,7 @@ public class VideoPlayerLayout extends RelativeLayout {
                 isMinimized = true;
                 isDismiss = false;
                 left = -playerMinWidth;
+                header_v.requestLayout();
             }
         });
 

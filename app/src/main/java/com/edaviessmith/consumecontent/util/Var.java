@@ -64,8 +64,11 @@ public class Var {
     //Format Youtube Video length into (00:00)
     static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
     static SimpleDateFormat lengthHour =  new SimpleDateFormat("k:mm:ss", Locale.getDefault());
+    public static DateFormat stringDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
+    public static DateFormat simpleDate = new SimpleDateFormat("MMM dd k:mm a", Locale.getDefault());
 
     public static int SCROLL_OFFSET = 5; //Number of items before next request
+
 
     //Util functions
     public static int getPixels(int unit, float size) {
@@ -193,7 +196,7 @@ public class Var {
             //date = AppInstance.getContext().getResources().getString(R.string.loading_date);
         } else {
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(publishedDate*1000);
+            cal.setTimeInMillis(publishedDate);
 
             Calendar now = Calendar.getInstance();
             SimpleDateFormat s;
@@ -214,11 +217,14 @@ public class Var {
 
     }
 
-    public static final int DATE_TODAY = 0;
-    public static final int DATE_YESTERDAY = 1;
-    public static final int DATE_THIS_WEEK = 2;
-    public static final int DATE_LAST_WEEK = 3;
-    public static final int DATE_MONTH = 4; //Divide by individual month
+    public static final int DATE_DAY = 0;
+    //public static final int DATE_YESTERDAY = 1;
+    //public static final int DATE_TWO_DAYS = 2;
+    //public static final int DATE_THREE_DAYS = 3;
+    public static final int DATE_THIS_WEEK = 1;
+    public static final int DATE_LAST_WEEK = 2;
+    public static final int DATE_MONTH = 3; //Divide by individual month
+    public static final String[] DAYS = {"Today", "Yesterday", "Days Ago" };
     public static final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
@@ -228,14 +234,34 @@ public class Var {
 
         if(publishedDate > 0) {
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(publishedDate*1000);
+            cal.setTimeInMillis(publishedDate);
 
             Calendar now = Calendar.getInstance();
-            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
-               return new int[] {Var.DATE_TODAY};
+            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR) <= 4)) {
+                int days = now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR);
+                if(days <0) days = 0;
+                return new int[] {Var.DATE_DAY, days};
+            } else {
+                if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
+                    return new int[] {Var.DATE_THIS_WEEK};
+                } else {
+                    if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.WEEK_OF_YEAR)+1)) == now.get(Calendar.WEEK_OF_YEAR)) {
+                        return new int[] {Var.DATE_LAST_WEEK};
+                    } else {
+                        if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) ) {
+                            return new int[] {Var.DATE_MONTH, cal.get(Calendar.MONTH)};
+                        } else {
+                            return new int[]{Var.DATE_MONTH, cal.get(Calendar.MONTH), cal.get(Calendar.YEAR)};
+                        }
+                    }
+                }
+            }
+
+            /*if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+               return new int[] {Var.DATE_DAY, 0};
             } else {
                 if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.DAY_OF_YEAR))+1) == now.get(Calendar.DAY_OF_YEAR)) {
-                    return new int[] {Var.DATE_YESTERDAY};
+                    return new int[] {Var.DATE_DAY, 1};
                 } else {
                     if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
                         return new int[] {Var.DATE_THIS_WEEK};
@@ -251,10 +277,10 @@ public class Var {
                         }
                     }
                 }
-            }
+            }*/
         }
 
-        return new int[] {Var.DATE_TODAY};
+        return new int[] {Var.DATE_DAY, 0};
     }
 
 

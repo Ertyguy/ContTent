@@ -82,7 +82,7 @@ public class MediaFeedORM {
             }
 
             database.setTransactionSuccessful();
-
+            Log.e(TAG, "saveMediaItems");
         }catch (Exception e) {
             e.printStackTrace();
         } finally {

@@ -1,6 +1,9 @@
 package com.edaviessmith.consumecontent.data;
 
 
+import android.util.Log;
+
+import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.List;
@@ -39,13 +42,17 @@ public class YoutubeFeed extends MediaFeed {
         super.setItems((List<YoutubeItem>) youtubeItems);
     }
 
-    public void addItems(List<YoutubeItem> youtubeItems) {
+    /**
+     * Merge new items  ordered by getDate()
+     * @param youtubeItems list of new youtubeItems
+     * @return true if database should be updated
+     */
+    public boolean addItems(List<YoutubeItem> youtubeItems) {
 
-        //Merge 2 lists order by getDate()
-        //Log.d(TAG, "addItems " + getItems().size());
+        int newer = 0;
         if(getItems().size() == 0) setItems(youtubeItems); //Nothing in list yet
         else if(youtubeItems.size() > 0) {
-            int newer = 0;
+
             int itemIndex = 0; //Index of older items (iterate to reduce checks)
             int older;
 
@@ -73,15 +80,18 @@ public class YoutubeFeed extends MediaFeed {
             }
 
             if(newer > 0) {
-                getItems().addAll(0, youtubeItems.subList(0, newer + 1)); // Prepend newer youtubeItems
-                //Log.d(TAG, "newer "+(newer + 1) );
+                Log.d(TAG, "newer " + (newer) + youtubeItems.size());
+                getItems().addAll(0, youtubeItems.subList(0, newer)); // Prepend newer youtubeItems
             }
             if(older < youtubeItems.size()) {
                 getItems().addAll(youtubeItems.subList(older, youtubeItems.size() - 1)); // Post pend newer youtubeItems
                 //Log.d(TAG, "older  "+older+" - " + (youtubeItems.size() - 1));
             }
 
+        } else {
+            return false; //youtubeItem list is empty
         }
+        return newer <= DB.PAGE_SIZE;
     }
 
     public String toString() {
