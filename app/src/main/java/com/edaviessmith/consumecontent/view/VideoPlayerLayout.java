@@ -45,11 +45,13 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     private int minimizedMargin = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 2);
 
+
     int headerWidth, headerHeight;
-    private boolean isMinimized;
+    private boolean isMinimized, isDismiss;
 
     private static final float Y_MIN_VELOCITY = 1300;
     private static final float Y_MIN_DISTANCE = 120;
+    private static final float CLAMP_DISTANCE = 20;
 
     public VideoPlayerLayout(Context context) {
         this(context, null);
@@ -156,6 +158,7 @@ public class VideoPlayerLayout extends RelativeLayout {
             @Override public void onAnimationEnd(Animation animation) {
                 Log.d(TAG, "minimize animation end");
                 isMinimized = true;
+                isDismiss = false;
                 act.updateUIVisibility(); //Remove fullscreen effect
                 postDelayed(new Runnable() {
                     @Override
@@ -196,13 +199,16 @@ public class VideoPlayerLayout extends RelativeLayout {
         @Override
         public void onViewPositionChanged(View changedView, int l, int t, int dx, int dy) {
             top = t;
-            left = l;
+            //left = l;
             dragOffset = ((float) top / dragRange);
             //description_v.setAlpha(1 - dragOffset);
 
             shade_v.setAlpha(1 - dragOffset);
             act.toggleVideoControls(false);
-            isMinimized = false;
+            if(!isDismiss) {
+                Log.d(TAG, "onViewPositionChanged isMinimized false");
+                //isMinimized = false;
+            }
 
             header_v.invalidate();
             header_v.requestLayout();
@@ -214,7 +220,7 @@ public class VideoPlayerLayout extends RelativeLayout {
         public void onViewReleased(View releasedChild, float xVel, float yVel) {
             super.onViewReleased(releasedChild, xVel, yVel);
 
-            Log.d(TAG, "onViewReleased" + " off"+dragOffset +" vel:"+ yVel);
+            //Log.d(TAG, "onViewReleased" + " off"+dragOffset +" vel:"+ yVel);
             if(dragOffset > 0 && dragOffset < 1) {
                 if (yVel < 0 && yVel <= -Y_MIN_VELOCITY) {
                     maximize();
@@ -231,6 +237,14 @@ public class VideoPlayerLayout extends RelativeLayout {
                 }
             }
 
+            if(isDismiss) {
+                left = 0;
+                minimize();
+
+                Log.e(TAG, "releaseDismiss: "+left);
+
+            }
+
         }
 
         @Override
@@ -238,16 +252,22 @@ public class VideoPlayerLayout extends RelativeLayout {
             return dragRange;
         }
 
+
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
-            final int topBound = getPaddingTop();
-            //final int bottomBound = getHeight() - header_v.getHeight() - header_v.getPaddingBottom();
-            final int bottomBound = getHeight() - playerMinHeight - header_v.getPaddingBottom();
+            int newTop = getHeight() - headerHeight;
+            //Log.d(TAG,"clamp Vert: "+ Math.abs(dy) +" - "+ isMinimized);
+            if (!isDismiss && ((isMinimized && Math.abs(dy) >= CLAMP_DISTANCE) || (!isMinimized && headerHeight != playerMinHeight))) {
 
-            final int newTop = Math.min(Math.max(top, topBound), bottomBound);
+                final int topBound = getPaddingTop();
+                final int bottomBound = getHeight() - playerMinHeight;
+                //Log.d(TAG,"newTop:  "+newTop +" - "+ Math.min(Math.max(top, topBound), bottomBound));
+                newTop = Math.min(Math.max(top, topBound), bottomBound);
+                left = 0;
+
+            }
             return newTop;
         }
-
     }
 
     @Override
@@ -272,14 +292,14 @@ public class VideoPlayerLayout extends RelativeLayout {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                initialX =  ev.getX();
+                initialX = ev.getX();
                 initialY = ev.getY();
                 interceptTap = viewDragHelper.isViewUnder(header_v, (int)  ev.getX(), (int) ev.getY());
                 break;
             }
 
             case MotionEvent.ACTION_MOVE: {
-                final float adx = Math.abs( ev.getX() - initialX);
+                final float adx = Math.abs(ev.getX() - initialX);
                 final float ady = Math.abs(ev.getY() - initialY);
                 final int slop = viewDragHelper.getTouchSlop();
                 dragSlop = ady > Y_MIN_DISTANCE;
@@ -304,7 +324,15 @@ public class VideoPlayerLayout extends RelativeLayout {
         boolean isSecondViewHit = isViewHit(description_v, (int) ev.getX(), (int) ev.getY());
 
 
-        if (isMinimized && ev.getAction() == MotionEvent.ACTION_UP) {
+        if(isMinimized && ev.getAction() == MotionEvent.ACTION_MOVE && Math.abs(ev.getX() - initialX) > Y_MIN_DISTANCE && Math.abs(ev.getY() - initialY) < Y_MIN_DISTANCE) {
+
+            Log.d(TAG, "dragging bottom: min:"+isMinimized +" pos "+left);
+            isDismiss = true;
+            left = (int) (initialX - ev.getX());
+            //left = (int) ((getWidth() - ev.getX()) - (playerMinWidth * 0.75f));
+        }
+
+        if (!isDismiss && isMinimized && ev.getAction() == MotionEvent.ACTION_UP) {
             isMinimized = false;
             maximize();
             Log.d(TAG, "maximizing from fake click");
@@ -350,7 +378,7 @@ public class VideoPlayerLayout extends RelativeLayout {
 
 
         dragRange = ((bottom - t) - playerMinHeight);// - minimizedMargin * 2; // headerHeight
-        Log.d(TAG, "onLayout" + " r: "+dragRange +", top:"+top+" - off"+dragOffset);
+        //Log.d(TAG, "onLayout" + " r: "+dragRange +", top:"+top+" - off"+dragOffset);
         if(isMinimized && top != dragRange) top = dragRange; //Resize minimized (for configChange)
 
 
