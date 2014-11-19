@@ -48,7 +48,7 @@ public class VideoPlayerLayout extends RelativeLayout {
     private int animationSpeed = 200;
 
     int headerWidth, headerHeight;
-    private boolean isMinimized, isDismiss;
+    public boolean isMinimized, isDismiss;
 
     private static final float Y_MIN_VELOCITY = 1300;
     private static final float Y_MIN_DISTANCE = 120;
@@ -69,7 +69,10 @@ public class VideoPlayerLayout extends RelativeLayout {
         header_v = findViewById(R.id.header_v);
         description_v = findViewById(R.id.description_v);
         shade_v = findViewById(R.id.shade_v);
+        header_v.setAlpha(0);
+        shade_v.setAlpha(0);
         player_v = getRootView();
+
 
     }
 
@@ -81,11 +84,12 @@ public class VideoPlayerLayout extends RelativeLayout {
     private void setup() {
         dragHelperCallback = new DragHelperCallback();
         viewDragHelper = ViewDragHelper.create(this, 1f, dragHelperCallback);
+        isMinimized = true;
+        updateDragOffset(1);
     }
 
     public void init(ContentActivity activity) {
         act = activity;
-
     }
 
     @Override
@@ -125,9 +129,9 @@ public class VideoPlayerLayout extends RelativeLayout {
         a.setAnimationListener(new Animation.AnimationListener() {
             @Override public void onAnimationStart(Animation animation) { }
             @Override public void onAnimationRepeat(Animation animation) { }
-
             @Override public void onAnimationEnd(Animation animation) {
                 Log.d(TAG, "maximize animation end");
+                header_v.setAlpha(1);
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -187,23 +191,16 @@ public class VideoPlayerLayout extends RelativeLayout {
 
 
     public void open() {
-
-        left = 0;
-        top = 0;
-        //updateDragOffset(0);
+        setVisibility(View.VISIBLE);
+        isMinimized = false;
+        isDismiss = false;
         maximize();
-        //header_v.invalidate();
-        //invalidate();
-
-
-        /*postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-
-
-            }
-        }, 100);*/
+        header_v.setAlpha(1);
+        left = 0;
+        act.setVideoPlaying(true);
+        header_v.requestLayout();
+        requestLayout();
+        header_v.invalidate();
 
     }
 
@@ -233,12 +230,7 @@ public class VideoPlayerLayout extends RelativeLayout {
                 Log.d(TAG, "dismiss animation end");
                 isMinimized = true;
                 isDismiss = false;
-                header_v.setAlpha(1);
                 left = -playerMinWidth;
-                header_v.clearAnimation();
-                header_v.invalidate();
-                header_v.requestLayout();
-
             }
         });
 
@@ -253,11 +245,11 @@ public class VideoPlayerLayout extends RelativeLayout {
         top = (int) ((getHeight() - playerMinHeight) *  dragOffset);
 
         //description_v.setAlpha(1 - dragOffset);
-        shade_v.setAlpha(1 - dragOffset);
+        if(shade_v != null) shade_v.setAlpha(1 - dragOffset);
 
-        header_v.requestLayout();
-        description_v.requestLayout();
-        shade_v.requestLayout();
+        //header_v.requestLayout();
+        //description_v.requestLayout();
+        //shade_v.requestLayout();
         requestLayout();
     }
 
@@ -454,22 +446,22 @@ public class VideoPlayerLayout extends RelativeLayout {
 
 
         dragRange = ((bottom - t) - playerMinHeight);// - minimizedMargin * 2; // headerHeight
-        Log.d(TAG, "onLayout" + " range: "+dragRange +", top:"+top+" header:"+headerHeight);
+        Log.d(TAG, "onLayout" + " range: "+dragRange +", top:"+top+" hight:"+getHeight());
         if(isMinimized && top != dragRange) {
 
             top = dragRange; //Resize minimized (for configChange)
         }
 
+        if(header_v != null) {
+            header_v.getLayoutParams().width = headerWidth;
+            header_v.getLayoutParams().height = headerHeight;
+            header_v.setPadding((int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset));
 
-        header_v.getLayoutParams().width = headerWidth;
-        header_v.getLayoutParams().height = headerHeight;
-        header_v.setPadding((int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset));
-
-        header_v.layout(right - left - headerWidth, top, right - left, top + headerHeight);
-        //header_v.layout(right - l - headerWidth, top, right, top + headerHeight);
-
-        description_v.layout(0, (int) (top + (headerHeight * (dragOffset + 1))), right, top + bottom);
-        shade_v.layout(l, t, right, bottom);
+            header_v.layout(right - left - headerWidth, top, right - left, top + headerHeight);
+            //header_v.layout(right - l - headerWidth, top, right, top + headerHeight);
+        }
+        if(description_v != null)  description_v.layout(0, (int) (top + (headerHeight * (dragOffset + 1))), right, top + bottom);
+        if(shade_v != null)  shade_v.layout(l, t, right, bottom);
     }
 
 }

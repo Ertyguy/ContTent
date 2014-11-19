@@ -45,8 +45,9 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     Toolbar toolbar;
     ImageLoader imageLoader;
     ImageView actionSettings;
+    VideoPlayerFragment videoPlayerFragment;
 
-    boolean isVideoPlaying;
+    //boolean isVideoPlaying;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +57,10 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+
         videoPlayerLayout = (VideoPlayerLayout) findViewById(R.id.video_player_v);
-        videoPlayerLayout.init(this); //Give the layout a reference to activity for utils
+        videoPlayerLayout.init(this);
 
 		mTitle = getTitle();
         imageLoader = new ImageLoader(this);
@@ -68,10 +71,10 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), users);
 
-		FragmentManager fragmentManager = getSupportFragmentManager();
-	    taskFragment = (TaskFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
+
+	    taskFragment = (TaskFragment) getSupportFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT);
 	    taskFragment = TaskFragment.newInstance(this);
-	    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
 
         actionSettings = (ImageView) findViewById(R.id.action_settings);
         actionSettings.setOnClickListener(new View.OnClickListener() {
@@ -85,16 +88,11 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
                     @Override
                     public void onSystemUiVisibilityChange(int visibility) {
-                        // Note that system bars will only be "visible" if none of the
-                        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+                        // Note that system bars will only be "visible" if none of the LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
                         if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                            // TODO: The system bars are visible. Make any desired
-                            // adjustments to your UI, such as showing the action bar or
-                            // other navigational controls.
+                            // TODO: The system bars are visible. Make any desired adjustments to your UI, such as showing the action bar or other navigational controls.
                         } else {
-                            // TODO: The system bars are NOT visible. Make any desired
-                            // adjustments to your UI, such as hiding the action bar or
-                            // other navigational controls.
+                            // TODO: The system bars are NOT visible. Make any desired adjustments to your UI, such as hiding the action bar or other navigational controls.
                         }
                         videoPlayerLayout.invalidate();
                         videoPlayerLayout.requestLayout();
@@ -109,7 +107,9 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         super.onResume();
         users = UserORM.getUsers(this);
 
+
     }
+
 
 	@Override
 	public void onNavigationDrawerItemSelected(int position) {
@@ -129,22 +129,22 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         return (userPos < users.size() ? users.get(userPos): null);
     }
 
-    VideoPlayerFragment videoPlayerFragment;
+
     public void startVideo(String url) {
-        videoPlayerFragment = VideoPlayerFragment.newInstance(this, url);
+        videoPlayerFragment = VideoPlayerFragment.newInstance(this);
         getSupportFragmentManager().beginTransaction().replace(R.id.video_v, videoPlayerFragment).commit();
 
-        videoPlayerFragment.init();
+        videoPlayerFragment.init(url);
         videoPlayerLayout.open();
     }
 
 
     public boolean isVideoPlaying() {
-        return isVideoPlaying;
+        return videoPlayerFragment == null || videoPlayerFragment.activePlayer == null || videoPlayerFragment.activePlayer.isPlaying();
     }
 
     public void setVideoPlaying(boolean isVideoPlaying) {
-        this.isVideoPlaying = isVideoPlaying;
+        if(videoPlayerFragment != null) videoPlayerFragment.toggleVideoPlayback(isVideoPlaying);
         updateUIVisibility();
     }
 
@@ -164,40 +164,19 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     @SuppressLint("NewApi")
     public void updateUIVisibility() {
-
-        if(!isVideoPlaying || getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            //getSherlock().getActionBar().show();
-
-            //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            /*content_layout.setVisibility(LinearLayout.VISIBLE);
-
-            ViewGroup.LayoutParams params = youtube_video.getLayoutParams();
-            params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-            youtube_video.setLayoutParams(params);*/
-
-            if (android.os.Build.VERSION.SDK_INT >= 14) {
+        if (android.os.Build.VERSION.SDK_INT >= 14) {
+            if (!isVideoPlaying() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
             }
-        }
 
-        if (isVideoPlaying && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            //getSherlock().getActionBar().hide();
-
-            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            /*content_layout.setVisibility(LinearLayout.GONE);
-
-            ViewGroup.LayoutParams params = youtube_video.getLayoutParams();
-            params.height = LinearLayout.LayoutParams.MATCH_PARENT;
-            youtube_video.setLayoutParams(params);*/
-
-            if (android.os.Build.VERSION.SDK_INT >= 14) {
-                getWindow().getDecorView().setSystemUiVisibility(
-                                  View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                                | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                                | View.SYSTEM_UI_FLAG_IMMERSIVE);
+            if (isVideoPlaying()&& getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                getWindow().getDecorView().setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                                                                | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                                                                | View.SYSTEM_UI_FLAG_IMMERSIVE);
             }
 
         }
@@ -237,4 +216,12 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	}
 
 
+    @Override
+    public void onBackPressed() {
+        if(videoPlayerLayout != null && !videoPlayerLayout.isDismiss && !videoPlayerLayout.isMinimized) {
+            videoPlayerLayout.minimize();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }

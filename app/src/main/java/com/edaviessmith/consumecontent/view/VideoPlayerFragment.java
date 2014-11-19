@@ -1,6 +1,6 @@
 package com.edaviessmith.consumecontent.view;
 
-import android.os.Bundle;
+import android.util.Log;
 
 import com.edaviessmith.consumecontent.ContentActivity;
 import com.edaviessmith.consumecontent.util.Var;
@@ -11,43 +11,47 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
 
     private String currentVideoID = "video_id";
-    private YouTubePlayer activePlayer;
+    public YouTubePlayer activePlayer;
     private static ContentActivity act;
 
-    public static VideoPlayerFragment newInstance(ContentActivity activity, String url) {
+    public boolean tryStop; //Prevent player from starting after stopping while loading
+    public int glitchPlayCount; //Replay video after resize ToS glitch
+
+
+    public static VideoPlayerFragment newInstance(ContentActivity activity ) {
         act = activity;
         VideoPlayerFragment playerYouTubeFrag = new VideoPlayerFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putString("url", url);
-
-        playerYouTubeFrag.setArguments(bundle);
-
 
         return playerYouTubeFrag;
     }
 
-    public void init() {
+
+
+
+
+    public void init(final String url) {
 
         initialize(Var.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
 
             @Override
-            public void onInitializationFailure(YouTubePlayer.Provider arg0, YouTubeInitializationResult arg1) {
-            }
+            public void onInitializationFailure(YouTubePlayer.Provider arg0, YouTubeInitializationResult arg1) { }
 
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
                 activePlayer = player;
                 toggleControls(false);
                 if (!wasRestored) {
-                    activePlayer.loadVideo(getArguments().getString("url"), 0);
-
+                    activePlayer.loadVideo(url, 0);
                 }
                 activePlayer.setShowFullscreenButton(false);
                 activePlayer.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
                     @Override
                     public void onPlaying() {
-                        act.setVideoPlaying(true);
+                        if(tryStop) {
+                            Log.e("VideoPlayerFramgnet","try stop");
+                            activePlayer.pause();
+                            tryStop = false;
+                        }
                     }
 
                     @Override
@@ -91,8 +95,12 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
 
     public void toggleVideoPlayback(boolean play) {
         if(activePlayer != null){
+            if(!activePlayer.isPlaying()) tryStop = true;
+
             if(play) activePlayer.play();
             else activePlayer.pause();
         }
     }
+
+
 }
