@@ -21,19 +21,20 @@ public class MediaFeedORM {
             DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
             DB.COL_USER             + " INTEGER, " +
             DB.COL_SORT             + " INTEGER, " +
-            //TODO add a last_update field (to not overtax the feed requests)
             DB.COL_NAME   	        + " TEXT, " +
             DB.COL_THUMBNAIL 	    + " TEXT, " +
             DB.COL_CHANNEL_HANDLE	+ " TEXT ," +
             //TODO twitterFeed display name is not handled (design decision required)
             DB.COL_FEED_ID          + " TEXT, " +
             DB.COL_TYPE		        + " INTEGER, " +
-            "FOREIGN KEY("+DB.COL_USER +") REFERENCES "+DB.TABLE_USER+"("+DB.COL_ID+")" +");";
+            DB.COL_NOTIFICATION     + " INTEGER, " +
+            DB.COL_LAST_UPDATE      + " INTEGER, " +
+            "FOREIGN KEY("+DB.COL_USER +") REFERENCES "+DB.TABLE_USER+"("+DB.COL_ID+")," +
+            "FOREIGN KEY("+DB.COL_NOTIFICATION +") REFERENCES "+DB.TABLE_NOTIFICATION+"("+DB.COL_ID+")" +");";
 
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_MEDIA_FEED;
 
-    
-    
+
     public static List getMediaFeeds(SQLiteDatabase database, int userId) {
         List mediaFeeds = new ArrayList();
 
@@ -75,7 +76,7 @@ public class MediaFeedORM {
         database.beginTransaction();
         try {
 
-            //TODO update last_updated field
+            //TODO update last_updated field (to prevent overtaxing requests)
 
             if(mediaFeed.getType() == Var.TYPE_YOUTUBE_ACTIVTY || mediaFeed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
                 YoutubeItemORM.saveYoutubeItems(database, mediaFeed.getItems(), mediaFeed.getId());
@@ -91,16 +92,16 @@ public class MediaFeedORM {
         }
     }
 
-    public static void saveMediaFeeds(SQLiteDatabase database, List<MediaFeed> mediaFeeds, int youtubeChannelId) {
+    public static void saveMediaFeeds(SQLiteDatabase database, List<MediaFeed> mediaFeeds, int userId) {
         for(int i=0; i< mediaFeeds.size(); i++) {
-            saveMediaFeed(database, mediaFeeds.get(i), youtubeChannelId, i);
+            saveMediaFeed(database, mediaFeeds.get(i), userId, i);
         }
     }
 
     public static void saveMediaFeed(SQLiteDatabase database, MediaFeed mediaFeed, int userId, int sort) {
 
         mediaFeed.setSort(sort);
-        if(Var.isValid(mediaFeed.getId())) {
+        if(DB.isValid(mediaFeed.getId())) {
             database.update(DB.TABLE_MEDIA_FEED, mediaFeedToContentValues(mediaFeed, userId, false), DB.COL_ID + " = " + mediaFeed.getId(), null);
         } else {
             database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false));
@@ -118,6 +119,8 @@ public class MediaFeedORM {
         values.put(DB.COL_THUMBNAIL, mediaFeed.getThumbnail());
         values.put(DB.COL_FEED_ID, mediaFeed.getFeedId());
         values.put(DB.COL_TYPE, mediaFeed.getType());
+        values.put(DB.COL_NOTIFICATION, mediaFeed.getNotificationId());
+        values.put(DB.COL_LAST_UPDATE, mediaFeed.getLastUpdate());
         return values;
     }
 
@@ -129,7 +132,9 @@ public class MediaFeedORM {
                     cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
-                    cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)));
+                    cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
+                    cursor.getInt(cursor.getColumnIndex(DB.COL_NOTIFICATION)),
+                    cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
         }
 
         //TODO return TwitterFeed
@@ -140,7 +145,9 @@ public class MediaFeedORM {
                                  cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
                                  cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
                                  cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
-                                 cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)) );
+                                 cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
+                                 cursor.getInt(cursor.getColumnIndex(DB.COL_NOTIFICATION)),
+                                 cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
     }
 
 }

@@ -13,16 +13,15 @@ public class MediaFeed {
     private String feedId;
     private int type;
 
+    private int notificationId = -1;
+    private long lastUpdate;
+
     private List items;
 
-    private String nextPageToken;
+    private String nextPageToken; //Not db related
 
     public MediaFeed() { }
 
-    public MediaFeed(String feedId, String name) {
-        this.feedId = feedId;
-        this.name = name;
-    }
 
     public MediaFeed(String feedId, String name, int type) {
         this.feedId = feedId;
@@ -32,35 +31,8 @@ public class MediaFeed {
         this.items = new ArrayList();
     }
 
-    public MediaFeed(int id, int sort, String name, String feedId, String thumbnail) {
-        this.id = id;
-        this.sort = sort;
-        this.name = name;
-        this.feedId = feedId;
-        this.thumbnail = thumbnail;
 
-    }
-
-    public MediaFeed(String name, String feedId, String thumbnail) {
-        this.name = name;
-        this.feedId = feedId;
-        this.thumbnail = thumbnail;
-
-        this.items = new ArrayList();
-    }
-
-    public MediaFeed(int id, int sort, String name, String thumbnail, String feedId, int type) {
-        this.id = id;
-        this.sort = sort;
-        this.name = name;
-        this.thumbnail = thumbnail;
-        this.feedId = feedId;
-        this.type = type;
-
-        this.items = new ArrayList();
-    }
-
-    public MediaFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type) {
+/*    public MediaFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type) {
         this.id = id;
         this.sort = sort;
         this.name = name;
@@ -70,6 +42,18 @@ public class MediaFeed {
         this.type = type;
         this.items = new ArrayList();
 
+    }*/
+
+    public MediaFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type, int notificationId, long lastUpdate) {
+        this.id = id;
+        this.sort = sort;
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.channelHandle = channelHandle;
+        this.feedId = feedId;
+        this.type = type;
+        this.notificationId = notificationId;
+        this.lastUpdate = lastUpdate;
     }
 
     public int getId() {
@@ -142,6 +126,22 @@ public class MediaFeed {
 
     public void setNextPageToken(String nextPageToken) {
         this.nextPageToken = nextPageToken;
+    }
+
+    public int getNotificationId() {
+        return notificationId;
+    }
+
+    public void setNotificationId(int notificationId) {
+        this.notificationId = notificationId;
+    }
+
+    public long getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(long lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     public String toString() {

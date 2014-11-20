@@ -21,9 +21,9 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
 
     public static VideoPlayerFragment newInstance(ContentActivity activity ) {
         act = activity;
-        VideoPlayerFragment playerYouTubeFrag = new VideoPlayerFragment();
+        //VideoPlayerFragment playerYouTubeFrag = new VideoPlayerFragment();
 
-        return playerYouTubeFrag;
+        return new VideoPlayerFragment();
     }
 
 

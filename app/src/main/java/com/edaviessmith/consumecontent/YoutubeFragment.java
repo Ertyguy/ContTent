@@ -503,7 +503,8 @@ public class YoutubeFragment extends Fragment{
 
             Collections.sort(youtubeItems, new Comparator<YoutubeItem>() {
                 public int compare(YoutubeItem m1, YoutubeItem m2) {
-                    return (int) ((m2.getDate()) - (m1.getDate()) );
+                    return (m1.getDate() > m2.getDate() ? -1 : (m1.getDate() == m2.getDate() ? 0 : 1));
+                    //return (int) ((m2.getDate()) - (m1.getDate()) ); //TODO update sort
                 }
             });
 

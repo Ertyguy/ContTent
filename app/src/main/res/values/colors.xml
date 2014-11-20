@@ -7,7 +7,7 @@
 
     <color name="gray">#ffe6e6e6</color>
 
-
+    <color name="background">#ffffffff</color>
     <!-- Used for text -->
     <color name="dark_gray">#ff212121</color>
     <color name="gray_accent">#ff9c9c9c</color>

@@ -8,30 +8,19 @@ public class User extends Content{
 
 	public List mediaFeed;
 
-    private boolean isNotification;
-
     private List<Group> groups; //TODO need to thoroughly hash out this relationship
 
     public User () {
         mediaFeed = new ArrayList();
         groups = new ArrayList<Group>();
-        isNotification = true;
+
     }
 
-    public User(int id, int sort, String name, String thumbnail, boolean isNotification) {
+    public User(int id, int sort, String name, String thumbnail) {
         super(id, sort, name, thumbnail);
-        setNotification(isNotification);
-
     }
 
 
-    public boolean isNotification() {
-        return isNotification;
-    }
-
-    public void setNotification(boolean isNotification) {
-        this.isNotification = isNotification;
-    }
 
     public List<Group> getGroups() {
         return groups;

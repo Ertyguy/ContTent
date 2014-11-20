@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DB extends SQLiteOpenHelper {
 
@@ -31,7 +32,8 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(MediaFeedORM.SQL_CREATE_TABLE);
         db.execSQL(YoutubeItemORM.SQL_CREATE_TABLE);
         db.execSQL(TwitterItemORM.SQL_CREATE_TABLE);
-
+        db.execSQL(NotificationORM.SQL_CREATE_TABLE);
+        db.execSQL(AlarmORM.SQL_CREATE_TABLE);
     }
 
     @Override
@@ -64,28 +66,36 @@ public class DB extends SQLiteOpenHelper {
     static final String TABLE_MEDIA_FEED = "media_feeds";
     static final String TABLE_YOUTUBE_ITEM = "youtube_items";
     static final String TABLE_TWITTER_ITEM = "twitter_items";
+    static final String TABLE_NOTIFICATION = "notifications";
+    static final String TABLE_ALARM = "alarms";
+
 
 
     public static String ORDER_BY_SORT = DB.COL_SORT + " ASC";
     public static String ORDER_BY_DATE = DB.COL_DATE + " DESC";
-    //// Database Columns /////
 
+    //// Database Columns /////
     static final String COL_ID = "id";
     static final String COL_SORT = "sort";
     static final String COL_NAME = "name";
     static final String COL_THUMBNAIL = "thumbnail";
     static final String COL_VISIBILITY = "visibility";
 
-    static final String COL_NOTIFICATION = "notification";
     static final String COL_TYPE = "type";
     static final String COL_FEED_ID = "feed_id";
     static final String COL_CHANNEL_HANDLE = "channel_handle";  //ChannelId or TwitterHandle
+    static final String COL_LAST_UPDATE= "last_update";
+
+    static final String COL_ENABLED = "enabled";
+    static final String COL_TIME = "time";
+    static final String COL_DAYS = "days";
+    static final String COL_ONLY_WIFI = "only_wifi";
 
     //Foreign id keys
     static final String COL_GROUP = "group_id";
     static final String COL_USER = "user_id";
     static final String COL_MEDIA_FEED = "media_feed_id";
-
+    static final String COL_NOTIFICATION = "notification_id";
 
     static final String COL_TITLE = "title";
     static final String COL_DATE =  "date";
@@ -103,6 +113,28 @@ public class DB extends SQLiteOpenHelper {
 
     public static final int PAGE_SIZE = 20; //Number of items to save
 
+
+
+    //Util methods
+
+    public static boolean isValid(int i) { //Check if integer has been set
+        return i != -1;
+    } //TODO should this be in the DB class?
+
+
+    public static String strSeparator = "__,__";
+    public static String integerListToString(List<Integer> integerList){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0;i<integerList.size(); i++) sb.append((i == 0? "":strSeparator) + integerList.get(i));
+
+        return sb.toString();
+    }
+    public static List<Integer> stringToIntegerList(String str){
+        String[] arr = str.split(strSeparator);
+        List<Integer> integerList = new ArrayList<Integer>();
+        for(String a: arr) integerList.add(Integer.decode(a));
+        return integerList;
+    }
 
 
     ///Helper class to view database for debugging

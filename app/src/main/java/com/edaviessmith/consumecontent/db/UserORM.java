@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.User;
-import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +19,7 @@ public class UserORM {
             DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
             DB.COL_SORT             + " INTEGER, " +
             DB.COL_NAME   	        + " TEXT, " +
-            DB.COL_THUMBNAIL 	    + " TEXT, " +
-            DB.COL_NOTIFICATION		+ " INTEGER " + ");";
+            DB.COL_THUMBNAIL 	    + " TEXT " + ");";
 
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_USER;
 
@@ -69,7 +67,7 @@ public class UserORM {
         try {
 
 
-            if(Var.isValid(user.getId())) {
+            if(DB.isValid(user.getId())) {
                 database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = " + user.getId(), null);
             } else {
                 user.setId((int) database.insert(DB.TABLE_USER, null, userToContentValues(user, false)));
@@ -97,7 +95,6 @@ public class UserORM {
         values.put(DB.COL_SORT, user.getSort());
         values.put(DB.COL_NAME, user.getName());
         values.put(DB.COL_THUMBNAIL, user.getThumbnail());
-        values.put(DB.COL_NOTIFICATION, user.isNotification());
         return values;
     }
 
@@ -105,8 +102,7 @@ public class UserORM {
         return new User(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
                          cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
                          cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
-                         cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
-                         cursor.getInt(cursor.getColumnIndex(DB.COL_NOTIFICATION)) == 1);
+                         cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)));
     }
 
 }

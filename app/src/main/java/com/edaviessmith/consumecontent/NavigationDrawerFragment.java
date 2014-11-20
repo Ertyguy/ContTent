@@ -56,6 +56,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 	private boolean mFromSavedInstanceState;
 	private boolean mUserLearnedDrawer;
     private Fab actionFab;
+    private View notification_v, settings_v;
 
 	List<User> users;
 	ContentActivity activity;
@@ -99,6 +100,12 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
         actionFab = (Fab) v.findViewById(R.id.action_fab);
         actionFab.setOnClickListener(this);
+
+        notification_v = v.findViewById(R.id.notification_v);
+        notification_v.setOnClickListener(this);
+
+        settings_v = v.findViewById(R.id.settings_v);
+        settings_v.setOnClickListener(this);
 		return v;
 	}
 	
@@ -107,6 +114,14 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
     @Override
     public void onClick(View v) {
         if(v == actionFab) {
+            Intent i = new Intent(activity, AddActivity.class);
+            startActivity(i);
+        }
+        if(v == notification_v) {
+            Intent i = new Intent(activity, AddActivity.class);
+            startActivity(i);
+        }
+        if(v == settings_v) {
             Intent i = new Intent(activity, AddActivity.class);
             startActivity(i);
         }

@@ -445,7 +445,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if(searchMode == Var.SEARCH_YT_CHANNEL) {
                 SparseBooleanArray checked = search_lv.getCheckedItemPositions();
                 for (int i = 0; i < checked.size(); i++) {
-                    if(checked.valueAt(i) == true) {
+                    if(checked.valueAt(i)) {
                         YoutubeFeed youtubeFeed = (YoutubeFeed) search_lv.getItemAtPosition(checked.keyAt(i));
                         youtubeFeed.setChannelHandle(searchChannel.getFeedId());
                         editUser.getMediaFeed().add(youtubeFeed);
@@ -460,7 +460,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             else if(searchMode == Var.SEARCH_NONE) {
 
                 editUser.setName(userName_edt.getText().toString().trim());
-                editUser.setNotification(notification_sw.isChecked());
+                //editUser.setNotification(notification_sw.isChecked());
                 editUser.setThumbnail((String) userPicture_sp.getSelectedItem());
 
                 UserORM.saveUser(this, editUser);

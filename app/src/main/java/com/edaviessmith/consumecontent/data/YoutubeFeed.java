@@ -21,16 +21,8 @@ public class YoutubeFeed extends MediaFeed {
         super(feedId, "Youtube", Var.TYPE_YOUTUBE_ACTIVTY);
     }
 
-    public YoutubeFeed(String feedId, String name) {
-        super(feedId, name, Var.TYPE_YOUTUBE_ACTIVTY);
-    }
-
-    public YoutubeFeed(int id, int sort, String name, String thumbnail, String feedId, int type) {
-        super(id, sort, name, thumbnail, feedId, type);
-    }
-
-    public YoutubeFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type) {
-        super(id, sort, name, thumbnail, channelHandle, feedId, type);
+    public YoutubeFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type, int notificationId, long lastUpdate) {
+        super(id, sort, name, thumbnail, channelHandle, feedId, type, notificationId, lastUpdate);
     }
 
     public List<YoutubeItem> getItems() {

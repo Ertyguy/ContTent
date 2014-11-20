@@ -13,19 +13,7 @@ public class YoutubeChannel extends MediaFeed {
         youtubeFeeds = new ArrayList<YoutubeFeed>();
     }
 
-    public YoutubeChannel(int id){
-        setId(id);
-        youtubeFeeds = new ArrayList<YoutubeFeed>();
-    }
 
-    public YoutubeChannel(String name, String feedId, String thumbnail) {
-        super(name, feedId, thumbnail);
-        youtubeFeeds = new ArrayList<YoutubeFeed>();
-    }
-
-    public YoutubeChannel(int id, int sort, String name, String thumbnail, String feedId, int type) {
-        super(id, sort, name, thumbnail, feedId, type);
-    }
 
     public List<YoutubeFeed> getYoutubeFeeds() {
         return youtubeFeeds;

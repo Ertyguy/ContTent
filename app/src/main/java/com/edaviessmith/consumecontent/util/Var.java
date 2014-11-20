@@ -58,6 +58,13 @@ public class Var {
     public static final int SEARCH_YT_CHANNEL = 3;
     public static final int SEARCH_TWITTER = 4;
 
+    //Notification
+    public static final int NOTIFICATION_ALARM = 0;
+    public static final int NOTIFICATION_SLEEP = 1;
+    public static final int ALARM_AT = 0;
+    public static final int ALARM_EVERY = 1;
+
+    //Handler (currently not used)
     public static final int HANDLER_COMPLETE = 0;
     public static final int HANDLER_ERROR = 1;
 
@@ -66,6 +73,14 @@ public class Var {
     static SimpleDateFormat lengthHour =  new SimpleDateFormat("k:mm:ss", Locale.getDefault());
     public static DateFormat stringDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
     public static DateFormat simpleDate = new SimpleDateFormat("MMM dd k:mm a", Locale.getDefault());
+
+    public static final int DATE_DAY = 0;
+    public static final int DATE_THIS_WEEK = 1;
+    public static final int DATE_LAST_WEEK = 2;
+    public static final int DATE_MONTH = 3; //Divide by individual month
+    public static final String[] DAYS = {"Today", "Yesterday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+    public static final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
 
     public static int SCROLL_OFFSET = 5; //Number of items before next request
 
@@ -185,10 +200,6 @@ public class Var {
         return (s == null || (s.toString().trim().isEmpty()));
     }
 
-    public static boolean isValid(int i) { //Check if integer has been set
-        return i != -1;
-    } //TODO should this be in the DB class?
-
     public static String getTimeSince(long publishedDate) {
         String date = "";
 
@@ -217,15 +228,6 @@ public class Var {
 
     }
 
-    public static final int DATE_DAY = 0;
-    //public static final int DATE_YESTERDAY = 1;
-    //public static final int DATE_TWO_DAYS = 2;
-    //public static final int DATE_THREE_DAYS = 3;
-    public static final int DATE_THIS_WEEK = 1;
-    public static final int DATE_LAST_WEEK = 2;
-    public static final int DATE_MONTH = 3; //Divide by individual month
-    public static final String[] DAYS = {"Today", "Yesterday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-    public static final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
     //Second return integer is for month value
