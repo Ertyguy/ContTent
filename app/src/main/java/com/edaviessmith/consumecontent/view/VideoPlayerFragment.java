@@ -10,13 +10,14 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
 public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
 
+    private final static String TAG = "VideoPlayerFragment";
     private String currentVideoID = "video_id";
     public YouTubePlayer activePlayer;
     private static ContentActivity act;
 
     public boolean tryStop; //Prevent player from starting after stopping while loading
     public int glitchPlayCount; //Replay video after resize ToS glitch
-
+    public boolean isBuffering;
 
     public static VideoPlayerFragment newInstance(ContentActivity activity ) {
         act = activity;
@@ -24,8 +25,6 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
 
         return playerYouTubeFrag;
     }
-
-
 
 
 
@@ -68,7 +67,7 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
 
                     @Override
                     public void onBuffering(boolean b) {
-
+                        isBuffering = b;
                     }
 
                     @Override
@@ -88,14 +87,9 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
         activePlayer.setPlayerStyle(show ? YouTubePlayer.PlayerStyle.DEFAULT: YouTubePlayer.PlayerStyle.CHROMELESS);
     }
 
-    public void onYouTubeVideoPaused() {
-        activePlayer.pause();
-    }
-
-
     public void toggleVideoPlayback(boolean play) {
         if(activePlayer != null){
-            if(!activePlayer.isPlaying()) tryStop = true;
+            if(isBuffering) tryStop = true;
 
             if(play) activePlayer.play();
             else activePlayer.pause();

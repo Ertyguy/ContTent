@@ -57,6 +57,7 @@ public class YoutubeFeed extends MediaFeed {
             int older;
 
             for(; newer < youtubeItems.size(); newer++) {
+                Log.d(TAG, "newer check break "+(youtubeItems.get(newer).getDate() <= getItems().get(0).getDate()) + ": "+youtubeItems.get(newer).getTitle());
                 if(youtubeItems.get(newer).getDate() <= getItems().get(0).getDate()) break;     // Number of youtubeItems that are newer
             }
 

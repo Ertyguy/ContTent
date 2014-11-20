@@ -201,6 +201,7 @@ public class VideoPlayerLayout extends RelativeLayout {
         header_v.setAlpha(1);
         left = 0;
         act.setVideoPlaying(true);
+        act.toggleVideoControls(true);
         header_v.requestLayout();
         requestLayout();
         header_v.invalidate();

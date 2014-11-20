@@ -224,7 +224,7 @@ public class Var {
     public static final int DATE_THIS_WEEK = 1;
     public static final int DATE_LAST_WEEK = 2;
     public static final int DATE_MONTH = 3; //Divide by individual month
-    public static final String[] DAYS = {"Today", "Yesterday", "Days Ago" };
+    public static final String[] DAYS = {"Today", "Yesterday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
     public static final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
@@ -240,7 +240,7 @@ public class Var {
             if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR) <= 4)) {
                 int days = now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR);
                 if(days <0) days = 0;
-                return new int[] {Var.DATE_DAY, days};
+                return new int[] {Var.DATE_DAY, (days < 2) ? days: (cal.get(Calendar.DAY_OF_WEEK) + 1)};
             } else {
                 if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
                     return new int[] {Var.DATE_THIS_WEEK};

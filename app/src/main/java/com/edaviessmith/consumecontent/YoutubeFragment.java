@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class YoutubeFragment extends Fragment {
+public class YoutubeFragment extends Fragment{
 
     private static String TAG = "YoutubeFragment";
     private static YoutubeFragment youtubeFragment;
@@ -84,6 +85,7 @@ public class YoutubeFragment extends Fragment {
     }
 
     LinearLayoutManager linearLayoutManager;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -98,6 +100,13 @@ public class YoutubeFragment extends Fragment {
         feed_rv.setItemAnimator(new DefaultItemAnimator());
 
 
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new GetFeedAsyncTask().execute(getFeed().getNextPageToken());
+            }
+        });
 
         //handler.sendMessage(handler.obtainMessage(what, 1, 0, authUrl));
 
@@ -115,7 +124,7 @@ public class YoutubeFragment extends Fragment {
                 super.onScrolled(recyclerView, dx, dy);
 
                 if(!isSearchBusy && linearLayoutManager.findLastVisibleItemPosition() > linearLayoutManager.getItemCount() - Var.SCROLL_OFFSET) {
-                    new GetFeedAsyncTask().execute();
+                    new GetFeedAsyncTask().execute(getFeed().getNextPageToken());
                     Log.d(TAG,"onScrolled getFeed called");
                 }
 
@@ -158,7 +167,7 @@ public class YoutubeFragment extends Fragment {
                             Log.d(TAG,"adding local items "+localItems.size());
                             getFeed().setItems(localItems);
                             itemAdapter.notifyDataSetChanged();
-                            new GetFeedAsyncTask().execute();
+                            new GetFeedAsyncTask().execute(getFeed().getNextPageToken());
                         }
                     });
 
@@ -240,7 +249,7 @@ public class YoutubeFragment extends Fragment {
                     String dividerTitle = "";
                     switch(dateCats[0]) {
                         case Var.DATE_DAY:
-                            dividerTitle = (dateCats[1] > 1 ? (dateCats[1] + " ") : "") + Var.DAYS[Math.min(dateCats[1], 2)];
+                            dividerTitle = Var.DAYS[dateCats[1]];
                             break;
                         case Var.DATE_THIS_WEEK: dividerTitle = "This Week"; break;
                         case Var.DATE_LAST_WEEK: dividerTitle = "Last Week"; break;
@@ -302,12 +311,12 @@ public class YoutubeFragment extends Fragment {
     };
 
 
-    private class GetFeedAsyncTask extends AsyncTask<Void, Void, String> {
+    private class GetFeedAsyncTask extends AsyncTask<String, Void, String> {
 
         final List<YoutubeItem> youtubeItems = new ArrayList<YoutubeItem>();
 
         @Override
-        protected String doInBackground(Void... params) {
+        protected String doInBackground(String... params) {
             isSearchBusy = true;
             try {
 
@@ -326,7 +335,7 @@ public class YoutubeFragment extends Fragment {
                     String fields = "";//"&fields=items(contentDetails%2Csnippet)%2CnextPageToken";
                     url = "https://www.googleapis.com/youtube/v3/activities?part=snippet%2C+contentDetails"+fields+"&channelId=" + URLEncoder.encode(getFeed().getChannelHandle(), "UTF-8") + "&maxResults=20&key=" + Var.DEVELOPER_KEY;
                 }
-                if(!Var.isEmpty(getFeed().getNextPageToken())) url+= "&pageToken="+ getFeed().getNextPageToken();
+                if(!Var.isEmpty(params[0])) url+= "&pageToken="+ getFeed().getNextPageToken();
                 else isFirstPage = false;
                 StringBuilder videos = new StringBuilder();
                 String playlistItems = Var.HTTPGet(url);
@@ -508,6 +517,7 @@ public class YoutubeFragment extends Fragment {
             if(getFeed().addItems(youtubeItems)) saveItems(getFeed()); //Add to list and save to database if needed
             itemAdapter.notifyDataSetChanged();
             isSearchBusy = false;
+            if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
         }
     }
 
