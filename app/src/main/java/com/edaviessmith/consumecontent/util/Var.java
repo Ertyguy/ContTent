@@ -1,6 +1,8 @@
 package com.edaviessmith.consumecontent.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -67,6 +69,13 @@ public class Var {
     //Handler (currently not used)
     public static final int HANDLER_COMPLETE = 0;
     public static final int HANDLER_ERROR = 1;
+
+    //Preferences
+    public static final String PREFS = "preferences";
+    public static final String PREF_ALL_NOTIFICATIONS = "all_notifications";
+    public static final String PREF_MOBILE_NOTIFICATIONS = "mobile_notifications";
+    public static final String PREF_VIBRATIONS = "vibrations";
+
 
     //Format Youtube Video length into (00:00)
     static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
@@ -258,28 +267,6 @@ public class Var {
                     }
                 }
             }
-
-            /*if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
-               return new int[] {Var.DATE_DAY, 0};
-            } else {
-                if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.DAY_OF_YEAR))+1) == now.get(Calendar.DAY_OF_YEAR)) {
-                    return new int[] {Var.DATE_DAY, 1};
-                } else {
-                    if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
-                        return new int[] {Var.DATE_THIS_WEEK};
-                    } else {
-                        if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.WEEK_OF_YEAR)+1)) == now.get(Calendar.WEEK_OF_YEAR)) {
-                            return new int[] {Var.DATE_LAST_WEEK};
-                        } else {
-                            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) ) {
-                                return new int[] {Var.DATE_MONTH, cal.get(Calendar.MONTH)};
-                            } else {
-                                return new int[]{Var.DATE_MONTH, cal.get(Calendar.MONTH), cal.get(Calendar.YEAR)};
-                            }
-                        }
-                    }
-                }
-            }*/
         }
 
         return new int[] {Var.DATE_DAY, 0};
@@ -319,4 +306,23 @@ public class Var {
         }
 
     }
+
+    public static boolean getBoolPreference(Context context, String pref) {
+        SharedPreferences settings = context.getSharedPreferences(Var.PREFS, 0);
+        return settings.getBoolean(pref, true); //TODO make list with defaults if a default is not true
+    }
+
+    @SuppressLint("NewApi")
+    public static void setBoolPreference(Context context, String pref, boolean state) {
+        SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
+        settings.putBoolean(pref, state);
+        if (android.os.Build.VERSION.SDK_INT >= 9) {
+            settings.apply();
+        } else {
+            settings.commit();
+        }
+    }
+
+
+
 }

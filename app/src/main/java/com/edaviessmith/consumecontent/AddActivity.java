@@ -226,15 +226,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         clearSearch_iv = (ImageView) findViewById(R.id.clear_iv);
         clearSearch_iv.setOnClickListener(this);
 
-        /*searchView = (SearchView) findViewById(R.id.action_search); //MenuItemCompat.getActionView(searchItem);
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                toggleSearch(Var.SEARCH_NONE);  return false;
-            }
-        });*/
-
 
         search_v = findViewById(R.id.search_v);
         search_v.setOnClickListener(this);
@@ -267,8 +258,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         search_fab.setOnClickListener(this);
         youtube_ll.setOnClickListener(this);
         twitter_ll.setOnClickListener(this);
-        //youtube_ll.setOnTouchListener(this);
-        //twitter_ll.setOnTouchListener(this);
 
         twitter = new TwitterUtil(this);
         twitter.setListener(new Listener() {
@@ -296,42 +285,13 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-
-
         return super.onPrepareOptionsMenu(menu);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //getMenuInflater().inflate(R.menu.menu_add, menu);
-
-        //searchItem = menu.findItem(R.id.action_search);
-
-
         return super.onCreateOptionsMenu(menu);
     }
-/*
-    @Override
-    public boolean onQueryTextSubmit(String s) {
-        pageToken = null;
-        twitterPage = 0;
-        search = s;
-        searchMessage_tv.setVisibility(View.GONE);
-        searchTimer();
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String s) {
-        pageToken = null;
-        twitterPage = 0;
-        search = s;
-        searchMessage_tv.setVisibility(View.GONE);
-        searchTimer();
-        return false;
-    }*/
-
 
     //TODO handler sometimes fails when typing fast (haven't seen lately)
     Handler handler = new Handler();
