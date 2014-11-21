@@ -25,6 +25,14 @@ public class Alarm {
         for(int i=0; i<7; i++) this.days.add(1);
     }
 
+    public Alarm(boolean enabled, int type, long time, boolean onlyWifi, List<Integer> days) {
+        this.enabled = enabled;
+        this.type = type;
+        this.time = time;
+        this.onlyWifi = onlyWifi;
+        this.days = days;
+    }
+
     public Alarm(int id, boolean enabled, int type, long time, boolean onlyWifi, List<Integer> days) {
         this.id = id;
         this.enabled = enabled;

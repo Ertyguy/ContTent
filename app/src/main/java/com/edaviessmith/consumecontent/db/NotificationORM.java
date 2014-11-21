@@ -85,6 +85,28 @@ public class NotificationORM {
 
     }
 
+    public static void saveNotifications(SQLiteDatabase database, List<Notification> notifications) {
+
+        try {
+            for(Notification notification: notifications) {
+
+                if (DB.isValid(notification.getId())) {
+                    database.update(DB.TABLE_NOTIFICATION, notificationToContentValues(notification, false), DB.COL_ID + " = " + notification.getId(), null);
+                } else {
+                    notification.setId((int) database.insert(DB.TABLE_NOTIFICATION, null, notificationToContentValues(notification, false)));
+                }
+
+                AlarmORM.saveAlarms(database, notification.getAlarms(), notification.getId());
+
+                Log.d(TAG, "Notification saved with id:" + notification.getId());
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     private static ContentValues notificationToContentValues(Notification notification, boolean includeId) {
         ContentValues values = new ContentValues();

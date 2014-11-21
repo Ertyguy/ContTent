@@ -42,7 +42,7 @@ public class YoutubeFeed extends MediaFeed {
     public boolean addItems(List<YoutubeItem> youtubeItems) {
 
         int newer = 0;
-        if(getItems().size() == 0) setItems(youtubeItems); //Nothing in list yet
+        if(getItems() == null || getItems().size() == 0) setItems(youtubeItems); //Nothing in list yet
         else if(youtubeItems.size() > 0) {
 
             int itemIndex = 0; //Index of older items (iterate to reduce checks)

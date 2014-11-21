@@ -8,6 +8,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.edaviessmith.consumecontent.data.Alarm;
+import com.edaviessmith.consumecontent.data.Notification;
+import com.edaviessmith.consumecontent.util.Var;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +38,54 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(TwitterItemORM.SQL_CREATE_TABLE);
         db.execSQL(NotificationORM.SQL_CREATE_TABLE);
         db.execSQL(AlarmORM.SQL_CREATE_TABLE);
+
+        addDefaultNotifications(db);
+    }
+
+    private void addDefaultNotifications(SQLiteDatabase db) {
+
+
+        final List<Integer> weekdays = new ArrayList<Integer>(){{
+            add(0); add(1); add(1); add(1); add(1); add(1); add(0);
+        }};
+        final List<Integer> weekends = new ArrayList<Integer>(){{
+            add(1); add(0); add(0); add(0); add(0); add(0); add(1);
+        }};
+        final List<Integer> everyday = new ArrayList<Integer>(){{
+            add(1); add(1); add(1); add(1); add(1); add(1); add(1);
+        }};
+
+        final List<Alarm> silenceAlarms = new ArrayList<Alarm>() {{
+            add(new Alarm(true, Var.ALARM_BEFORE, 32400000, false, weekdays));
+            add(new Alarm(true, Var.ALARM_AFTER, 84900000, false, weekdays));
+            add(new Alarm(true, Var.ALARM_BEFORE, 25200000, false, weekends));
+        }};
+
+        final List<Alarm> hourlyAlarms = new ArrayList<Alarm>() {{
+            add(new Alarm(true, Var.ALARM_EVERY, 3600000, true, everyday));
+            add(new Alarm(true, Var.ALARM_EVERY, 10800000, false, everyday));
+        }};
+
+        final List<Alarm> fewHoursAlarms = new ArrayList<Alarm>() {{
+            add(new Alarm(true, Var.ALARM_EVERY, 7200000, true, everyday));
+            add(new Alarm(true, Var.ALARM_EVERY, 14400000, false, everyday));
+        }};
+
+        final List<Alarm> busyWeekAlarms = new ArrayList<Alarm>() {{
+            add(new Alarm(true, Var.ALARM_EVERY, 3600000, true, weekends));
+            add(new Alarm(true, Var.ALARM_EVERY, 7200000, false, weekends));
+            add(new Alarm(true, Var.ALARM_AT, 44400000, false, weekdays));
+            add(new Alarm(true, Var.ALARM_AT, 71100000, false, weekdays));
+        }};
+
+        List<Notification> notifications = new ArrayList<Notification>(){{
+            add( new Notification("Silent", Var.NOTIFICATION_SLEEP, silenceAlarms));
+            add(new Notification("Hourly on Wifi", Var.NOTIFICATION_ALARM, hourlyAlarms));
+            add(new Notification("Every few hours", Var.NOTIFICATION_ALARM, fewHoursAlarms));
+            add(new Notification("Busy week, free weekends", Var.NOTIFICATION_ALARM, busyWeekAlarms));
+        }};
+
+        NotificationORM.saveNotifications(db, notifications);
     }
 
     @Override

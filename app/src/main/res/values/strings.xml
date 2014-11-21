@@ -41,5 +41,8 @@
     <string name="alarm_at_default">At 10:00 pm</string>
     <string name="new_alarm">New Alarm</string>
     <string name="disabled">disabled</string>
+    <string name="play_sound">Play sound</string>
+    <string name="vibrations_enabled">Vibrations enabled</string>
+    <string name="enable_notification_on_mobile">Enable notifications on mobile</string>
 
 </resources>

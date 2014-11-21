@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <View style="@style/divider"/>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,7 +18,7 @@
             android:layout_height="40dp"
             android:scaleType="fitCenter"
             android:contentDescription="@null"
-            android:src="@drawable/ic_access_alarm_grey600_36dp"
+            android:src="@drawable/ic_alarm_grey600_36dp"
             android:layout_marginRight="10dp"/>
 
         <TextView

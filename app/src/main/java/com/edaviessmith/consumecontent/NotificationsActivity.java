@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -39,9 +41,9 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
     AlarmAdapter alarmAdapter;
 
     Fab add_fab, addAlarm_fab, save_fab;
-    View alarm_v, allNotifications_v, mobileNotifications_v, vibrations_v;
-    SwitchCompat allNotifications_sw, mobileNotifications_sw, vibrations_sw;
-    boolean isAllNotificationsEnabled, isMobileNotificationsEnabled, isVibrationsEnabled;
+    View alarm_v, allNotifications_v, mobileNotifications_v, vibrations_v, playSound_v;
+    SwitchCompat allNotifications_sw, mobileNotifications_sw, vibrations_sw, playSound_sw;
+    boolean isAllNotificationsEnabled, isMobileNotificationsEnabled, isVibrationsEnabled, isPlaySoundEnabled;
     EditText notificationName_tv;
 
     public static final int NOTIFICATIONS_LIST = 0;
@@ -62,21 +64,23 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         notifications = NotificationORM.getNotifications(this);
         editNotification = new Notification();
 
-        //editNotification.setType(Var.NOTIFICATION_SLEEP); //TODO testing adding first one (this should be added in the DB
-
         isAllNotificationsEnabled = Var.getBoolPreference(this, Var.PREF_ALL_NOTIFICATIONS);
         isMobileNotificationsEnabled = Var.getBoolPreference(this, Var.PREF_MOBILE_NOTIFICATIONS);
         isVibrationsEnabled = Var.getBoolPreference(this, Var.PREF_VIBRATIONS);
+        isPlaySoundEnabled =  Var.getBoolPreference(this, Var.PREF_PLAY_SOUND);
 
         View header = getLayoutInflater().inflate(R.layout.header_notifications, null, false);
         View alarmHeader = getLayoutInflater().inflate(R.layout.header_alarms, null, false);
-
+        View footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
+        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 60)));
 
         alarm_v = findViewById(R.id.alarm_v);
         save_fab = (Fab) findViewById(R.id.save_fab);
 
         alarm_lv = (ListView) findViewById(R.id.alarm_lv);
         alarm_lv.addHeaderView(alarmHeader, null, false);
+        alarm_lv.addFooterView(footer, null, false);
+        alarm_lv.setFooterDividersEnabled(false);
         addAlarm_fab = (Fab) alarmHeader.findViewById(R.id.add_alarm_fab);
 
         notification_lv = (ListView) findViewById(R.id.notification_lv);
@@ -92,6 +96,9 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         vibrations_v = header.findViewById(R.id.vibrations_v);
         vibrations_sw = (SwitchCompat) header.findViewById(R.id.vibrations_sw);
         vibrations_sw.setChecked(isVibrationsEnabled);
+        playSound_v = header.findViewById(R.id.play_sound_v);
+        playSound_sw = (SwitchCompat) header.findViewById(R.id.play_sound_sw);
+        playSound_sw.setChecked(isPlaySoundEnabled);
 
         notificationName_tv = (EditText) alarmHeader.findViewById(R.id.notification_name_tv);
 
@@ -102,6 +109,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         allNotifications_v.setOnClickListener(this);
         mobileNotifications_v.setOnClickListener(this);
         vibrations_v.setOnClickListener(this);
+        playSound_v.setOnClickListener(this);
 
         notificationAdapter = new NotificationAdapter(this);
         notification_lv.setAdapter(notificationAdapter);
@@ -109,6 +117,8 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
         alarmAdapter = new AlarmAdapter(this);
         alarm_lv.setAdapter(alarmAdapter);
+
+        toggleList(listType);
 
     }
 
@@ -123,6 +133,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         }
         if(listType == ALARMS_LIST) {
             notificationName_tv.setText(editNotification.getName());
+            alarmAdapter.notifyDataSetChanged();
         }
     }
 
@@ -223,16 +234,12 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
 
-            ViewHolder holder;
-
             if(convertView == null) {
                 convertView = inflater.inflate(R.layout.item_alarm, parent, false);
-                holder = new ViewHolder(convertView);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
+                convertView.setTag(new ViewHolder(convertView));
             }
 
+            final ViewHolder holder = (ViewHolder) convertView.getTag();
             final Alarm alarm = getItem(position);
 
 
@@ -262,6 +269,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
                     int day = getDayIndex((ToggleButton) v);
                     List<Integer> days = getItem(position).getDays();
                     days.set(day, (days.get(day) == 1 ? 0 : 1));   //Toggle opposite
+                    holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTime(alarm): "disabled");
                 }
             };
 
@@ -274,10 +282,15 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             holder.sat_tb.setOnClickListener(dayOnClickListener);
 
             holder.enabled_sw.setChecked(alarm.isEnabled());
+            holder.enabled_sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTime(alarm): "disabled");
+                }
+            });
+
             holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTime(alarm): "disabled");
 
-
-            //TODO create util to get next alarm time (will be needed for service soon)
 
             holder.delete_iv.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -346,7 +359,10 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         // Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if(id == android.R.id.home) {
-
+            if(listType != NOTIFICATIONS_LIST) {
+                toggleList(NOTIFICATIONS_LIST);
+                return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -401,5 +417,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             Var.setBoolPreference(this, Var.PREF_VIBRATIONS, isVibrationsEnabled);
             vibrations_sw.setChecked(isVibrationsEnabled);
         }
+        if(playSound_v == v) {
+            isPlaySoundEnabled = !isPlaySoundEnabled;
+            Var.setBoolPreference(this, Var.PREF_PLAY_SOUND, isPlaySoundEnabled);
+            playSound_sw.setChecked(isPlaySoundEnabled);
+        }
+
     }
 }

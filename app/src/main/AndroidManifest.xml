@@ -49,6 +49,20 @@
         </activity>
 
         <activity android:name="com.edaviessmith.consumecontent.db.AndroidDatabaseManager"  />
+
+        <receiver
+            android:name="com.edaviessmith.consumecontent.AlarmBroadcastReceiver"
+            android:process=":remote">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.edaviessmith.consumecontent.MediaFeedActivityService"
+            android:label="Notification Listener"
+            android:exported="false" />
+
     </application>
 
 </manifest>

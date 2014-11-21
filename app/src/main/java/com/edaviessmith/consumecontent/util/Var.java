@@ -1,7 +1,10 @@
 package com.edaviessmith.consumecontent.util;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -72,8 +75,10 @@ public class Var {
     public static final String PREF_ALL_NOTIFICATIONS = "all_notifications";
     public static final String PREF_MOBILE_NOTIFICATIONS = "mobile_notifications";
     public static final String PREF_VIBRATIONS = "vibrations";
+    public static final String PREF_PLAY_SOUND = "play_sound";
 
 
+    static public final String NOTIFY_ACTION = "notify_action";
 
     //Time Variables
     static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
@@ -214,7 +219,7 @@ public class Var {
         String date = "";
 
         if(publishedDate <= 0) {
-            //date = AppInstance.getContext().getResources().getString(R.string.loading_date);
+            //date = context.getResources().getString(R.string.loading_date);
         } else {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(publishedDate);
@@ -235,8 +240,42 @@ public class Var {
         }
 
         return date;
-
     }
+
+    public static void setNextAlarm(Context context) {
+
+        if(getBoolPreference(context, Var.PREF_ALL_NOTIFICATIONS)) {
+            Intent intent = new Intent(context, AlarmBroadcastReceiver.class);
+            intent.setAction(Var.NOTIFY_ACTION);
+            boolean alarmActive = (PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE) != null);
+
+            //If alarm isn't already active create a new alarm
+            if(!alarmActive) {
+                try {
+                    long minutes = 0L;//getMinutes();
+                    //BugSenseHandler.addCrashExtraData("Members", "Alarm Minutes set to "+minutes);
+                    if(minutes != 0L) {
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+                        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                        //BugSenseHandler.addCrashExtraData("Members", "Alarm Pending");
+                        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + minutes, pendingIntent);
+                        Log.d("Util", "AlarmManager update was set to run in "+ (minutes / 60000) + " minutes");
+                    } else {
+                        Log.d("Util", "Alarm time set to never");
+                    }
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace(); // in case you want to see the stacktrace in your log cat output
+                    //Toast.makeText(context, "Unable to start Notifications", Toast.LENGTH_SHORT).show();
+                    //BugSenseHandler.addCrashExtraData("Exception", "Alarm exception");
+                    //BugSenseHandler.sendException(ex);
+                }
+            } else {
+                Log.d("Util", "AlarmManager already active");
+            }
+        }
+    }
+
 
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
@@ -310,7 +349,7 @@ public class Var {
 
     public static boolean getBoolPreference(Context context, String pref) {
         SharedPreferences settings = context.getSharedPreferences(Var.PREFS, 0);
-        return settings.getBoolean(pref, true); //TODO make list with defaults if a default is not true
+        return settings.getBoolean(pref, getPrefDefault(pref));
     }
 
     @SuppressLint("NewApi")
@@ -322,6 +361,11 @@ public class Var {
         } else {
             settings.commit();
         }
+    }
+
+    private static boolean getPrefDefault(String pref) {
+        if(pref.equals(Var.PREF_PLAY_SOUND)) return false;
+        return true;
     }
 
 
@@ -347,7 +391,7 @@ public class Var {
     }
 
 
-    //TODO doesn't account for sleep time
+    //TODO doesn't account for sleep time or day of the week
     public static String getNextAlarmTime(Alarm alarm) {
 
         Calendar now = Calendar.getInstance(Locale.getDefault());
@@ -364,29 +408,71 @@ public class Var {
 
         if(alarm.getType() == Var.ALARM_EVERY) {
             Calendar today = (Calendar) now.clone();
-            today.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
-            today.set(Calendar.MINUTE, now.get(Calendar.MINUTE));
+            //today.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
+            today.set(Calendar.MINUTE, 0);//now.get(Calendar.MINUTE)); //bad offset
+            int next = (int) (today.get(Calendar.HOUR_OF_DAY) % (alarm.getTime() / Var.HOUR_MILLI));
+            int h = today.get(Calendar.HOUR_OF_DAY) + (next > 0? next: (int) (alarm.getTime() / Var.HOUR_MILLI));
 
-            when = Calendar.getInstance(Locale.getDefault());
-            when.setTimeInMillis(today.getTimeInMillis() + (today.getTimeInMillis() % alarm.getTime())); //Next occurence
+            //when = Calendar.getInstance(Locale.getDefault());
+            when = (Calendar) now.clone();
+            when.set(Calendar.HOUR_OF_DAY, h);
+            when.set(Calendar.MINUTE, 0);
+            //when.setTimeInMillis(today.getTimeInMillis() + (today.getTimeInMillis() % alarm.getTime())); //Next occurence
         }
 
+        int today = now.get(Calendar.DAY_OF_WEEK) - 1;
+        Log.d(TAG, getAlarmText(alarm)+" today: "+ Var.DAYS[today+2]);
+        for(int day = now.before(when)? 0: 1; day < 7; day++) {
+            if(alarm.getDays().get((day + today) % 7) == 1) { //Next day alarm will go off
+                when.add(Calendar.DAY_OF_YEAR, (day));
+                Log.d(TAG, "when: "+ Var.DAYS[((day + today) % 7)+2] + " days: "+ (when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)));
+                break;
+            }
+        }
 
-        int hours = (when.get(Calendar.HOUR_OF_DAY) + (now.before(when)? 0: 24)) - now.get(Calendar.HOUR_OF_DAY);
+        /*int today = now.get(Calendar.DAY_OF_WEEK) - 1;
+        for(int day = today; day < today + 7; day++) {
+            if(alarm.getDays().get(day % 7) == 1) { //Next day alarm will go off
+                when.add(Calendar.DAY_OF_YEAR, (day - today) + (now.before(when)? 0: 1));
+                break;
+            }
+        }*/
+
+        /*int days = when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR);
+        int hours = (when.get(Calendar.HOUR_OF_DAY)) *//*+ (now.before(when)? 0: 24))*//* - now.get(Calendar.HOUR_OF_DAY);
         int minutes = when.get(Calendar.MINUTE) - now.get(Calendar.MINUTE);
         if(minutes < 0) {
             hours --;
-            minutes = 60 - minutes;
+            //minutes = 60 - minutes;
         }
         if(minutes > 59) {
             hours ++;
-            minutes -= 60;
+            //minutes -= 60;
         }
 
         String time = "in ";
+        if(days > 0) time += days+" day"+(days == 1? "":"s");
+        if(days > 0 && (hours > 0 || minutes > 0)) time += " and ";
         if(hours > 0) time += hours+" hour"+(hours == 1? "":"s");
         if(hours > 0 && minutes > 0) time += " and ";
         if(minutes > 0) time += minutes+" minute"+(minutes == 1? "":"s");
+*/
+
+        Calendar nextAlarm = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        nextAlarm.setTimeInMillis(when.getTimeInMillis() - now.getTimeInMillis());
+
+        int days = nextAlarm.get(Calendar.DAY_OF_YEAR) - 1;
+        int hours = nextAlarm.get(Calendar.HOUR_OF_DAY);
+        int minutes = nextAlarm.get(Calendar.MINUTE);
+
+        String time = "in ";
+        if(days > 0) time += days+" day"+(days == 1? "":"s");
+        if(days > 0 && hours > 0 && minutes > 0) time += ", ";
+        else if(days > 0 && hours > 0 && minutes == 0 || days > 0 && minutes > 0) time += " and ";
+        if(hours > 0) time += hours+" hour"+(hours == 1? "":"s");
+        if(hours > 0 && minutes > 0) time += " and ";
+        if(minutes > 0) time += minutes+" minute"+(minutes == 1? "":"s");
+
 
         return time;
     }
