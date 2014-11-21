@@ -14,12 +14,6 @@
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" >
 
-        <!--<SearchView
-            android:id="@+id/action_search"
-            app:theme="@style/AppDarkTheme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />-->
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

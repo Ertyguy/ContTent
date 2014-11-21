@@ -24,18 +24,34 @@
         android:id="@+id/notification_lv" />
 
 
-    <com.edaviessmith.consumecontent.view.Fab
-        android:id="@+id/save_fab"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        app:colour="@color/accent"
-        app:drawable="@drawable/ic_check_white_24dp"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar"
+        android:id="@+id/alarm_v"
+        android:background="#f0ffffff"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/alarm_lv" />
+
+        <com.edaviessmith.consumecontent.view.Fab
+            android:id="@+id/save_fab"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            app:colour="@color/accent"
+            app:drawable="@drawable/ic_check_white_24dp"/>
+    </RelativeLayout>
+
 
 </RelativeLayout>

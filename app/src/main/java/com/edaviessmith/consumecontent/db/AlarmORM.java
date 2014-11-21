@@ -31,7 +31,7 @@ public class AlarmORM {
     public static List<Alarm> getAlarms(SQLiteDatabase database, int notificationId) {
         List<Alarm>  alarms= new ArrayList<Alarm>();
 
-        Cursor cursor = database.query(false, DB.TABLE_ALARM, null, DB.COL_NOTIFICATION + " = " + notificationId, null, null, null, DB.ORDER_BY_SORT, null);
+        Cursor cursor = database.query(false, DB.TABLE_ALARM, null, DB.COL_NOTIFICATION + " = " + notificationId, null, null, null, DB.ORDER_BY_ID, null);
 
         if(cursor.getCount() > 0) {
             cursor.moveToFirst();

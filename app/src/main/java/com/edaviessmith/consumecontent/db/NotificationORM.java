@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.Notification;
-import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,7 @@ public class NotificationORM {
 
         database.beginTransaction();
         try {
-            Cursor cursor = database.query(false, DB.TABLE_NOTIFICATION, null, null, null, null, null, DB.ORDER_BY_SORT, null);
+            Cursor cursor = database.query(false, DB.TABLE_NOTIFICATION, null, null, null, null, null, DB.ORDER_BY_ID, null);
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();

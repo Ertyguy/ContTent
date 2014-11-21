@@ -1,6 +1,9 @@
 package com.edaviessmith.consumecontent.data;
 
 
+import com.edaviessmith.consumecontent.util.Var;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class Notification {
@@ -11,10 +14,16 @@ public class Notification {
 
     private List<Alarm> alarms;
 
+    public Notification() {
+        type = Var.NOTIFICATION_ALARM;
+        alarms = new ArrayList<Alarm>();
+    }
+
     public Notification(int id, String name, int type) {
         this.id = id;
         this.name = name;
         this.type = type;
+        alarms = new ArrayList<Alarm>();
     }
 
     public int getId() {

@@ -10,6 +10,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.edaviessmith.consumecontent.data.Alarm;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -53,18 +55,13 @@ public class Var {
     public static final int TYPE_FAVORITE = 2;
     public static final int TYPE_ADD_TO_PLAYLIST = 3;
 
-    //Searching users
-    public static final int SEARCH_NONE = 0;
-    public static final int SEARCH_OPTIONS = 1;
-    public static final int SEARCH_YOUTUBE = 2;
-    public static final int SEARCH_YT_CHANNEL = 3;
-    public static final int SEARCH_TWITTER = 4;
-
     //Notification
     public static final int NOTIFICATION_ALARM = 0;
     public static final int NOTIFICATION_SLEEP = 1;
     public static final int ALARM_AT = 0;
     public static final int ALARM_EVERY = 1;
+    public static final int ALARM_BEFORE = 2; //Sleep alarms
+    public static final int ALARM_AFTER = 3;
 
     //Handler (currently not used)
     public static final int HANDLER_COMPLETE = 0;
@@ -77,11 +74,15 @@ public class Var {
     public static final String PREF_VIBRATIONS = "vibrations";
 
 
-    //Format Youtube Video length into (00:00)
+
+    //Time Variables
     static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
     static SimpleDateFormat lengthHour =  new SimpleDateFormat("k:mm:ss", Locale.getDefault());
     public static DateFormat stringDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
     public static DateFormat simpleDate = new SimpleDateFormat("MMM dd k:mm a", Locale.getDefault());
+
+    public static final Long HOUR_MILLI = 3600000L ;
+    public static final Long MINUTE_MILLI = 60000L ;
 
     public static final int DATE_DAY = 0;
     public static final int DATE_THIS_WEEK = 1;
@@ -324,5 +325,69 @@ public class Var {
     }
 
 
+    public static String getAlarmText(Alarm alarm) {
 
+        if(alarm.getType() == Var.ALARM_AT || alarm.getType() == Var.ALARM_BEFORE || alarm.getType() == Var.ALARM_AFTER) {
+            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            c.setTimeInMillis(alarm.getTime());
+            int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
+
+            String ret = "At ";
+            if(alarm.getType() == Var.ALARM_BEFORE)   ret = "Before ";
+            if(alarm.getType() == Var.ALARM_AFTER)   ret = "After ";
+            return ret +(hourOfDay <= 12? hourOfDay: hourOfDay - 12)+":"+String.format("%02d",  c.get(Calendar.MINUTE)) + " " + (hourOfDay >= 12? "pm": "am");
+        }
+
+        if(alarm.getType() == Var.ALARM_EVERY) {
+            int hour = (int) (alarm.getTime() / Var.HOUR_MILLI);
+            return "Every " + hour + " hour" + (hour == 1 ? "" : "s");
+        }
+
+        return "";
+    }
+
+
+    //TODO doesn't account for sleep time
+    public static String getNextAlarmTime(Alarm alarm) {
+
+        Calendar now = Calendar.getInstance(Locale.getDefault());
+        Calendar when = Calendar.getInstance(Locale.getDefault());
+
+        if(alarm.getType() == Var.ALARM_AT || alarm.getType() == Var.ALARM_BEFORE || alarm.getType() == Var.ALARM_AFTER) {
+            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            c.setTimeInMillis(alarm.getTime());
+
+            when = (Calendar) now.clone();
+            when.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
+            when.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+        }
+
+        if(alarm.getType() == Var.ALARM_EVERY) {
+            Calendar today = (Calendar) now.clone();
+            today.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
+            today.set(Calendar.MINUTE, now.get(Calendar.MINUTE));
+
+            when = Calendar.getInstance(Locale.getDefault());
+            when.setTimeInMillis(today.getTimeInMillis() + (today.getTimeInMillis() % alarm.getTime())); //Next occurence
+        }
+
+
+        int hours = (when.get(Calendar.HOUR_OF_DAY) + (now.before(when)? 0: 24)) - now.get(Calendar.HOUR_OF_DAY);
+        int minutes = when.get(Calendar.MINUTE) - now.get(Calendar.MINUTE);
+        if(minutes < 0) {
+            hours --;
+            minutes = 60 - minutes;
+        }
+        if(minutes > 59) {
+            hours ++;
+            minutes -= 60;
+        }
+
+        String time = "in ";
+        if(hours > 0) time += hours+" hour"+(hours == 1? "":"s");
+        if(hours > 0 && minutes > 0) time += " and ";
+        if(minutes > 0) time += minutes+" minute"+(minutes == 1? "":"s");
+
+        return time;
+    }
 }

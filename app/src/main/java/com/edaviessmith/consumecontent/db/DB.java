@@ -73,6 +73,7 @@ public class DB extends SQLiteOpenHelper {
 
     public static String ORDER_BY_SORT = DB.COL_SORT + " ASC";
     public static String ORDER_BY_DATE = DB.COL_DATE + " DESC";
+    public static String ORDER_BY_ID   = DB.COL_ID   + " ASC";
 
     //// Database Columns /////
     static final String COL_ID = "id";

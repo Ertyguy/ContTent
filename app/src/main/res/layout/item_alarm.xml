@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <View style="@style/divider"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingTop="25dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="25dp">
+
+        <ImageView
+            android:id="@+id/thumbnail_iv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_access_alarm_grey600_36dp"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Every 3 hours"
+            android:id="@+id/time_tv"
+            android:layout_alignTop="@+id/thumbnail_iv"
+            android:layout_toRightOf="@+id/thumbnail_iv"
+            android:layout_toEndOf="@+id/thumbnail_iv"
+            android:textColor="@color/gray_accent"
+            android:minLines="1"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="26sp"
+            android:layout_alignBottom="@+id/thumbnail_iv"
+            android:gravity="center_vertical"
+            android:layout_toLeftOf="@+id/only_wifi_iv"
+            android:layout_toStartOf="@+id/only_wifi_iv" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/only_wifi_iv"
+            android:src="@drawable/ic_signal_wifi_2_bar_grey600_36dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/thumbnail_iv"
+            android:layout_toStartOf="@+id/delete_iv"
+            android:orientation="horizontal"
+            android:weightSum="7"
+            android:gravity="center_vertical"
+            android:id="@+id/days_v"
+            android:layout_alignRight="@+id/delete_iv"
+            android:layout_alignEnd="@+id/delete_iv">
+
+            <ToggleButton style="@style/day_tb"
+                android:textOn="SUN"
+                android:textOff="SUN"
+                android:id="@+id/sun_tb" />
+            <ToggleButton style="@style/day_tb"
+                android:textOn="MON"
+                android:textOff="MON"
+                android:id="@+id/mon_tb" />
+            <ToggleButton style="@style/day_tb"
+                android:textOn="TUE"
+                android:textOff="TUE"
+                android:id="@+id/tue_tb" />
+            <ToggleButton style="@style/day_tb"
+                android:textOn="WED"
+                android:textOff="WED"
+                android:id="@+id/wed_tb" />
+            <ToggleButton style="@style/day_tb"
+                android:textOn="THU"
+                android:textOff="THU"
+                android:id="@+id/thu_tb" />
+            <ToggleButton style="@style/day_tb"
+                android:textOn="FRI"
+                android:textOff="FRI"
+                android:id="@+id/fri_tb" />
+            <ToggleButton style="@style/day_tb"
+                android:textOn="SAT"
+                android:textOff="SAT"
+                android:id="@+id/sat_tb" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_below="@+id/days_v"
+            android:paddingTop="5dp"
+            android:id="@+id/enabled_v"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/delete_iv"
+            android:layout_toStartOf="@+id/delete_iv">
+
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/enabled_sw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/gray_accent"
+                android:gravity="center_vertical"
+                android:id="@+id/next_alarm_tv"
+                android:text="@string/disabled"/>
+
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/delete_iv"
+            android:src="@drawable/ic_delete_grey600_24dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/enabled_v"
+            android:layout_alignBottom="@+id/enabled_v"/>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

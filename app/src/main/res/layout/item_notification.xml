@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <View style="@style/divider"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingTop="25dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="25dp">
+
+        <ImageView
+            android:id="@+id/icon_iv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_alarm_grey600_36dp"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sleep"
+            android:id="@+id/name_tv"
+            android:layout_alignTop="@+id/icon_iv"
+            android:layout_toRightOf="@+id/icon_iv"
+            android:layout_toEndOf="@+id/icon_iv"
+            android:textColor="@color/gray_accent"
+            android:minLines="1"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="26sp"
+            android:layout_alignBottom="@+id/thumbnail_iv"
+            android:gravity="center_vertical"
+            android:layout_toLeftOf="@+id/only_wifi_iv"
+            android:layout_toStartOf="@+id/only_wifi_iv" />
+
+        </RelativeLayout>
+
+
+</LinearLayout>

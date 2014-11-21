@@ -78,6 +78,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     List<String> userPictureThumbnails;
     View search_v, searchTwitter_v, searchDiv_v, channel_v;
 
+    //Searching users
+    public static final int SEARCH_NONE = 0;
+    public static final int SEARCH_OPTIONS = 1;
+    public static final int SEARCH_YOUTUBE = 2;
+    public static final int SEARCH_YT_CHANNEL = 3;
+    public static final int SEARCH_TWITTER = 4;
     final static int maxResults = 10;
 
     LinearLayout youtube_ll, twitter_ll;
@@ -88,7 +94,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     SpinnerTrigger group_sp;
     SwitchCompat notification_sw;
     IconAdapter iconAdapter;
-    int spinnerInit, spinnerSelect, twitterPage, searchMode = Var.SEARCH_NONE;
+    int spinnerInit, spinnerSelect, twitterPage, searchMode = SEARCH_NONE;
     String search, pageToken;
     boolean searchBusy;
 
@@ -108,20 +114,20 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         this.searchMode = searchMode;
 
         search_v.setVisibility(searchModePreSearch() ? View.GONE: View.VISIBLE);
-        searchTwitter_v.setVisibility((searchMode == Var.SEARCH_TWITTER && !twitter.hasAccessToken()) ? View.VISIBLE: View.GONE);
-        searchDiv_v.setVisibility((searchMode == Var.SEARCH_TWITTER && twitter.hasAccessToken()) ? View.GONE: View.VISIBLE);
-        youtube_ll.setVisibility((searchMode == Var.SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
-        twitter_ll.setVisibility((searchMode == Var.SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
-        channel_v.setVisibility((searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
-        search_fab.setVisibility((searchModePreSearch() || searchMode == Var.SEARCH_YT_CHANNEL) ? View.VISIBLE : View.GONE);
-        search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_YT_CHANNEL
+        searchTwitter_v.setVisibility((searchMode == SEARCH_TWITTER && !twitter.hasAccessToken()) ? View.VISIBLE: View.GONE);
+        searchDiv_v.setVisibility((searchMode == SEARCH_TWITTER && twitter.hasAccessToken()) ? View.GONE: View.VISIBLE);
+        youtube_ll.setVisibility((searchMode == SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
+        twitter_ll.setVisibility((searchMode == SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
+        channel_v.setVisibility((searchMode == SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
+        search_fab.setVisibility((searchModePreSearch() || searchMode == SEARCH_YT_CHANNEL) ? View.VISIBLE : View.GONE);
+        search_fab.setDrawable(getResources().getDrawable(searchMode == SEARCH_YT_CHANNEL
                 ? R.drawable.ic_add_white_18dp
                 : R.drawable.ic_search_white_24dp));
 
 
-        search_lv.setChoiceMode((searchMode == Var.SEARCH_YT_CHANNEL) ? ListView.CHOICE_MODE_MULTIPLE : ListView.CHOICE_MODE_SINGLE);
+        search_lv.setChoiceMode((searchMode == SEARCH_YT_CHANNEL) ? ListView.CHOICE_MODE_MULTIPLE : ListView.CHOICE_MODE_SINGLE);
 
-        if(searchMode == Var.SEARCH_NONE) {
+        if(searchMode == SEARCH_NONE) {
             dismissSearch();
             //searchView.setQuery("", false);
             //searchView.setVisibility(View.GONE);
@@ -134,31 +140,31 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             twitterFeedSearch.clear();
             searchAdapter.notifyDataSetChanged();
 
-        } if(searchMode == Var.SEARCH_YT_CHANNEL) {
+        } if(searchMode == SEARCH_YT_CHANNEL) {
             dismissSearch();
             action_fab.setVisibility(View.VISIBLE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             clearSearchOptions();
-        } else if(searchMode == Var.SEARCH_YOUTUBE || searchMode == Var.SEARCH_TWITTER) {
+        } else if(searchMode == SEARCH_YOUTUBE || searchMode == SEARCH_TWITTER) {
             //if(searchItem != null) {
-                //searchView.setQueryHint(getResources().getString((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter));
+                //searchView.setQueryHint(getResources().getString((searchMode == SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter));
                 //searchView.setIconified(false);
                 //searchView.setVisibility(View.VISIBLE);
                 //searchView.requestFocusFromTouch();
-            search_edt.setHint((searchMode == Var.SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
+            search_edt.setHint((searchMode == SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
             search_rl.setVisibility(View.VISIBLE);
             search_rl.requestFocus();
             //}
         }
         if (searchModePreSearch()) {
-            search_fab.setDrawable(getResources().getDrawable(searchMode == Var.SEARCH_NONE
+            search_fab.setDrawable(getResources().getDrawable(searchMode == SEARCH_NONE
                     ? R.drawable.ic_search_white_24dp
                     : R.drawable.ic_close_white_36dp));
         }
     }
 
     private boolean searchModePreSearch() {
-        return (searchMode == Var.SEARCH_NONE || searchMode == Var.SEARCH_OPTIONS);
+        return (searchMode == SEARCH_NONE || searchMode == SEARCH_OPTIONS);
     }
 
     private void clearSearchOptions() {
@@ -279,7 +285,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //getSupportActionBar().setTitle("Add User");
 
-        toggleSearch(Var.SEARCH_NONE);
+        toggleSearch(SEARCH_NONE);
     }
 
 
@@ -300,8 +306,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
-                if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
+                if(searchMode == SEARCH_YOUTUBE) searchYoutube();
+                if(searchMode == SEARCH_TWITTER) searchTwitter();
             }
         }, 800);
     }
@@ -345,7 +351,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        if(searchMode == Var.SEARCH_YOUTUBE) {
+        if(searchMode == SEARCH_YOUTUBE) {
             searchChannel = youtubeChannelSearch.get(position - 1);
             Log.d(TAG, searchChannel.toString());
 
@@ -354,17 +360,17 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             name_tv.setText(searchChannel.getName());
             imageLoader.DisplayImage(searchChannel.getThumbnail(), thumbnail_iv);
 
-            toggleSearch(Var.SEARCH_YT_CHANNEL);
+            toggleSearch(SEARCH_YT_CHANNEL);
             searchChannel();
         }
 
-        if(searchMode == Var.SEARCH_TWITTER) {
+        if(searchMode == SEARCH_TWITTER) {
             editUser.getMediaFeed().add( twitterFeedSearch.get(position - 1));
             addThumbnail(twitterFeedSearch.get(position - 1).getThumbnail());
 
             if(Var.isEmpty(userName_edt.getText().toString())) userName_edt.setText(twitterFeedSearch.get(position - 1).getDisplayName());
 
-            toggleSearch(Var.SEARCH_NONE);
+            toggleSearch(SEARCH_NONE);
         }
 
     }
@@ -397,12 +403,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     public void onClick(View v) {
         Log.d(TAG, "onclick "+(v == action_fab) +", "+ searchMode);
         if(v == search_fab) {
-            if(searchMode == Var.SEARCH_NONE) toggleSearch(Var.SEARCH_OPTIONS);
-            else if(searchMode == Var.SEARCH_OPTIONS) toggleSearch(Var.SEARCH_NONE);
+            if(searchMode == SEARCH_NONE) toggleSearch(SEARCH_OPTIONS);
+            else if(searchMode == SEARCH_OPTIONS) toggleSearch(SEARCH_NONE);
         }
 
         if(v == action_fab) {
-            if(searchMode == Var.SEARCH_YT_CHANNEL) {
+            if(searchMode == SEARCH_YT_CHANNEL) {
                 SparseBooleanArray checked = search_lv.getCheckedItemPositions();
                 for (int i = 0; i < checked.size(); i++) {
                     if(checked.valueAt(i)) {
@@ -415,9 +421,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 feedAdapter.notifyDataSetChanged();
                 clearSearchOptions();
 
-                toggleSearch(Var.SEARCH_NONE);
+                toggleSearch(SEARCH_NONE);
             }
-            else if(searchMode == Var.SEARCH_NONE) {
+            else if(searchMode == SEARCH_NONE) {
 
                 editUser.setName(userName_edt.getText().toString().trim());
                 //editUser.setNotification(notification_sw.isChecked());
@@ -428,9 +434,9 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 finish();
             }
         }
-        if(v == youtube_ll) toggleSearch(Var.SEARCH_YOUTUBE);
-        if(v == twitter_ll) toggleSearch(Var.SEARCH_TWITTER);
-        if(v == search_v) toggleSearch(Var.SEARCH_NONE);
+        if(v == youtube_ll) toggleSearch(SEARCH_YOUTUBE);
+        if(v == twitter_ll) toggleSearch(SEARCH_TWITTER);
+        if(v == search_v) toggleSearch(SEARCH_NONE);
         if(v == searchTwitterLogin_tv) {
             twitter.resetAccessToken();
             if (!twitter.hasAccessToken()) twitter.authorize();
@@ -454,8 +460,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
         if(view.getLastVisiblePosition() >= totalItemCount - 5 && !searchBusy){
-            if(searchMode == Var.SEARCH_YOUTUBE) searchYoutube();
-            //if(searchMode == Var.SEARCH_TWITTER) searchTwitter();
+            if(searchMode == SEARCH_YOUTUBE) searchYoutube();
+            //if(searchMode == SEARCH_TWITTER) searchTwitter();
         }
     }
 
@@ -465,8 +471,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         int id = item.getItemId();
 
         if(id == android.R.id.home) {
-            if(searchMode != Var.SEARCH_NONE) {
-                toggleSearch(Var.SEARCH_NONE);
+            if(searchMode != SEARCH_NONE) {
+                toggleSearch(SEARCH_NONE);
                 return true;
             }
         }
@@ -476,8 +482,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     @Override
     public void onBackPressed() {
-        if(searchMode != Var.SEARCH_NONE) {
-            toggleSearch(Var.SEARCH_NONE);
+        if(searchMode != SEARCH_NONE) {
+            toggleSearch(SEARCH_NONE);
             return;
         }
 
@@ -735,7 +741,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         @Override
         public int getItemViewType(int position) {
-            return (searchMode == Var.SEARCH_YOUTUBE || searchMode == Var.SEARCH_YT_CHANNEL)? 0: 1;
+            return (searchMode == SEARCH_YOUTUBE || searchMode == SEARCH_YT_CHANNEL)? 0: 1;
         }
 
         @Override
@@ -745,17 +751,17 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         @Override
         public int getCount() {
-            if(searchMode == Var.SEARCH_YOUTUBE) return youtubeChannelSearch.size();
-            if(searchMode == Var.SEARCH_TWITTER) return twitterFeedSearch.size();
-            if(searchMode == Var.SEARCH_YT_CHANNEL) return searchChannel.getYoutubeFeeds().size();
+            if(searchMode == SEARCH_YOUTUBE) return youtubeChannelSearch.size();
+            if(searchMode == SEARCH_TWITTER) return twitterFeedSearch.size();
+            if(searchMode == SEARCH_YT_CHANNEL) return searchChannel.getYoutubeFeeds().size();
                 return 0;
         }
 
         @Override
         public Object getItem(int position) {
-            if(searchMode == Var.SEARCH_YOUTUBE) return youtubeChannelSearch.get(position);
-            if(searchMode == Var.SEARCH_TWITTER) return twitterFeedSearch.get(position);
-            if(searchMode == Var.SEARCH_YT_CHANNEL) return searchChannel.getYoutubeFeeds().get(position);
+            if(searchMode == SEARCH_YOUTUBE) return youtubeChannelSearch.get(position);
+            if(searchMode == SEARCH_TWITTER) return twitterFeedSearch.get(position);
+            if(searchMode == SEARCH_YT_CHANNEL) return searchChannel.getYoutubeFeeds().get(position);
             return null;
         }
 
@@ -780,7 +786,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            if(searchMode == Var.SEARCH_YOUTUBE) {
+            if(searchMode == SEARCH_YOUTUBE) {
                 YoutubeChannel feed = (YoutubeChannel) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
                 if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
@@ -788,7 +794,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 holder.name_tv.setText(feed.getName());
             }
 
-            if(searchMode == Var.SEARCH_TWITTER) {
+            if(searchMode == SEARCH_TWITTER) {
                 TwitterFeed feed = (TwitterFeed) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_twitter_icon);
                 if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
@@ -797,7 +803,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 holder.screenName_tv.setText(feed.getName());
             }
 
-            if(searchMode == Var.SEARCH_YT_CHANNEL) {
+            if(searchMode == SEARCH_YT_CHANNEL) {
                 YoutubeFeed feed = (YoutubeFeed) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
                 if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);

@@ -1,6 +1,9 @@
 package com.edaviessmith.consumecontent.data;
 
 
+import com.edaviessmith.consumecontent.util.Var;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class Alarm {
@@ -12,12 +15,22 @@ public class Alarm {
     private boolean onlyWifi;
     private List<Integer> days;
 
-    public Alarm(int id, boolean enabled, int type, long time, boolean wifi, List<Integer> days) {
+    public Alarm(int notificationType) {
+        this.enabled = true;
+        this.type = (notificationType == Var.NOTIFICATION_ALARM? Var.ALARM_EVERY: Var.ALARM_BEFORE);
+        this.time = 10800000;       // 3 hours
+        this.onlyWifi = false;
+
+        this.days = new ArrayList<Integer>();
+        for(int i=0; i<7; i++) this.days.add(1);
+    }
+
+    public Alarm(int id, boolean enabled, int type, long time, boolean onlyWifi, List<Integer> days) {
         this.id = id;
         this.enabled = enabled;
         this.type = type;
         this.time = time;
-        this.onlyWifi = wifi;
+        this.onlyWifi = onlyWifi;
         this.days = days;
     }
 
