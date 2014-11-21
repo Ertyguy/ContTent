@@ -408,16 +408,13 @@ public class Var {
 
         if(alarm.getType() == Var.ALARM_EVERY) {
             Calendar today = (Calendar) now.clone();
-            //today.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
-            today.set(Calendar.MINUTE, 0);//now.get(Calendar.MINUTE)); //bad offset
-            int next = (int) (today.get(Calendar.HOUR_OF_DAY) % (alarm.getTime() / Var.HOUR_MILLI));
-            int h = today.get(Calendar.HOUR_OF_DAY) + (next > 0? next: (int) (alarm.getTime() / Var.HOUR_MILLI));
+            today.set(Calendar.MINUTE, 0);
 
-            //when = Calendar.getInstance(Locale.getDefault());
+            int next = (int) (today.get(Calendar.HOUR_OF_DAY) % (alarm.getTime() / Var.HOUR_MILLI));
+
             when = (Calendar) now.clone();
-            when.set(Calendar.HOUR_OF_DAY, h);
+            when.set(Calendar.HOUR_OF_DAY, today.get(Calendar.HOUR_OF_DAY) + (next > 0? next: (int) (alarm.getTime() / Var.HOUR_MILLI)));
             when.set(Calendar.MINUTE, 0);
-            //when.setTimeInMillis(today.getTimeInMillis() + (today.getTimeInMillis() % alarm.getTime())); //Next occurence
         }
 
         int today = now.get(Calendar.DAY_OF_WEEK) - 1;
