@@ -24,25 +24,30 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
 
     NotificationsActivity act;
     Alarm alarm;
-    TextView every_tv, at_tv, cancel_tv, create_tv;
+    TextView title_tv, every_tv, at_tv, cancel_tv, create_tv;
     View every_divider, at_divider, every_v, onlyWifi_v;
     TimePicker timePicker;
     NumberPicker numberPicker;
     SwitchCompat onlyWifi_sw;
 
+    private static int ALARM_FROM = 10;
+    private static int ALARM_TO = 11;
+
     int alarmType;
+    int tabType = ALARM_FROM; //Only used for ACTIVE_TIME
+
+    private long time;
+    private long timeBetween;
+
 
     public AlarmDialog(NotificationsActivity activity, Alarm alarm) {
         super(activity);
         this.alarm = alarm;
         this.act = activity;
-        init();
-    }
+        time = alarm.getTime();
+        timeBetween = alarm.getTimeBetween();
 
-    private int getNotificationType() {
-        if(alarmType == Var.ALARM_EVERY || alarmType == Var.ALARM_AT) return Var.NOTIFICATION_ALARM;
-        if(alarmType == Var.ALARM_BEFORE || alarmType == Var.ALARM_AFTER) return Var.NOTIFICATION_SLEEP;
-        return Var.NOTIFICATION_ALARM;
+        init();
     }
 
     private void init() {
@@ -51,6 +56,7 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
         getWindow().setBackgroundDrawable(new ColorDrawable(0));
         setContentView(R.layout.dialog_alarm);
 
+        title_tv = (TextView) findViewById(R.id.title_tv);
         every_tv = (TextView) findViewById(R.id.every_tv);
         at_tv = (TextView) findViewById(R.id.at_tv);
         cancel_tv = (TextView) findViewById(R.id.cancel_tv);
@@ -62,7 +68,7 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
         timePicker = (TimePicker) findViewById(R.id.timePicker);
         onlyWifi_v = findViewById(R.id.only_wifi_v);
         onlyWifi_sw = (SwitchCompat) findViewById(R.id.only_wifi_sw);
-        onlyWifi_sw.setChecked(alarm.isOnlyWifi());
+
         every_tv.setOnClickListener(this);
         at_tv.setOnClickListener(this);
         cancel_tv.setOnClickListener(this);
@@ -77,8 +83,10 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
             @Override
             public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
                 if(alarmType == Var.ALARM_AT) setAtTime(hourOfDay, minute);
-                if(alarmType == Var.ALARM_BEFORE) setBeforeTime(hourOfDay, minute);
-                if(alarmType == Var.ALARM_AFTER) setAfterTime(hourOfDay, minute);
+                if(alarmType == Var.ALARM_BETWEEN) {
+                    if(tabType == ALARM_FROM) setTimeFrom(hourOfDay, minute);
+                    if(tabType == ALARM_TO) setTimeTo(hourOfDay, minute);
+                }
             }
         });
 
@@ -89,31 +97,72 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
             }
         });
 
+        if(alarm.getType() == Var.ALARM_BETWEEN) {
+            onlyWifi_v.setVisibility(View.GONE);
+            every_v.setVisibility(View.GONE);
+            timePicker.setVisibility(View.VISIBLE);
+
+            title_tv.setText("Alarms Between");
+        } else {
+
+            onlyWifi_sw.setChecked(alarm.isOnlyWifi());
+
+        }
+
         setAlarmType(alarm.getType());
 
         show();
     }
 
     private void setAtTime(int hourOfDay, int minute) {
-        at_tv.setText("At "+(hourOfDay < 12? hourOfDay: hourOfDay - 12)+":"+String.format("%02d",  minute) + " " + (hourOfDay >= 12? "pm": "am"));
+        time = (hourOfDay * Var.HOUR_MILLI)+ (minute * Var.MINUTE_MILLI);
+        at_tv.setText("At " + Var.getTimeText(hourOfDay, minute));
     }
 
     private void setEveryTime(int newVal) {
         every_tv.setText("Every " + newVal + " hour" + (newVal == 1 ? "" : "s"));
     }
 
-    private void setBeforeTime(int hourOfDay, int minute) {
-        every_tv.setText("Before "+(hourOfDay < 12? hourOfDay: hourOfDay - 12)+":"+String.format("%02d",  minute) + " " + (hourOfDay >= 12? "pm": "am"));
+    private void setTimeFrom(int hourOfDay, int minute) {
+        time = (hourOfDay * Var.HOUR_MILLI)+ (minute * Var.MINUTE_MILLI);
+        every_tv.setText("From " + Var.getTimeText(hourOfDay, minute));
     }
-    private void setAfterTime(int hourOfDay, int minute) {
-        at_tv.setText("After "+(hourOfDay < 12? hourOfDay: hourOfDay - 12)+":"+String.format("%02d",  minute) + " " + (hourOfDay >= 12? "pm": "am"));
+    private void setTimeTo(int hourOfDay, int minute) {
+        timeBetween = (hourOfDay * Var.HOUR_MILLI)+ (minute * Var.MINUTE_MILLI);
+        at_tv.setText("To "+ Var.getTimeText(hourOfDay, minute));
     }
 
+
+    private void setTabType(int tabType) {
+        this.tabType = tabType;
+        setAlarmType(alarmType);
+    }
 
     private void setAlarmType(int alarmType) {
         this.alarmType = alarmType;
 
-        if(getNotificationType() == Var.NOTIFICATION_ALARM) {
+        if(alarmType == Var.ALARM_BETWEEN) {
+            every_divider.setVisibility(tabType == ALARM_FROM ? View.VISIBLE : View.INVISIBLE);
+            at_divider.setVisibility(tabType == ALARM_TO ? View.VISIBLE : View.INVISIBLE);
+
+            Calendar calFrom = Calendar.getInstance(TimeZone.getTimeZone("UTC"));  // From Time
+            calFrom.setTimeInMillis(time);
+            Calendar calTo = Calendar.getInstance(TimeZone.getTimeZone("UTC"));  // To Time
+            calTo.setTimeInMillis(timeBetween);
+
+            if(tabType == ALARM_FROM) {
+                timePicker.setCurrentHour(calFrom.get(Calendar.HOUR_OF_DAY));
+                timePicker.setCurrentMinute(calFrom.get(Calendar.MINUTE));
+            }
+            setTimeFrom(calFrom.get(Calendar.HOUR_OF_DAY), calFrom.get(Calendar.MINUTE));
+
+            if(tabType == ALARM_TO) {
+                timePicker.setCurrentHour(calTo.get(Calendar.HOUR_OF_DAY));
+                timePicker.setCurrentMinute(calTo.get(Calendar.MINUTE));
+            }
+            setTimeTo(calTo.get(Calendar.HOUR_OF_DAY), calTo.get(Calendar.MINUTE));
+
+        } else {
             every_divider.setVisibility(alarmType == Var.ALARM_EVERY ? View.VISIBLE : View.INVISIBLE);
             at_divider.setVisibility(alarmType == Var.ALARM_AT ? View.VISIBLE : View.INVISIBLE);
 
@@ -121,51 +170,27 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
             timePicker.setVisibility(alarmType == Var.ALARM_AT ? View.VISIBLE : View.INVISIBLE);
 
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            c.setTimeInMillis(alarm.getTime());
+            c.setTimeInMillis(time);
             timePicker.setCurrentHour(c.get(Calendar.HOUR_OF_DAY));
             timePicker.setCurrentMinute(c.get(Calendar.MINUTE));
-            numberPicker.setValue((int) (alarm.getTime() / Var.HOUR_MILLI));
+            numberPicker.setValue((int) (time / Var.HOUR_MILLI));
 
             setAtTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
-            setEveryTime((int) (alarm.getTime() / Var.HOUR_MILLI));
-        }
-        if(getNotificationType() == Var.NOTIFICATION_SLEEP) {
-            every_divider.setVisibility(alarmType == Var.ALARM_BEFORE ? View.VISIBLE : View.INVISIBLE);
-            at_divider.setVisibility(alarmType == Var.ALARM_AFTER ? View.VISIBLE : View.INVISIBLE);
-
-            every_v.setVisibility(View.GONE);
-            timePicker.setVisibility(View.VISIBLE);
-            onlyWifi_v.setVisibility(View.GONE);
-
-            Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            c.setTimeInMillis(alarm.getTime());
-            timePicker.setCurrentHour(c.get(Calendar.HOUR_OF_DAY));
-            timePicker.setCurrentMinute(c.get(Calendar.MINUTE));
-            numberPicker.setValue((int) (alarm.getTime() / Var.HOUR_MILLI));
-
-            setBeforeTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
-            setAfterTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
+            setEveryTime((int) (time / Var.HOUR_MILLI));
         }
     }
 
     @Override
     public void onClick(View v) {
-        if(getNotificationType() == Var.NOTIFICATION_ALARM) {
-            if (every_tv == v) {
-                setAlarmType(Var.ALARM_EVERY);
-            }
-            if (at_tv == v) {
-                setAlarmType(Var.ALARM_AT);
-            }
+
+        if(alarmType == Var.ALARM_BETWEEN) {
+            if (every_tv == v) setTabType(ALARM_FROM);
+            if (at_tv == v) setTabType(ALARM_TO);
+        } else {
+            if (every_tv == v) setAlarmType(Var.ALARM_EVERY);
+            if (at_tv == v) setAlarmType(Var.ALARM_AT);
         }
-        if(getNotificationType() == Var.NOTIFICATION_SLEEP) {
-            if (every_tv == v) {
-                setAlarmType(Var.ALARM_BEFORE);
-            }
-            if (at_tv == v) {
-                setAlarmType(Var.ALARM_AFTER);
-            }
-        }
+
         if(cancel_tv == v) {
             dismiss();
         }
@@ -175,16 +200,13 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
             alarm.setType(alarmType);
             alarm.setEnabled(true);
 
-            if(getNotificationType() == Var.NOTIFICATION_ALARM) alarm.setOnlyWifi(onlyWifi_sw.isChecked());
+            if(alarmType != Var.ALARM_BETWEEN) alarm.setOnlyWifi(onlyWifi_sw.isChecked());
             else alarm.setOnlyWifi(false);
 
-            if(alarmType == Var.ALARM_EVERY) {
-                alarm.setTime(numberPicker.getValue() * Var.HOUR_MILLI);
-            }
+            if(alarmType == Var.ALARM_EVERY) alarm.setTime(numberPicker.getValue() * Var.HOUR_MILLI);
+            else if(alarmType == Var.ALARM_AT || alarmType == Var.ALARM_BETWEEN) alarm.setTime(time);
 
-            if(alarmType == Var.ALARM_AT || alarmType == Var.ALARM_BEFORE || alarmType == Var.ALARM_AFTER) {
-                alarm.setTime((timePicker.getCurrentHour() * Var.HOUR_MILLI )+ (timePicker.getCurrentMinute() * Var.MINUTE_MILLI));
-            }
+            if(alarmType == Var.ALARM_BETWEEN) alarm.setTimeBetween(timeBetween);
 
             act.addAlarm(alarm);
             dismiss();

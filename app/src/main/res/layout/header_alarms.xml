@@ -21,8 +21,20 @@
             android:layout_height="wrap_content"
             android:id="@+id/notification_name_tv"
             android:layout_marginLeft="65dp"
-            android:textColor="@color/dark_gray"
-            android:text="Every Hour"/>
+            android:layout_marginStart="65dp"
+            android:textColor="@color/dark_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/schedule_time_explanation_tv"
+            android:layout_marginLeft="67dp"
+            android:layout_marginStart="67dp"
+            android:textColor="@color/gray_accent"
+            android:textSize="13sp"
+            android:text="@string/schedule_time_example" />
+
 
     </LinearLayout>
 

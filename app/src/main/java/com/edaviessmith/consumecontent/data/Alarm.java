@@ -12,12 +12,13 @@ public class Alarm {
     private boolean enabled;
     private int type;
     private long time;
+    private long timeBetween;
     private boolean onlyWifi;
     private List<Integer> days;
 
     public Alarm(int notificationType) {
         this.enabled = true;
-        this.type = (notificationType == Var.NOTIFICATION_ALARM? Var.ALARM_EVERY: Var.ALARM_BEFORE);
+        this.type = (notificationType == Var.NOTIFICATION_ALARM? Var.ALARM_EVERY: Var.ALARM_BETWEEN);
         this.time = 10800000;       // 3 hours
         this.onlyWifi = false;
 
@@ -33,11 +34,30 @@ public class Alarm {
         this.days = days;
     }
 
+    public Alarm(boolean enabled, int type, long time, long timeBetween, boolean onlyWifi, List<Integer> days) {
+        this.enabled = enabled;
+        this.type = type;
+        this.time = time;
+        this.timeBetween = timeBetween;
+        this.onlyWifi = onlyWifi;
+        this.days = days;
+    }
+
     public Alarm(int id, boolean enabled, int type, long time, boolean onlyWifi, List<Integer> days) {
         this.id = id;
         this.enabled = enabled;
         this.type = type;
         this.time = time;
+        this.onlyWifi = onlyWifi;
+        this.days = days;
+    }
+
+    public Alarm(int id, boolean enabled, int type, long time, long timeBetween, boolean onlyWifi, List<Integer> days) {
+        this.id = id;
+        this.enabled = enabled;
+        this.type = type;
+        this.time = time;
+        this.timeBetween = timeBetween;
         this.onlyWifi = onlyWifi;
         this.days = days;
     }
@@ -74,6 +94,14 @@ public class Alarm {
         this.time = time;
     }
 
+    public long getTimeBetween() {
+        return timeBetween;
+    }
+
+    public void setTimeBetween(long timeBetween) {
+        this.timeBetween = timeBetween;
+    }
+
     public boolean isOnlyWifi() {
         return onlyWifi;
     }
@@ -88,5 +116,12 @@ public class Alarm {
 
     public void setDays(List<Integer> days) {
         this.days = days;
+    }
+
+    public int getDaysUntilNextAlarm(int dayOfWeek) {
+        for(int i=0; i<7; i++) {    //Not including today
+            if(getDays().get((dayOfWeek + i) % 7) == 1) return i;
+        }
+        return -1;
     }
 }

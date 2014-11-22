@@ -35,16 +35,17 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
     Toolbar toolbar;
     List<Notification> notifications;
-    Notification editNotification;
+    Notification editNotification, activeNotification;
     ListView notification_lv, alarm_lv;
     NotificationAdapter notificationAdapter;
     AlarmAdapter alarmAdapter;
 
     Fab add_fab, addAlarm_fab, save_fab;
-    View alarm_v, allNotifications_v, mobileNotifications_v, vibrations_v, playSound_v;
+    View alarm_v, allNotifications_v, mobileNotifications_v, vibrations_v, playSound_v, schedule_v;
     SwitchCompat allNotifications_sw, mobileNotifications_sw, vibrations_sw, playSound_sw;
     boolean isAllNotificationsEnabled, isMobileNotificationsEnabled, isVibrationsEnabled, isPlaySoundEnabled;
     EditText notificationName_tv;
+    TextView scheduleTimeExplanation_tv;
 
     public static final int NOTIFICATIONS_LIST = 0;
     public static final int ALARMS_LIST = 1;
@@ -62,6 +63,9 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         getSupportActionBar().setHomeButtonEnabled(true);
 
         notifications = NotificationORM.getNotifications(this);
+        activeNotification = notifications.get(0);
+        notifications.remove(activeNotification);
+
         editNotification = new Notification();
 
         isAllNotificationsEnabled = Var.getBoolPreference(this, Var.PREF_ALL_NOTIFICATIONS);
@@ -99,8 +103,10 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         playSound_v = header.findViewById(R.id.play_sound_v);
         playSound_sw = (SwitchCompat) header.findViewById(R.id.play_sound_sw);
         playSound_sw.setChecked(isPlaySoundEnabled);
+        schedule_v = header.findViewById(R.id.schedule_v);
 
         notificationName_tv = (EditText) alarmHeader.findViewById(R.id.notification_name_tv);
+        scheduleTimeExplanation_tv = (TextView) alarmHeader.findViewById(R.id.schedule_time_explanation_tv);
 
         save_fab.setOnClickListener(this);
         addAlarm_fab.setOnClickListener(this);
@@ -110,6 +116,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         mobileNotifications_v.setOnClickListener(this);
         vibrations_v.setOnClickListener(this);
         playSound_v.setOnClickListener(this);
+        schedule_v.setOnClickListener(this);
 
         notificationAdapter = new NotificationAdapter(this);
         notification_lv.setAdapter(notificationAdapter);
@@ -133,6 +140,8 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         }
         if(listType == ALARMS_LIST) {
             notificationName_tv.setText(editNotification.getName());
+            notificationName_tv.setEnabled(editNotification.getType() == Var.NOTIFICATION_ALARM);
+            scheduleTimeExplanation_tv.setVisibility(editNotification.getType() == Var.NOTIFICATION_SCHEDULE? View.VISIBLE: View.GONE);
             alarmAdapter.notifyDataSetChanged();
         }
     }
@@ -186,7 +195,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
             Notification notification = getItem(position);
             if(notification.getType() == Var.NOTIFICATION_ALARM) holder.icon_iv.setImageResource(R.drawable.ic_alarm_grey600_36dp);
-            if(notification.getType() == Var.NOTIFICATION_SLEEP) holder.icon_iv.setImageResource(R.drawable.ic_alarm_off_grey600_36dp);
+            if(notification.getType() == Var.NOTIFICATION_SCHEDULE) holder.icon_iv.setImageResource(R.drawable.ic_alarm_off_grey600_36dp);
             holder.name_tv.setText(notification.getName());
 
             return convertView;
@@ -250,6 +259,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
                     new AlarmDialog(NotificationsActivity.this, alarm);
                 }
             });
+            holder.time_tv.setTextSize(alarm.getType() == Var.ALARM_BETWEEN? 18: 26);
 
             holder.onlyWifi_iv.setVisibility(alarm.isOnlyWifi()? View.VISIBLE: View.GONE);
 
@@ -268,8 +278,20 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
                 public void onClick(View v) {
                     int day = getDayIndex((ToggleButton) v);
                     List<Integer> days = getItem(position).getDays();
-                    days.set(day, (days.get(day) == 1 ? 0 : 1));   //Toggle opposite
-                    holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTime(alarm): "disabled");
+
+                    if(editNotification.getType() == Var.NOTIFICATION_SCHEDULE) {  //Toggle off other alarms for this day
+                        if(days.get(day) == 0) {
+                            for(Alarm a : editNotification.getAlarms()) {
+                                a.getDays().set(day, 0);
+                            }
+                            days.set(day, 1);
+                        }
+                        notifyDataSetChanged();
+                    } else {
+                        days.set(day, (days.get(day) == 1 ? 0 : 1));   //Toggle opposite
+                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, activeNotification) : "disabled");
+                    }
+
                 }
             };
 
@@ -285,11 +307,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             holder.enabled_sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTime(alarm): "disabled");
+                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, activeNotification): "disabled");
                 }
             });
 
-            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTime(alarm): "disabled");
+            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, activeNotification): "disabled");
 
 
             holder.delete_iv.setOnClickListener(new View.OnClickListener() {
@@ -387,7 +409,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             //TODO: Make sure data works before trying to save
             NotificationORM.saveNotification(this, editNotification);
 
-            if(!notifications.contains(editNotification)) notifications.add(editNotification);
+            if(!notifications.contains(editNotification) && editNotification.getType() == Var.NOTIFICATION_ALARM) notifications.add(editNotification);
             alarmAdapter.notifyDataSetChanged();
 
             toggleList(NOTIFICATIONS_LIST);
@@ -421,6 +443,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             isPlaySoundEnabled = !isPlaySoundEnabled;
             Var.setBoolPreference(this, Var.PREF_PLAY_SOUND, isPlaySoundEnabled);
             playSound_sw.setChecked(isPlaySoundEnabled);
+        }
+
+        if(schedule_v == v) {
+            editNotification = activeNotification;
+            toggleList(ALARMS_LIST);
         }
 
     }

@@ -55,10 +55,9 @@ public class DB extends SQLiteOpenHelper {
             add(1); add(1); add(1); add(1); add(1); add(1); add(1);
         }};
 
-        final List<Alarm> silenceAlarms = new ArrayList<Alarm>() {{
-            add(new Alarm(true, Var.ALARM_BEFORE, 32400000, false, weekdays));
-            add(new Alarm(true, Var.ALARM_AFTER, 84900000, false, weekdays));
-            add(new Alarm(true, Var.ALARM_BEFORE, 25200000, false, weekends));
+        final List<Alarm> scheduleAlarms = new ArrayList<Alarm>() {{
+            add(new Alarm(true, Var.ALARM_BETWEEN, 28800000, 84900000, false, weekdays));
+            add(new Alarm(true, Var.ALARM_BETWEEN, 25200000, 86400000, false, weekends));
         }};
 
         final List<Alarm> hourlyAlarms = new ArrayList<Alarm>() {{
@@ -79,7 +78,7 @@ public class DB extends SQLiteOpenHelper {
         }};
 
         List<Notification> notifications = new ArrayList<Notification>(){{
-            add( new Notification("Silent", Var.NOTIFICATION_SLEEP, silenceAlarms));
+            add(new Notification("Schedule Time", Var.NOTIFICATION_SCHEDULE, scheduleAlarms));
             add(new Notification("Hourly on Wifi", Var.NOTIFICATION_ALARM, hourlyAlarms));
             add(new Notification("Every few hours", Var.NOTIFICATION_ALARM, fewHoursAlarms));
             add(new Notification("Busy week, free weekends", Var.NOTIFICATION_ALARM, busyWeekAlarms));
@@ -141,6 +140,7 @@ public class DB extends SQLiteOpenHelper {
 
     static final String COL_ENABLED = "enabled";
     static final String COL_TIME = "time";
+    static final String COL_TIME_BETWEEN = "time_between";
     static final String COL_DAYS = "days";
     static final String COL_ONLY_WIFI = "only_wifi";
 

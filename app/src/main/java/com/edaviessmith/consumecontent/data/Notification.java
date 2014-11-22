@@ -63,4 +63,21 @@ public class Notification {
     public void setAlarms(List<Alarm> alarms) {
         this.alarms = alarms;
     }
+
+    //Used by schedule notification
+    public Alarm getAlarmForDay(int dayOfWeek) {
+        for(Alarm alarm: getAlarms()) {
+            if(alarm.getDays().get(dayOfWeek) == 1) return alarm;
+        }
+        return null;
+    }
+
+    public int getDaysUntilNextAlarm(int dayOfWeek) {
+        for(int i=0; i<7; i++) {    //Not including today
+            for(Alarm alarm: getAlarms()) {
+                if(alarm.getDays().get((dayOfWeek + i) % 7) == 1) return i;
+            }
+        }
+        return -1;
+    }
 }

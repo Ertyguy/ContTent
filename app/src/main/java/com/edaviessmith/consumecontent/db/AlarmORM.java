@@ -20,6 +20,7 @@ public class AlarmORM {
             DB.COL_ENABLED          + " INTEGER, " +
             DB.COL_TYPE             + " INTEGER, " +
             DB.COL_TIME             + " INTEGER, " +
+            DB.COL_TIME_BETWEEN     + " INTEGER, " +
             DB.COL_ONLY_WIFI        + " INTEGER, " +
             DB.COL_DAYS             + " TEXT, "     +
             "FOREIGN KEY("+DB.COL_NOTIFICATION +") REFERENCES "+DB.TABLE_NOTIFICATION+"("+DB.COL_ID+")" +");";
@@ -73,6 +74,7 @@ public class AlarmORM {
         values.put(DB.COL_ENABLED, alarm.isEnabled());
         values.put(DB.COL_TYPE, alarm.getType());
         values.put(DB.COL_TIME, alarm.getTime());
+        values.put(DB.COL_TIME_BETWEEN, alarm.getTimeBetween());
         values.put(DB.COL_ONLY_WIFI, alarm.isOnlyWifi());
         values.put(DB.COL_DAYS, DB.integerListToString(alarm.getDays()));
         return values;
@@ -82,7 +84,8 @@ public class AlarmORM {
         return new Alarm(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
                         (cursor.getInt(cursor.getColumnIndex(DB.COL_ENABLED)) == 1),
                          cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
-                         cursor.getLong(cursor.getColumnIndex(DB.COL_TIME)),
+                        cursor.getLong(cursor.getColumnIndex(DB.COL_TIME)),
+                        cursor.getLong(cursor.getColumnIndex(DB.COL_TIME_BETWEEN)),
                         (cursor.getInt(cursor.getColumnIndex(DB.COL_ONLY_WIFI)) == 1),
                         DB.stringToIntegerList(cursor.getString(cursor.getColumnIndex(DB.COL_DAYS))) );
     }

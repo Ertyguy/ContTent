@@ -14,6 +14,7 @@ import android.util.Log;
 import android.util.TypedValue;
 
 import com.edaviessmith.consumecontent.data.Alarm;
+import com.edaviessmith.consumecontent.data.Notification;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -60,11 +61,10 @@ public class Var {
 
     //Notification
     public static final int NOTIFICATION_ALARM = 0;
-    public static final int NOTIFICATION_SLEEP = 1;
+    public static final int NOTIFICATION_SCHEDULE = 1;
     public static final int ALARM_AT = 0;
     public static final int ALARM_EVERY = 1;
-    public static final int ALARM_BEFORE = 2; //Sleep alarms
-    public static final int ALARM_AFTER = 3;
+    public static final int ALARM_BETWEEN = 2; // Alarm Range
 
     //Handler (currently not used)
     public static final int HANDLER_COMPLETE = 0;
@@ -371,15 +371,12 @@ public class Var {
 
     public static String getAlarmText(Alarm alarm) {
 
-        if(alarm.getType() == Var.ALARM_AT || alarm.getType() == Var.ALARM_BEFORE || alarm.getType() == Var.ALARM_AFTER) {
+        if(alarm.getType() == Var.ALARM_AT) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             c.setTimeInMillis(alarm.getTime());
             int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
 
-            String ret = "At ";
-            if(alarm.getType() == Var.ALARM_BEFORE)   ret = "Before ";
-            if(alarm.getType() == Var.ALARM_AFTER)   ret = "After ";
-            return ret +(hourOfDay <= 12? hourOfDay: hourOfDay - 12)+":"+String.format("%02d",  c.get(Calendar.MINUTE)) + " " + (hourOfDay >= 12? "pm": "am");
+            return "At " + Var.getTimeText(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
         }
 
         if(alarm.getType() == Var.ALARM_EVERY) {
@@ -387,73 +384,79 @@ public class Var {
             return "Every " + hour + " hour" + (hour == 1 ? "" : "s");
         }
 
+        if(alarm.getType() == Var.ALARM_BETWEEN) {
+            Calendar from = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            from.setTimeInMillis(alarm.getTime());
+
+            Calendar to = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            to.setTimeInMillis(alarm.getTimeBetween());
+
+            return "From " + Var.getTimeText(from.get(Calendar.HOUR_OF_DAY), from.get(Calendar.MINUTE))
+                  + " to " + Var.getTimeText(to.get(Calendar.HOUR_OF_DAY), to.get(Calendar.MINUTE));
+
+        }
+
         return "";
     }
 
+    public static String getTimeText(int hour, int minute) {
+        return (hour < 13? (hour == 0? 12: hour): hour - 12)+":"+String.format("%02d",  minute) + " " + (hour >= 12? "pm": "am");
+    }
 
-    //TODO doesn't account for sleep time or day of the week
-    public static String getNextAlarmTime(Alarm alarm) {
+    public static String getNextAlarmTimeText(Alarm alarm, Notification notificationSchedule) {
 
         Calendar now = Calendar.getInstance(Locale.getDefault());
         Calendar when = Calendar.getInstance(Locale.getDefault());
 
-        if(alarm.getType() == Var.ALARM_AT || alarm.getType() == Var.ALARM_BEFORE || alarm.getType() == Var.ALARM_AFTER) {
+        int today = now.get(Calendar.DAY_OF_WEEK) - 1;
+
+        if(alarm.getType() == Var.ALARM_AT) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             c.setTimeInMillis(alarm.getTime());
 
-            when = (Calendar) now.clone();
             when.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
             when.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
         }
 
         if(alarm.getType() == Var.ALARM_EVERY) {
-            Calendar today = (Calendar) now.clone();
-            today.set(Calendar.MINUTE, 0);
+            Calendar calToday = (Calendar) now.clone(); //Get absolute day and add relative time increment for next alarm
+            Calendar nextAlarm = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            nextAlarm.clear();
 
-            int next = (int) (today.get(Calendar.HOUR_OF_DAY) % (alarm.getTime() / Var.HOUR_MILLI));
+            int next = (int) (calToday.get(Calendar.HOUR_OF_DAY) % (alarm.getTime() / Var.HOUR_MILLI));
+            nextAlarm.set(Calendar.HOUR_OF_DAY, calToday.get(Calendar.HOUR_OF_DAY) + (next > 0? next: (int) (alarm.getTime() / Var.HOUR_MILLI)));
 
-            when = (Calendar) now.clone();
-            when.set(Calendar.HOUR_OF_DAY, today.get(Calendar.HOUR_OF_DAY) + (next > 0? next: (int) (alarm.getTime() / Var.HOUR_MILLI)));
-            when.set(Calendar.MINUTE, 0);
+            calToday.set(Calendar.HOUR_OF_DAY, 0);
+            calToday.set(Calendar.MINUTE, 0);
+
+            int daysUntilNextAlarm = alarm.getDaysUntilNextAlarm(today);
+
+            int daysUntilNextSchedule = 0;
+            Alarm scheduleAlarm = notificationSchedule.getAlarmForDay((today + daysUntilNextAlarm) % 7);   //Get today's schedule
+            if(scheduleAlarm == null || nextAlarm.getTimeInMillis() > (scheduleAlarm.getTimeBetween() == 0 ? Var.HOUR_MILLI * 24: scheduleAlarm.getTimeBetween())) { //No alarm or we pass it's end time
+                daysUntilNextSchedule = notificationSchedule.getDaysUntilNextAlarm((today + daysUntilNextAlarm) % 7);
+                scheduleAlarm = notificationSchedule.getAlarmForDay((today + daysUntilNextAlarm+ daysUntilNextSchedule) % 7);    //Get next alarm in schedule
+            }
+            if((nextAlarm.getTimeInMillis() < scheduleAlarm.getTime()) || ((daysUntilNextAlarm + daysUntilNextSchedule) > 0)) { // Alarm is before next schedule or the schedule is not today
+                when.setTimeInMillis(calToday.getTimeInMillis() + scheduleAlarm.getTime() + (alarm.getTime() - (scheduleAlarm.getTime() % alarm.getTime()))); //Start of next alarm
+                when.set(Calendar.DAY_OF_YEAR, now.get(Calendar.DAY_OF_YEAR) + daysUntilNextSchedule);
+            } else {
+                when.setTimeInMillis(calToday.getTimeInMillis() + nextAlarm.getTimeInMillis()); //Today + in how many hours
+                Log.d(TAG, "nextAlarm : "+Var.getTimeText(nextAlarm.get(Calendar.HOUR_OF_DAY), nextAlarm.get(Calendar.MINUTE)));
+            }
+            Log.d(TAG, "day alarm set with"+daysUntilNextSchedule+" - "+ Var.getTimeText(when.get(Calendar.HOUR_OF_DAY), when.get(Calendar.MINUTE)));
+
         }
 
-        int today = now.get(Calendar.DAY_OF_WEEK) - 1;
+
         Log.d(TAG, getAlarmText(alarm)+" today: "+ Var.DAYS[today+2]);
         for(int day = now.before(when)? 0: 1; day < 7; day++) {
             if(alarm.getDays().get((day + today) % 7) == 1) { //Next day alarm will go off
                 when.add(Calendar.DAY_OF_YEAR, (day));
-                Log.d(TAG, "when: "+ Var.DAYS[((day + today) % 7)+2] + " days: "+ (when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)));
+                Log.d(TAG, "when: " + Var.DAYS[((day + today) % 7) + 2] + " days: " + (when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)));
                 break;
             }
         }
-
-        /*int today = now.get(Calendar.DAY_OF_WEEK) - 1;
-        for(int day = today; day < today + 7; day++) {
-            if(alarm.getDays().get(day % 7) == 1) { //Next day alarm will go off
-                when.add(Calendar.DAY_OF_YEAR, (day - today) + (now.before(when)? 0: 1));
-                break;
-            }
-        }*/
-
-        /*int days = when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR);
-        int hours = (when.get(Calendar.HOUR_OF_DAY)) *//*+ (now.before(when)? 0: 24))*//* - now.get(Calendar.HOUR_OF_DAY);
-        int minutes = when.get(Calendar.MINUTE) - now.get(Calendar.MINUTE);
-        if(minutes < 0) {
-            hours --;
-            //minutes = 60 - minutes;
-        }
-        if(minutes > 59) {
-            hours ++;
-            //minutes -= 60;
-        }
-
-        String time = "in ";
-        if(days > 0) time += days+" day"+(days == 1? "":"s");
-        if(days > 0 && (hours > 0 || minutes > 0)) time += " and ";
-        if(hours > 0) time += hours+" hour"+(hours == 1? "":"s");
-        if(hours > 0 && minutes > 0) time += " and ";
-        if(minutes > 0) time += minutes+" minute"+(minutes == 1? "":"s");
-*/
 
         Calendar nextAlarm = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         nextAlarm.setTimeInMillis(when.getTimeInMillis() - now.getTimeInMillis());
@@ -470,7 +473,7 @@ public class Var {
         if(hours > 0 && minutes > 0) time += " and ";
         if(minutes > 0) time += minutes+" minute"+(minutes == 1? "":"s");
 
-
-        return time;
+        if(days > 0 || hours > 0 || minutes > 0) return time;
+        return "never";
     }
 }
