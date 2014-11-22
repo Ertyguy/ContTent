@@ -56,6 +56,39 @@ public class MediaFeedORM {
 
     }
 
+    public static List<YoutubeFeed> getMediaFeedsByNotificationId(Context context, int notificationId) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+        List<YoutubeFeed> mediaFeeds = new ArrayList<YoutubeFeed>();
+
+        database.beginTransaction();
+        try {
+            Cursor cursor = database.query(false, DB.TABLE_MEDIA_FEED, null, DB.COL_NOTIFICATION + " = " + notificationId, null, null, null, DB.ORDER_BY_SORT, null);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
+                    YoutubeFeed youtubeFeed = (YoutubeFeed) cursorToMediaFeed(cursor, type);
+
+                    youtubeFeed.setItems(YoutubeItemORM.getYoutubeItems(database, youtubeFeed.getId()));
+
+                    mediaFeeds.add(youtubeFeed);
+                    cursor.moveToNext();
+                }
+            }
+
+            database.setTransactionSuccessful();
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+            database.close();
+        }
+        return mediaFeeds;
+
+    }
+
     public static MediaFeed getMediaFeed(SQLiteDatabase database, int mediaFeedId) {
 
         Cursor cursor = database.query(false, DB.TABLE_MEDIA_FEED, null,  DB.COL_ID + " = " + mediaFeedId, null, null, null, null, null);

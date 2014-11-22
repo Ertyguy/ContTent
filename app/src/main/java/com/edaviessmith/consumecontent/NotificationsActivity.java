@@ -35,7 +35,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
     Toolbar toolbar;
     List<Notification> notifications;
-    Notification editNotification, activeNotification;
+    Notification editNotification, scheduleNotification;
     ListView notification_lv, alarm_lv;
     NotificationAdapter notificationAdapter;
     AlarmAdapter alarmAdapter;
@@ -63,8 +63,8 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         getSupportActionBar().setHomeButtonEnabled(true);
 
         notifications = NotificationORM.getNotifications(this);
-        activeNotification = notifications.get(0);
-        notifications.remove(activeNotification);
+        scheduleNotification = notifications.get(0);
+        notifications.remove(scheduleNotification);
 
         editNotification = new Notification();
 
@@ -289,7 +289,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
                         notifyDataSetChanged();
                     } else {
                         days.set(day, (days.get(day) == 1 ? 0 : 1));   //Toggle opposite
-                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, activeNotification) : "disabled");
+                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, scheduleNotification) : "disabled");
                     }
 
                 }
@@ -307,11 +307,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             holder.enabled_sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, activeNotification): "disabled");
+                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, scheduleNotification): "disabled");
                 }
             });
 
-            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, activeNotification): "disabled");
+            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, scheduleNotification): "disabled");
 
 
             holder.delete_iv.setOnClickListener(new View.OnClickListener() {
@@ -446,7 +446,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         }
 
         if(schedule_v == v) {
-            editNotification = activeNotification;
+            editNotification = scheduleNotification;
             toggleList(ALARMS_LIST);
         }
 

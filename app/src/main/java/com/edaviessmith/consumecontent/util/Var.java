@@ -35,6 +35,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -79,15 +80,16 @@ public class Var {
 
 
     static public final String NOTIFY_ACTION = "notify_action";
+    static public final String NOTIFY_NOTIFICATION_ID = "notification_id";
 
     //Time Variables
-    static SimpleDateFormat length =  new SimpleDateFormat("mm:ss", Locale.getDefault());
-    static SimpleDateFormat lengthHour =  new SimpleDateFormat("k:mm:ss", Locale.getDefault());
+    static SimpleDateFormat length = new SimpleDateFormat("mm:ss", Locale.getDefault());
+    static SimpleDateFormat lengthHour = new SimpleDateFormat("k:mm:ss", Locale.getDefault());
     public static DateFormat stringDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
     public static DateFormat simpleDate = new SimpleDateFormat("MMM dd k:mm a", Locale.getDefault());
 
-    public static final Long HOUR_MILLI = 3600000L ;
-    public static final Long MINUTE_MILLI = 60000L ;
+    public static final Long HOUR_MILLI = 3600000L;
+    public static final Long MINUTE_MILLI = 60000L;
 
     public static final int DATE_DAY = 0;
     public static final int DATE_THIS_WEEK = 1;
@@ -105,7 +107,8 @@ public class Var {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         return (int) TypedValue.applyDimension(unit, size, metrics);
     }
-    public static int getDp(int px)  {
+
+    public static int getDp(int px) {
         return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 
@@ -133,22 +136,30 @@ public class Var {
                 StringBuilder sb = new StringBuilder();
                 String line;
                 try {
-                    while ((line = reader.readLine()) != null)  sb.append(line + "\n");
+                    while ((line = reader.readLine()) != null) sb.append(line + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    try { instream.close(); }
-                    catch (IOException e) { e.printStackTrace(); }
+                    try {
+                        instream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return sb.toString().trim();
             }
 
 
-        } catch (Exception e) { e.printStackTrace();  Log.e("GetData", "error in http Request"); }
-        finally{
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("GetData", "error in http Request");
+        } finally {
             if (reader != null)
-                try { reader.close(); }
-                catch (IOException e) { e.printStackTrace(); }
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
         return null;
     }
@@ -172,41 +183,68 @@ public class Var {
                 StringBuilder sb = new StringBuilder();
                 String line;
                 try {
-                    while ((line = reader.readLine()) != null)  sb.append(line + "\n");
+                    while ((line = reader.readLine()) != null) sb.append(line + "\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    try { instream.close(); }
-                    catch (IOException e) { e.printStackTrace(); }
+                    try {
+                        instream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return sb.toString().trim();
             }
-        } catch (Exception e) { e.printStackTrace();  Log.e("GetData", "error in http Request"); }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("GetData", "error in http Request");
+        }
         return null;
     }
 
     // Validate JSON when parsing
     public static boolean isJsonString(JSONObject jObj, String jObjKey) {
         boolean isValid = false;
-        try { if (jObj.has(jObjKey) && !jObj.isNull(jObjKey)  && (jObj.getString(jObjKey) instanceof String)) isValid = true; }
-        catch (JSONException e) { e.printStackTrace(); Log.e("isJsonString", "JSONException jObjKey:" + jObjKey); }
-        catch (Exception e) { e.printStackTrace(); Log.e("isJsonString", "Exception jObjKey:" + jObjKey); }
+        try {
+            if (jObj.has(jObjKey) && !jObj.isNull(jObjKey) && (jObj.getString(jObjKey) instanceof String))
+                isValid = true;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("isJsonString", "JSONException jObjKey:" + jObjKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("isJsonString", "Exception jObjKey:" + jObjKey);
+        }
         return isValid;
     }
 
     public static boolean isJsonObject(JSONObject jObj, String jObjKey) {
         boolean isValid = false;
-        try { if (jObj.has(jObjKey) && !jObj.isNull(jObjKey)  && (jObj.getJSONObject(jObjKey) instanceof JSONObject)) isValid = true; }
-        catch (JSONException e) { e.printStackTrace(); Log.e("isJSONObject", "JSONException jObjKey:" + jObjKey); }
-        catch (Exception e) { e.printStackTrace(); Log.e("isJsonObject", "Exception jObjKey:" + jObjKey); }
+        try {
+            if (jObj.has(jObjKey) && !jObj.isNull(jObjKey) && (jObj.getJSONObject(jObjKey) instanceof JSONObject))
+                isValid = true;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("isJSONObject", "JSONException jObjKey:" + jObjKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("isJsonObject", "Exception jObjKey:" + jObjKey);
+        }
         return isValid;
     }
 
     public static boolean isJsonArray(JSONObject jObj, String jObjKey) {
         boolean isValid = false;
-        try { if (jObj.has(jObjKey) && !jObj.isNull(jObjKey)  && (jObj.getJSONArray(jObjKey) instanceof JSONArray)) isValid = true; }
-        catch (JSONException e) {  e.printStackTrace(); Log.e("isJSONArray", "JSONException jObjKey:" + jObjKey); }
-        catch (Exception e) {  e.printStackTrace(); Log.e("isJsonArray", "Exception jObjKey:" + jObjKey); }
+        try {
+            if (jObj.has(jObjKey) && !jObj.isNull(jObjKey) && (jObj.getJSONArray(jObjKey) instanceof JSONArray))
+                isValid = true;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("isJSONArray", "JSONException jObjKey:" + jObjKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("isJsonArray", "Exception jObjKey:" + jObjKey);
+        }
         return isValid;
     }
 
@@ -218,7 +256,7 @@ public class Var {
     public static String getTimeSince(long publishedDate) {
         String date = "";
 
-        if(publishedDate <= 0) {
+        if (publishedDate <= 0) {
             //date = context.getResources().getString(R.string.loading_date);
         } else {
             Calendar cal = Calendar.getInstance();
@@ -226,56 +264,69 @@ public class Var {
 
             Calendar now = Calendar.getInstance();
             SimpleDateFormat s;
-            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
+            if (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)) {
                 date = "Today at ";
-                s =  new SimpleDateFormat("h:mm a", Locale.getDefault());
+                s = new SimpleDateFormat("h:mm a", Locale.getDefault());
             } else {
-                if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.DAY_OF_YEAR))+1) == now.get(Calendar.DAY_OF_YEAR)) {
+                if (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.DAY_OF_YEAR)) + 1) == now.get(Calendar.DAY_OF_YEAR)) {
                     return "Yesterday";
                 }
                 s = new SimpleDateFormat("MMMM d", Locale.getDefault());
 
             }
-            date += s.format(publishedDate*1000);
+            date += s.format(publishedDate * 1000);
         }
 
         return date;
     }
 
-    public static void setNextAlarm(Context context) {
 
-        if(getBoolPreference(context, Var.PREF_ALL_NOTIFICATIONS)) {
+    public static void setNextAlarm(Context context, List<Notification> notifications, Notification scheduleNotification) {
+
+        if (getBoolPreference(context, Var.PREF_ALL_NOTIFICATIONS)) {
             Intent intent = new Intent(context, AlarmBroadcastReceiver.class);
             intent.setAction(Var.NOTIFY_ACTION);
             boolean alarmActive = (PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE) != null);
 
             //If alarm isn't already active create a new alarm
-            if(!alarmActive) {
+            if (!alarmActive) {
                 try {
-                    long minutes = 0L;//getMinutes();
-                    //BugSenseHandler.addCrashExtraData("Members", "Alarm Minutes set to "+minutes);
-                    if(minutes != 0L) {
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-                        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                        //BugSenseHandler.addCrashExtraData("Members", "Alarm Pending");
-                        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + minutes, pendingIntent);
-                        Log.d("Util", "AlarmManager update was set to run in "+ (minutes / 60000) + " minutes");
-                    } else {
-                        Log.d("Util", "Alarm time set to never");
+                    int notificationId = -1; //Send id in intent to know which notification to update
+                    Alarm nextAlarm = null; //for debug log
+                    Calendar nextAlarmTime = null;
+
+                    for(Notification notification: notifications) {
+                        for(Alarm alarm: notification.getAlarms()){
+                            Calendar alarmTime = Var.getNextAlarmTime(alarm, scheduleNotification);
+                            if(nextAlarmTime == null || alarmTime.before(nextAlarmTime)) {
+                                notificationId = notification.getId();
+                                nextAlarmTime = alarmTime;
+                                nextAlarm = alarm;
+                            }
+                        }
                     }
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace(); // in case you want to see the stacktrace in your log cat output
-                    //Toast.makeText(context, "Unable to start Notifications", Toast.LENGTH_SHORT).show();
-                    //BugSenseHandler.addCrashExtraData("Exception", "Alarm exception");
-                    //BugSenseHandler.sendException(ex);
+
+
+                    if (nextAlarmTime != null) {
+                        intent.putExtra(Var.NOTIFY_NOTIFICATION_ID, notificationId);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+                        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                        alarmManager.set(AlarmManager.RTC, nextAlarmTime.getTimeInMillis(), pendingIntent);
+                        Log.d(TAG, "AlarmManager update was set to run at " + Var.getNextAlarmTimeText(nextAlarm, scheduleNotification));
+                    } else {
+                        Log.d(TAG, "Alarm time set to never");
+                    }
+
+
+                } catch (Exception e) {
+                    e.printStackTrace(); // in case you want to see the stacktrace in your log cat output
                 }
             } else {
-                Log.d("Util", "AlarmManager already active");
+                Log.d(TAG, "AlarmManager already active");
             }
         }
     }
-
 
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
@@ -283,24 +334,24 @@ public class Var {
     //Third return integer is for year value
     public static int[] getTimeCategory(long publishedDate) {
 
-        if(publishedDate > 0) {
+        if (publishedDate > 0) {
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(publishedDate);
 
             Calendar now = Calendar.getInstance();
-            if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR) <= 4)) {
+            if (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR) <= 4)) {
                 int days = now.get(Calendar.DAY_OF_YEAR) - cal.get(Calendar.DAY_OF_YEAR);
-                if(days <0) days = 0;
-                return new int[] {Var.DATE_DAY, (days < 2) ? days: (cal.get(Calendar.DAY_OF_WEEK) + 1)};
+                if (days < 0) days = 0;
+                return new int[]{Var.DATE_DAY, (days < 2) ? days : (cal.get(Calendar.DAY_OF_WEEK) + 1)};
             } else {
-                if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
-                    return new int[] {Var.DATE_THIS_WEEK};
+                if (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && (cal.get(Calendar.WEEK_OF_YEAR)) == now.get(Calendar.WEEK_OF_YEAR)) {
+                    return new int[]{Var.DATE_THIS_WEEK};
                 } else {
-                    if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.WEEK_OF_YEAR)+1)) == now.get(Calendar.WEEK_OF_YEAR)) {
-                        return new int[] {Var.DATE_LAST_WEEK};
+                    if (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) && ((cal.get(Calendar.WEEK_OF_YEAR) + 1)) == now.get(Calendar.WEEK_OF_YEAR)) {
+                        return new int[]{Var.DATE_LAST_WEEK};
                     } else {
-                        if(cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) ) {
-                            return new int[] {Var.DATE_MONTH, cal.get(Calendar.MONTH)};
+                        if (cal.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
+                            return new int[]{Var.DATE_MONTH, cal.get(Calendar.MONTH)};
                         } else {
                             return new int[]{Var.DATE_MONTH, cal.get(Calendar.MONTH), cal.get(Calendar.YEAR)};
                         }
@@ -309,22 +360,24 @@ public class Var {
             }
         }
 
-        return new int[] {Var.DATE_DAY, 0};
+        return new int[]{Var.DATE_DAY, 0};
     }
 
 
     public static String getStringFromDuration(String youtubeDuration) {
         String formatDate = "'PT'";
-        if(youtubeDuration.contains("H")) formatDate += "h'H'";
-        if(youtubeDuration.contains("M")) formatDate += "mm'M'";
-        if(youtubeDuration.contains("S")) formatDate += "ss'S'";
+        if (youtubeDuration.contains("H")) formatDate += "h'H'";
+        if (youtubeDuration.contains("M")) formatDate += "mm'M'";
+        if (youtubeDuration.contains("S")) formatDate += "ss'S'";
         DateFormat df = new SimpleDateFormat(formatDate);
         try {
             Date d = df.parse(youtubeDuration);
-            if((d.getTime() + TimeZone.getDefault().getRawOffset()) < 3600000) return length.format(d); //Only show hour if that long  //Remove stupid default local (+5 for me)
+            if ((d.getTime() + TimeZone.getDefault().getRawOffset()) < 3600000)
+                return length.format(d); //Only show hour if that long  //Remove stupid default local (+5 for me)
             else return lengthHour.format(d);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        catch (Exception e) { e.printStackTrace(); }
         return null;
     }
 
@@ -337,12 +390,12 @@ public class Var {
 
     public static String displayViews(int views) {
 
-        if(views > 1000000) {
+        if (views > 1000000) {
             return (views / 1000000) + "M views";
-        } else if(views > 1000) {
+        } else if (views > 1000) {
             return (views / 1000) + "K views";
         } else {
-            return (views == 301? views+"+": views) + " views";
+            return (views == 301 ? views + "+" : views) + " views";
         }
 
     }
@@ -364,14 +417,14 @@ public class Var {
     }
 
     private static boolean getPrefDefault(String pref) {
-        if(pref.equals(Var.PREF_PLAY_SOUND)) return false;
+        if (pref.equals(Var.PREF_PLAY_SOUND)) return false;
         return true;
     }
 
 
     public static String getAlarmText(Alarm alarm) {
 
-        if(alarm.getType() == Var.ALARM_AT) {
+        if (alarm.getType() == Var.ALARM_AT) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             c.setTimeInMillis(alarm.getTime());
             int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
@@ -379,12 +432,12 @@ public class Var {
             return "At " + Var.getTimeText(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
         }
 
-        if(alarm.getType() == Var.ALARM_EVERY) {
+        if (alarm.getType() == Var.ALARM_EVERY) {
             int hour = (int) (alarm.getTime() / Var.HOUR_MILLI);
             return "Every " + hour + " hour" + (hour == 1 ? "" : "s");
         }
 
-        if(alarm.getType() == Var.ALARM_BETWEEN) {
+        if (alarm.getType() == Var.ALARM_BETWEEN) {
             Calendar from = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             from.setTimeInMillis(alarm.getTime());
 
@@ -392,7 +445,7 @@ public class Var {
             to.setTimeInMillis(alarm.getTimeBetween());
 
             return "From " + Var.getTimeText(from.get(Calendar.HOUR_OF_DAY), from.get(Calendar.MINUTE))
-                  + " to " + Var.getTimeText(to.get(Calendar.HOUR_OF_DAY), to.get(Calendar.MINUTE));
+                    + " to " + Var.getTimeText(to.get(Calendar.HOUR_OF_DAY), to.get(Calendar.MINUTE));
 
         }
 
@@ -400,17 +453,37 @@ public class Var {
     }
 
     public static String getTimeText(int hour, int minute) {
-        return (hour < 13? (hour == 0? 12: hour): hour - 12)+":"+String.format("%02d",  minute) + " " + (hour >= 12? "pm": "am");
+        return (hour < 13 ? (hour == 0 ? 12 : hour) : hour - 12) + ":" + String.format("%02d", minute) + " " + (hour >= 12 ? "pm" : "am");
     }
 
     public static String getNextAlarmTimeText(Alarm alarm, Notification notificationSchedule) {
+
+        Calendar nextAlarm = Var.getNextAlarmTime(alarm, notificationSchedule);
+
+        int days = nextAlarm.get(Calendar.DAY_OF_YEAR) - 1;
+        int hours = nextAlarm.get(Calendar.HOUR_OF_DAY);
+        int minutes = nextAlarm.get(Calendar.MINUTE);
+
+        String time = "in ";
+        if (days > 0) time += days + " day" + (days == 1 ? "" : "s");
+        if (days > 0 && hours > 0 && minutes > 0) time += ", ";
+        else if (days > 0 && hours > 0 && minutes == 0 || days > 0 && minutes > 0) time += " and ";
+        if (hours > 0) time += hours + " hour" + (hours == 1 ? "" : "s");
+        if (hours > 0 && minutes > 0) time += " and ";
+        if (minutes > 0) time += minutes + " minute" + (minutes == 1 ? "" : "s");
+
+        if (days > 0 || hours > 0 || minutes > 0) return time;
+        return "never";
+    }
+
+    public static Calendar getNextAlarmTime(Alarm alarm, Notification scheduleNotification) {
 
         Calendar now = Calendar.getInstance(Locale.getDefault());
         Calendar when = Calendar.getInstance(Locale.getDefault());
 
         int today = now.get(Calendar.DAY_OF_WEEK) - 1;
 
-        if(alarm.getType() == Var.ALARM_AT) {
+        if (alarm.getType() == Var.ALARM_AT) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             c.setTimeInMillis(alarm.getTime());
 
@@ -418,13 +491,13 @@ public class Var {
             when.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
         }
 
-        if(alarm.getType() == Var.ALARM_EVERY) {
+        if (alarm.getType() == Var.ALARM_EVERY) {
             Calendar calToday = (Calendar) now.clone(); //Get absolute day and add relative time increment for next alarm
             Calendar nextAlarm = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             nextAlarm.clear();
 
             int next = (int) (calToday.get(Calendar.HOUR_OF_DAY) % (alarm.getTime() / Var.HOUR_MILLI));
-            nextAlarm.set(Calendar.HOUR_OF_DAY, calToday.get(Calendar.HOUR_OF_DAY) + (next > 0? next: (int) (alarm.getTime() / Var.HOUR_MILLI)));
+            nextAlarm.set(Calendar.HOUR_OF_DAY, calToday.get(Calendar.HOUR_OF_DAY) + (next > 0 ? next : (int) (alarm.getTime() / Var.HOUR_MILLI)));
 
             calToday.set(Calendar.HOUR_OF_DAY, 0);
             calToday.set(Calendar.MINUTE, 0);
@@ -432,28 +505,28 @@ public class Var {
             int daysUntilNextAlarm = alarm.getDaysUntilNextAlarm(today);
 
             int daysUntilNextSchedule = 0;
-            Alarm scheduleAlarm = notificationSchedule.getAlarmForDay((today + daysUntilNextAlarm) % 7);   //Get today's schedule
-            if(scheduleAlarm == null || nextAlarm.getTimeInMillis() > (scheduleAlarm.getTimeBetween() == 0 ? Var.HOUR_MILLI * 24: scheduleAlarm.getTimeBetween())) { //No alarm or we pass it's end time
-                daysUntilNextSchedule = notificationSchedule.getDaysUntilNextAlarm((today + daysUntilNextAlarm) % 7);
-                scheduleAlarm = notificationSchedule.getAlarmForDay((today + daysUntilNextAlarm+ daysUntilNextSchedule) % 7);    //Get next alarm in schedule
+            Alarm scheduleAlarm = scheduleNotification.getAlarmForDay((today + daysUntilNextAlarm) % 7);   //Get today's schedule
+            if (scheduleAlarm == null || nextAlarm.getTimeInMillis() > (scheduleAlarm.getTimeBetween() == 0 ? Var.HOUR_MILLI * 24 : scheduleAlarm.getTimeBetween())) { //No alarm or we pass it's end time
+                daysUntilNextSchedule = scheduleNotification.getDaysUntilNextAlarm((today + daysUntilNextAlarm) % 7);
+                scheduleAlarm = scheduleNotification.getAlarmForDay((today + daysUntilNextAlarm + daysUntilNextSchedule) % 7);    //Get next alarm in schedule
             }
-            if((nextAlarm.getTimeInMillis() < scheduleAlarm.getTime()) || ((daysUntilNextAlarm + daysUntilNextSchedule) > 0)) { // Alarm is before next schedule or the schedule is not today
+            if ((nextAlarm.getTimeInMillis() < scheduleAlarm.getTime()) || ((daysUntilNextAlarm + daysUntilNextSchedule) > 0)) { // Alarm is before next schedule or the schedule is not today
                 when.setTimeInMillis(calToday.getTimeInMillis() + scheduleAlarm.getTime() + (alarm.getTime() - (scheduleAlarm.getTime() % alarm.getTime()))); //Start of next alarm
                 when.set(Calendar.DAY_OF_YEAR, now.get(Calendar.DAY_OF_YEAR) + daysUntilNextSchedule);
             } else {
                 when.setTimeInMillis(calToday.getTimeInMillis() + nextAlarm.getTimeInMillis()); //Today + in how many hours
-                Log.d(TAG, "nextAlarm : "+Var.getTimeText(nextAlarm.get(Calendar.HOUR_OF_DAY), nextAlarm.get(Calendar.MINUTE)));
+                //Log.d(TAG, "nextAlarm : "+Var.getTimeText(nextAlarm.get(Calendar.HOUR_OF_DAY), nextAlarm.get(Calendar.MINUTE)));
             }
-            Log.d(TAG, "day alarm set with"+daysUntilNextSchedule+" - "+ Var.getTimeText(when.get(Calendar.HOUR_OF_DAY), when.get(Calendar.MINUTE)));
+            //Log.d(TAG, "day alarm set with"+daysUntilNextSchedule+" - "+ Var.getTimeText(when.get(Calendar.HOUR_OF_DAY), when.get(Calendar.MINUTE)));
 
         }
 
 
-        Log.d(TAG, getAlarmText(alarm)+" today: "+ Var.DAYS[today+2]);
-        for(int day = now.before(when)? 0: 1; day < 7; day++) {
-            if(alarm.getDays().get((day + today) % 7) == 1) { //Next day alarm will go off
+        //Log.d(TAG, getAlarmText(alarm)+" today: "+ Var.DAYS[today+2]);
+        for (int day = now.before(when) ? 0 : 1; day < 7; day++) {
+            if (alarm.getDays().get((day + today) % 7) == 1) { //Next day alarm will go off
                 when.add(Calendar.DAY_OF_YEAR, (day));
-                Log.d(TAG, "when: " + Var.DAYS[((day + today) % 7) + 2] + " days: " + (when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)));
+                //Log.d(TAG, "when: " + Var.DAYS[((day + today) % 7) + 2] + " days: " + (when.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)));
                 break;
             }
         }
@@ -461,19 +534,6 @@ public class Var {
         Calendar nextAlarm = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         nextAlarm.setTimeInMillis(when.getTimeInMillis() - now.getTimeInMillis());
 
-        int days = nextAlarm.get(Calendar.DAY_OF_YEAR) - 1;
-        int hours = nextAlarm.get(Calendar.HOUR_OF_DAY);
-        int minutes = nextAlarm.get(Calendar.MINUTE);
-
-        String time = "in ";
-        if(days > 0) time += days+" day"+(days == 1? "":"s");
-        if(days > 0 && hours > 0 && minutes > 0) time += ", ";
-        else if(days > 0 && hours > 0 && minutes == 0 || days > 0 && minutes > 0) time += " and ";
-        if(hours > 0) time += hours+" hour"+(hours == 1? "":"s");
-        if(hours > 0 && minutes > 0) time += " and ";
-        if(minutes > 0) time += minutes+" minute"+(minutes == 1? "":"s");
-
-        if(days > 0 || hours > 0 || minutes > 0) return time;
-        return "never";
+        return nextAlarm;
     }
 }

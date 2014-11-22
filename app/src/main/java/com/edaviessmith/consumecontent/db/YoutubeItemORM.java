@@ -67,6 +67,21 @@ public class YoutubeItemORM {
 
     }
 
+    public static List<YoutubeItem> getYoutubeItems(SQLiteDatabase db, int mediaFeedId) {
+        List<YoutubeItem> youtubeItems = new ArrayList<YoutubeItem>();
+
+        Cursor cursor = db.query(false, DB.TABLE_YOUTUBE_ITEM, null, DB.COL_MEDIA_FEED + " = " + mediaFeedId, null, null, null, DB.ORDER_BY_DATE, null);
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                youtubeItems.add(cursorToYoutubeItem(cursor));
+                cursor.moveToNext();
+            }
+        }
+
+        return youtubeItems;
+    }
+
     //Only saves the first PAGE_SIZE of items
     public static void saveYoutubeItems(SQLiteDatabase database, List<YoutubeItem> youtubeItems, int youtubeFeedId) {
         for(int i=0; i < youtubeItems.size() && i< DB.PAGE_SIZE; i++) {

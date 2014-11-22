@@ -84,6 +84,7 @@ public class YoutubeFeed extends MediaFeed {
         } else {
             return false; //youtubeItem list is empty
         }
+
         return newer <= DB.PAGE_SIZE;
     }
 

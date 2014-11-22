@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.Notification;
+import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,30 @@ public class NotificationORM {
         return notifications;
     }
 
+    //Barebone ScheduleNotification for Alarm
+    public static Notification getScheduleNotifications(Context context) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+        Notification notification = null;
 
+        database.beginTransaction();
+        try {
+            Cursor cursor = database.query(false, DB.TABLE_NOTIFICATION, null, DB.COL_TYPE+" = "+ Var.NOTIFICATION_SCHEDULE, null, null, null, DB.ORDER_BY_ID, null);
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                if (!cursor.isAfterLast()) notification = cursorToNotification(cursor);
+                //notification.setAlarms(AlarmORM.getAlarms(database, notification.getId()));
+                //cursor.moveToNext();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return notification;
+    }
 
     public static void saveNotification(Context context, Notification notification) {
         DB databaseHelper = new DB(context);

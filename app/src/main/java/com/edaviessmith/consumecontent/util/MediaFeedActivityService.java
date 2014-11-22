@@ -3,8 +3,13 @@ package com.edaviessmith.consumecontent.util;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 
-import com.edaviessmith.consumecontent.data.YoutubeItem;
+import com.edaviessmith.consumecontent.data.Notification;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
+import com.edaviessmith.consumecontent.db.MediaFeedORM;
+import com.edaviessmith.consumecontent.db.NotificationORM;
 
 import java.lang.reflect.Member;
 import java.util.ArrayList;
@@ -14,9 +19,10 @@ public class MediaFeedActivityService extends IntentService {
 
     private static String TAG = "MemberActivityService";
 
-    private static List<Member> memberList;
-    private static List<YoutubeItem> youtubeItemList;
     private static int threadCounter;
+    private List<Notification> notifications;
+    Notification scheduleNotification;
+
 
     public MediaFeedActivityService(){
         super("MediaFeedActivityService");
@@ -24,26 +30,29 @@ public class MediaFeedActivityService extends IntentService {
 
 
     @Override
-    protected void onHandleIntent(Intent arg0) {
+    protected void onHandleIntent(Intent intent) {
 
-        Var.setNextAlarm(this); //Set next Alarm
+        int notificationId = intent.getIntExtra(Var.NOTIFY_NOTIFICATION_ID, -1);
 
-       /* memberList = MemberORM.getMembersbyStatus(this, Constants.FAVORITE);
-        youtubeItemList = new ArrayList<YoutubeItem>();
+        notifications = NotificationORM.getNotifications(this);
+        scheduleNotification = notifications.get(0);
+        notifications.remove(scheduleNotification);
+        Var.setNextAlarm(this, notifications, scheduleNotification); //Set next Alarm
+
+
+
+        List<YoutubeFeed> youtubeFeeds = MediaFeedORM.getMediaFeedsByNotificationId(this, notificationId);
         threadCounter = 0;
 
-        for(Member member : memberList) {
-            YoutubeItem youtubeItem = YoutubeItemORM.getMemberLatestYoutubeItem(this, member.getId());
-            if(youtubeItem != null) {
-                youtubeItemList.add(youtubeItem);
-            } else {
-                //No videos for the user
+        for(YoutubeFeed youtubeFeed : youtubeFeeds) {
+
+            if(youtubeFeed.getItems().size() == 0) {    //No videos for the user
                 threadCounter ++;
-                new YoutubePlaylist(this, member.getId(), null).execute(member.getUploadsId());
+                new YoutubeFeedAsyncTask(this, youtubeFeed, handler).execute("");
             }
 
         }
-*/
+
         checkMemberActivity();
     }
 
@@ -131,5 +140,36 @@ public class MediaFeedActivityService extends IntentService {
         }*/
     }
 
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+            if(msg.what == 0) {
+                threadCounter --;
+
+
+                if(msg.arg1 == 1) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            //if (getFeed().getItems().size() > 0) MediaFeedORM.saveMediaItems(act, getFeed());
+                        }
+                    }.start();
+                }
+            }
+
+            /*if (msg.what == 1) {
+                //if (msg.arg1 == 1) listener.onError("Error getting request token");
+               // else listener.onError("Error getting access token");
+            } else {
+                //if (msg.arg1 == 1) ;//showLoginDialog((String) msg.obj);
+                //else listener.onComplete("");
+                itemAdapter.notifyDataSetChanged();
+                if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
+
+            }*/
+        }
+    };
 
 }
