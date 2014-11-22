@@ -32,11 +32,14 @@ import android.widget.Toast;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
+import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
+import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.db.GroupORM;
+import com.edaviessmith.consumecontent.db.NotificationORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Listener;
@@ -75,6 +78,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     List<YoutubeChannel> youtubeChannelSearch;
     List<TwitterFeed> twitterFeedSearch;
     List<Group> groups;
+    List<Notification> notifications;
     List<String> userPictureThumbnails;
     View search_v, searchTwitter_v, searchDiv_v, channel_v;
 
@@ -177,17 +181,24 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         setContentView(R.layout.activity_add);
 
         imageLoader = new ImageLoader(this);
-        editUser = new User();
         youtubeChannelSearch = new ArrayList<YoutubeChannel>();
         twitterFeedSearch = new ArrayList<TwitterFeed>();
         userPictureThumbnails = new ArrayList<String>();
+
+        int userId = getIntent().getIntExtra(Var.INTENT_USER_ID, -1);
+        if(DB.isValid(userId)) editUser = UserORM.getUser(this, userId);
+        else editUser = new User();
+
+        groups = GroupORM.getVisibleGroups(this);
+        notifications = NotificationORM.getNotificationsByType(this, Var.NOTIFICATION_ALARM);
+
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        groups = GroupORM.getVisibleGroups(this);
+
 
         View header = getLayoutInflater().inflate(R.layout.header_add, null, false);
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
@@ -283,7 +294,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         spinnerInit = 1;
 
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //getSupportActionBar().setTitle("Add User");
+        getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? editUser.getName(): "Add User"));
 
         toggleSearch(SEARCH_NONE);
     }

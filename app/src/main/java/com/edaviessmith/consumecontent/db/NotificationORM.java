@@ -25,13 +25,17 @@ public class NotificationORM {
 
 
     public static List<Notification> getNotifications(Context context) {
+        return getNotificationsByType(context, -1);
+    }
+
+    public static List<Notification> getNotificationsByType(Context context, int notificationType) {
         DB databaseHelper = new DB(context);
         List<Notification> notifications = new ArrayList<Notification>();
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         database.beginTransaction();
         try {
-            Cursor cursor = database.query(false, DB.TABLE_NOTIFICATION, null, null, null, null, null, DB.ORDER_BY_ID, null);
+            Cursor cursor = database.query(false, DB.TABLE_NOTIFICATION, null, (DB.isValid(notificationType)? (DB.COL_TYPE+" = "+notificationType): null), null, null, null, DB.ORDER_BY_ID, null);
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();

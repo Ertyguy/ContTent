@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 
 import java.util.List;
@@ -142,32 +143,46 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
 	    @Override
 	    public View getView(int position, View convertView, ViewGroup parent) {
-	        View row = convertView;
 	        ViewHolder holder;
 	        
-	        if(row == null) {
+	        if(convertView == null) {
 	            LayoutInflater inflater = ((Activity)context).getLayoutInflater();
-	            row = inflater.inflate(layoutResourceId, parent, false);
+                convertView = inflater.inflate(layoutResourceId, parent, false);
 	            
-	            holder = new ViewHolder();
-	            holder.name_tv = (TextView) row.findViewById(R.id.title_tv);
-                holder.thumbnail_iv = (ImageView) row.findViewById(R.id.thumbnail_iv);
-	            
-	            row.setTag(holder);
+	            holder = new ViewHolder(convertView);
+
+                convertView.setTag(holder);
 	        } else {
-	            holder = (ViewHolder)row.getTag();
+	            holder = (ViewHolder)convertView.getTag();
 	        }
 	        
-	        User user = data.get(position);
+	        final User user = data.get(position);
 	        holder.name_tv.setText(user.getName());
             activity.imageLoader.DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
-	        
-	        return row;
+
+
+            holder.edit_iv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(activity, AddActivity.class);
+                    i.putExtra(Var.INTENT_USER_ID, user.getId());
+                    startActivity(i);
+                }
+            });
+
+	        return convertView;
 	    }
 	    
 	    class ViewHolder {
 	        TextView name_tv;
             ImageView thumbnail_iv;
+            ImageView edit_iv;
+
+            public ViewHolder(View view) {
+                name_tv = (TextView) view.findViewById(R.id.title_tv);
+                thumbnail_iv = (ImageView) view.findViewById(R.id.thumbnail_iv);
+                edit_iv = (ImageView) view.findViewById(R.id.edit_iv);
+            }
 	    }
 		
 	}

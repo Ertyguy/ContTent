@@ -268,7 +268,7 @@ public class YoutubeFragment extends Fragment{
                     new Thread() {
                         @Override
                         public void run() {
-                            if (getFeed().getItems().size() > 0) MediaFeedORM.saveMediaItems(act, getFeed());
+                            if (getFeed() != null && getFeed().getItems().size() > 0) MediaFeedORM.saveMediaItems(act, getFeed());
                         }
                     }.start();
                 }

@@ -57,7 +57,73 @@ public class UserORM {
         return users;
     }
 
+    public static User getUser(Context context, int userId) {
+        DB databaseHelper = new DB(context);
+        User user = null;
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
+        database.beginTransaction();
+        try {
+            Cursor cursor = database.query(false, DB.TABLE_USER, null, DB.COL_ID+" = "+userId, null, null, null, DB.ORDER_BY_SORT, null);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                if (!cursor.isAfterLast()) {
+                    user = cursorToUser(cursor);
+
+                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+                    user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
+                }
+
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return user;
+    }
+
+
+    public static List<User> getUsersByMediaFeeds(Context context, List<Integer> mediaFeedIds) {
+        DB databaseHelper = new DB(context);
+        List<User> users = new ArrayList<User>();
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+
+            Cursor cursor = database.rawQuery("SELECT U.* FROM "+DB.TABLE_USER+" AS U INNER JOIN "+DB.TABLE_MEDIA_FEED+" MF " +
+                                              "ON (U."+DB.COL_ID+" = MF."+DB.COL_USER+") " +
+                                              "WHERE MF."+DB.COL_ID+" IN ("+DB.integerListToString(mediaFeedIds)+")", null) ;
+
+            //Cursor cursor = database.query(false, DB.TABLE_USER, null, null, null, null, null, DB.ORDER_BY_SORT, null);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    User user = cursorToUser(cursor);
+
+                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+                    //user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId())); //Not needed
+
+                    users.add(user);
+                    cursor.moveToNext();
+                }
+
+            }
+            Log.i("UserORM", "Users loaded successfully :"+users.size());
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return users;
+    }
 
     public static void saveUser(Context context, User user) {
         DB databaseHelper = new DB(context);

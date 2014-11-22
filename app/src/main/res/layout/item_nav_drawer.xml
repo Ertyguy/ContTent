@@ -29,4 +29,15 @@
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv" />
 
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:id="@+id/edit_iv"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_create_white_24dp" />
+
 </RelativeLayout>

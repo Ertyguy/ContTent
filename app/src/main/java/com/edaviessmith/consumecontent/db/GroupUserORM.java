@@ -22,9 +22,7 @@ public class GroupUserORM {
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_GROUP_USER;
 
 
-
     public static void saveUserGroups(SQLiteDatabase database, List<Group> groups, int userId) {
-
         //clear all groups for user
         database.delete(DB.TABLE_GROUP_USER,  DB.COL_USER + " = "+ userId, null);
 

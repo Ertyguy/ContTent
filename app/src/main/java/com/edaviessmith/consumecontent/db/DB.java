@@ -175,7 +175,7 @@ public class DB extends SQLiteOpenHelper {
     } //TODO should this be in the DB class?
 
 
-    public static String strSeparator = "__,__";
+    public static String strSeparator = ",";
     public static String integerListToString(List<Integer> integerList){
         StringBuilder sb = new StringBuilder();
         for (int i = 0;i<integerList.size(); i++) sb.append((i == 0? "":strSeparator) + integerList.get(i));

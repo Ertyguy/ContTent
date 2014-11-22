@@ -41,7 +41,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
 
             final Map<String, YoutubeItem> youtubeItemMap = new HashMap<String, YoutubeItem>();
 
-            //TODO make this a beautiful toast like Chrome
+            //TODO make this a beautiful toast like Chrome (use Handler)
             if (!Var.isNetworkAvailable(context)) return null;
 
             String url = null;
@@ -230,7 +230,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         Log.d(TAG,"adding youtube items "+youtubeItems.size());
         boolean updated = youtubeFeed.addItems(youtubeItems);
-        handler.sendMessage(handler.obtainMessage(0, updated? 1: 0, 0, null));
+        handler.sendMessage(handler.obtainMessage(0, updated? 1: 0, youtubeFeed.getId(), null));
     }
 
 
