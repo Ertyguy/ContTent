@@ -12,11 +12,10 @@ import android.support.v4.app.NotificationCompat;
 
 import com.edaviessmith.consumecontent.ContentActivity;
 import com.edaviessmith.consumecontent.R;
-import com.edaviessmith.consumecontent.data.Notification;
+import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
-import com.edaviessmith.consumecontent.db.NotificationORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 
 import java.util.ArrayList;
@@ -40,10 +39,7 @@ public class MediaFeedActivityService extends IntentService {
 
         int notificationId = intent.getIntExtra(Var.NOTIFY_NOTIFICATION_ID, -1);
 
-        List<Notification> notifications = NotificationORM.getNotifications(this);
-        Notification scheduleNotification = notifications.get(0);
-        notifications.remove(scheduleNotification);
-        Var.setNextAlarm(this, notifications, scheduleNotification); //Set next Alarm
+        Var.setNextAlarm(this, new NotificationList(this)); //Set next Alarm
 
         List<YoutubeFeed> youtubeFeeds = MediaFeedORM.getMediaFeedsByNotificationId(this, notificationId);
         updatedMediaFeedIds = new ArrayList<Integer>();

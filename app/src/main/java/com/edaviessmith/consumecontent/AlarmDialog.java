@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.view;
+package com.edaviessmith.consumecontent;
 
 import android.app.Dialog;
 import android.graphics.drawable.ColorDrawable;

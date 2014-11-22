@@ -14,52 +14,69 @@
 
     <ImageView
 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="96dp"
+        android:layout_height="53dp"
         android:id="@+id/thumbnail_iv"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:src="@drawable/ic_youtube_icon"
-        android:layout_alignRight="@+id/visible_sw"
-        android:layout_alignEnd="@+id/visible_sw"
-        android:layout_alignBottom="@+id/name_tv"
-        android:layout_alignParentTop="true" />
+        android:layout_centerVertical="true" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Display Name"
-
         android:id="@+id/name_tv"
-        android:layout_marginLeft="10dp"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@color/dark_gray" />
-
-
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/visible_sw"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/thumbnail_iv"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:gravity="center_vertical"
-        android:text="Visible"
-        android:id="@+id/visible_text"
-        android:layout_alignLeft="@+id/name_tv"
-        android:layout_alignStart="@+id/name_tv"
         android:textColor="@color/dark_gray"
-        android:layout_alignBottom="@+id/visible_sw"
-        android:layout_alignTop="@+id/visible_sw"/>
+        android:layout_toLeftOf="@+id/delete_iv"
+        android:layout_toStartOf="@+id/delete_iv" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/delete_iv"
+            android:src="@drawable/ic_delete_grey600_24dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@+id/name_tv"
+            android:layout_alignTop="@+id/name_tv"
+            android:scaleType="fitEnd"
+            android:background="@drawable/selector_accent"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/notification_v"
+            android:layout_toRightOf="@+id/thumbnail_iv"
+            android:layout_toEndOf="@+id/thumbnail_iv"
+            android:layout_below="@+id/name_tv"
+            android:background="@drawable/selector_accent">
+
+            <ImageView
+                android:id="@+id/notification_iv"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_alarm_grey600_36dp"
+                android:layout_marginRight="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:gravity="center_vertical"
+                android:text="No notification set"
+                android:id="@+id/notification_tv"
+                android:textColor="@color/dark_gray" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
-    <View style="@style/shadow_bottom"/>
 </LinearLayout>

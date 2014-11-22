@@ -23,8 +23,8 @@ import android.widget.ToggleButton;
 import com.edaviessmith.consumecontent.data.Alarm;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.db.NotificationORM;
+import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.util.Var;
-import com.edaviessmith.consumecontent.view.AlarmDialog;
 import com.edaviessmith.consumecontent.view.Fab;
 
 import java.util.List;
@@ -34,8 +34,9 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
     String TAG = "NotificationsActivity";
 
     Toolbar toolbar;
-    List<Notification> notifications;
-    Notification editNotification, scheduleNotification;
+    //List<Notification> notifications;
+    NotificationList notificationList;
+    Notification editNotification;
     ListView notification_lv, alarm_lv;
     NotificationAdapter notificationAdapter;
     AlarmAdapter alarmAdapter;
@@ -62,9 +63,9 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        notifications = NotificationORM.getNotifications(this);
-        scheduleNotification = notifications.get(0);
-        notifications.remove(scheduleNotification);
+
+        notificationList = new NotificationList(this);
+
 
         editNotification = new Notification();
 
@@ -76,7 +77,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         View header = getLayoutInflater().inflate(R.layout.header_notifications, null, false);
         View alarmHeader = getLayoutInflater().inflate(R.layout.header_alarms, null, false);
         View footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
-        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 60)));
+        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
 
         alarm_v = findViewById(R.id.alarm_v);
         save_fab = (Fab) findViewById(R.id.save_fab);
@@ -153,7 +154,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        editNotification = notifications.get(position - 1);
+        editNotification = new Notification(notificationList.getNotifications().get(position - 1));
         toggleList(ALARMS_LIST);
     }
 
@@ -167,12 +168,12 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
         @Override
         public int getCount() {
-            return notifications.size();
+            return notificationList.getNotifications().size();
         }
 
         @Override
         public Notification getItem(int position) {
-            return notifications.get(position);
+            return notificationList.getNotifications().get(position);
         }
 
         @Override
@@ -194,9 +195,9 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             }
 
             Notification notification = getItem(position);
-            if(notification.getType() == Var.NOTIFICATION_ALARM) holder.icon_iv.setImageResource(R.drawable.ic_alarm_grey600_36dp);
-            if(notification.getType() == Var.NOTIFICATION_SCHEDULE) holder.icon_iv.setImageResource(R.drawable.ic_alarm_off_grey600_36dp);
+
             holder.name_tv.setText(notification.getName());
+            holder.nextAlarm_tv.setText(Var.getNextNotificationAlarm(notification, notificationList.getScheduleNotification()));
 
             return convertView;
 
@@ -205,14 +206,14 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         class ViewHolder {
             ImageView icon_iv;
             TextView name_tv;
+            TextView nextAlarm_tv;
 
             public ViewHolder(View view) {
                 icon_iv = (ImageView) view.findViewById(R.id.icon_iv);
                 name_tv = (TextView) view.findViewById(R.id.name_tv);
+                nextAlarm_tv = (TextView) view.findViewById(R.id.next_alarm_tv);
             }
         }
-
-
     }
 
     public class AlarmAdapter extends BaseAdapter {
@@ -289,7 +290,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
                         notifyDataSetChanged();
                     } else {
                         days.set(day, (days.get(day) == 1 ? 0 : 1));   //Toggle opposite
-                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, scheduleNotification) : "disabled");
+                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, notificationList.getScheduleNotification()) : "disabled");
                     }
 
                 }
@@ -307,11 +308,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             holder.enabled_sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, scheduleNotification): "disabled");
+                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, notificationList.getScheduleNotification()): "disabled");
                 }
             });
 
-            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, scheduleNotification): "disabled");
+            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, notificationList.getScheduleNotification()): "disabled");
 
 
             holder.delete_iv.setOnClickListener(new View.OnClickListener() {
@@ -377,6 +378,12 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        Var.setNextAlarm(this, notificationList);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
@@ -406,10 +413,17 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
         if(save_fab == v) {
             editNotification.setName(notificationName_tv.getText().toString().trim());
-            //TODO: Make sure data works before trying to save
+            //TODO: Make sure data is valid before trying to save
             NotificationORM.saveNotification(this, editNotification);
 
-            if(!notifications.contains(editNotification) && editNotification.getType() == Var.NOTIFICATION_ALARM) notifications.add(editNotification);
+
+            if(editNotification.getType() == Var.NOTIFICATION_ALARM){
+                if(notificationList.getNotification(editNotification.getId()) != null)
+                     notificationList.getNotifications().set(notificationList.getNotifications().indexOf(notificationList.getNotification(editNotification.getId())), editNotification);
+                else notificationList.getNotifications().add(editNotification);
+            }
+            if(editNotification.getType() == Var.NOTIFICATION_SCHEDULE) notificationList.setScheduleNotification(new Notification(editNotification));
+
             alarmAdapter.notifyDataSetChanged();
 
             toggleList(NOTIFICATIONS_LIST);
@@ -446,7 +460,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         }
 
         if(schedule_v == v) {
-            editNotification = scheduleNotification;
+            editNotification = new Notification(notificationList.getScheduleNotification());
             toggleList(ALARMS_LIST);
         }
 

@@ -35,6 +35,8 @@
                 android:id="@+id/search_edt"
                 android:textColor="@android:color/white"
                 android:textColorHint="@android:color/white"
+                android:maxLines="1"
+                android:imeOptions="actionSearch"
                 android:layout_toLeftOf="@+id/clear_iv"
                 android:layout_toStartOf="@+id/clear_iv"
                 android:layout_toRightOf="@+id/search_icon_iv"

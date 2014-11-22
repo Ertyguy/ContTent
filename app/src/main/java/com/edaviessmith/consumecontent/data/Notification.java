@@ -19,6 +19,13 @@ public class Notification {
         alarms = new ArrayList<Alarm>();
     }
 
+    public Notification(Notification notification) {
+        this.id = notification.getId();
+        this.name = notification.getName();
+        this.type = notification.getType();
+        this.alarms = notification.getAlarms();
+    }
+
     public Notification(String name, int type, List<Alarm> alarms) {
         this.name = name;
         this.type = type;

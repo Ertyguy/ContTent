@@ -15,6 +15,7 @@ import android.util.TypedValue;
 
 import com.edaviessmith.consumecontent.data.Alarm;
 import com.edaviessmith.consumecontent.data.Notification;
+import com.edaviessmith.consumecontent.data.NotificationList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,7 +36,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -77,6 +77,7 @@ public class Var {
     public static final String PREF_MOBILE_NOTIFICATIONS = "mobile_notifications";
     public static final String PREF_VIBRATIONS = "vibrations";
     public static final String PREF_PLAY_SOUND = "play_sound";
+    public static final String PREF_NEXT_ALARM = "next_alarm";
 
 
     static public final String NOTIFY_ACTION = "notify_action";
@@ -132,8 +133,8 @@ public class Var {
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
-                InputStream instream = entity.getContent();
-                reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"), 8);
+                InputStream inStream = entity.getContent();
+                reader = new BufferedReader(new InputStreamReader(inStream, "UTF-8"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line;
                 try {
@@ -142,7 +143,7 @@ public class Var {
                     e.printStackTrace();
                 } finally {
                     try {
-                        instream.close();
+                        inStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -174,13 +175,12 @@ public class Var {
         try {
             DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
 
-            InputStream inputStream;
             HttpResponse response = httpclient.execute(httpPost);
             HttpEntity entity = response.getEntity();
 
             if (entity != null) {
-                InputStream instream = entity.getContent();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(instream, "UTF-8"), 8);
+                InputStream insStream = entity.getContent();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(insStream, "UTF-8"), 8);
                 StringBuilder sb = new StringBuilder();
                 String line;
                 try {
@@ -189,7 +189,7 @@ public class Var {
                     e.printStackTrace();
                 } finally {
                     try {
-                        instream.close();
+                        insStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -254,6 +254,7 @@ public class Var {
         return (s == null || (s.toString().trim().isEmpty()));
     }
 
+
     public static String getTimeSince(long publishedDate) {
         String date = "";
 
@@ -282,53 +283,74 @@ public class Var {
     }
 
 
-    public static void setNextAlarm(Context context, List<Notification> notifications, Notification scheduleNotification) {
+    public static void setNextAlarm(Context context, NotificationList notificationList) {
 
         if (getBoolPreference(context, Var.PREF_ALL_NOTIFICATIONS)) {
             Intent intent = new Intent(context, AlarmBroadcastReceiver.class);
             intent.setAction(Var.NOTIFY_ACTION);
-            boolean alarmActive = (PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE) != null);
 
+            Calendar today = Calendar.getInstance(Locale.getDefault());
+            long now = today.getTimeInMillis();
+            //boolean hasPreviousAlarm = (PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE) != null);
+            long nextAlarmPref = Var.getLongPreference(context, Var.PREF_NEXT_ALARM);
             //If alarm isn't already active create a new alarm
-            if (!alarmActive) {
-                try {
-                    int notificationId = -1; //Send id in intent to know which notification to update
-                    Alarm nextAlarm = null; //for debug log
-                    Calendar nextAlarmTime = null;
+            //if (!hasPreviousAlarm) {
+            try {
+                int notificationId = -1; //Send id in intent to know which notification to update
+                long nextAlarm = 0L;
 
-                    for(Notification notification: notifications) {
-                        for(Alarm alarm: notification.getAlarms()){
-                            Calendar alarmTime = Var.getNextAlarmTime(alarm, scheduleNotification);
-                            if(nextAlarmTime == null || alarmTime.before(nextAlarmTime)) {
-                                notificationId = notification.getId();
-                                nextAlarmTime = alarmTime;
-                                nextAlarm = alarm;
-                            }
+                for(Notification notification: notificationList.getNotifications()) {
+                    for(Alarm alarm: notification.getAlarms()){
+                        long alarmCal = Var.getNextAlarmTime(alarm, notificationList.getScheduleNotification()).getTimeInMillis();
+                        if(nextAlarm == 0L || alarmCal < nextAlarm) {
+                            notificationId = notification.getId();
+                            nextAlarm = alarmCal;
                         }
                     }
-
-
-                    if (nextAlarmTime != null) {
-                        intent.putExtra(Var.NOTIFY_NOTIFICATION_ID, notificationId);
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-
-                        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-                        alarmManager.set(AlarmManager.RTC, nextAlarmTime.getTimeInMillis(), pendingIntent);
-                        Log.d(TAG, "AlarmManager update was set to run at " + Var.getNextAlarmTimeText(nextAlarm, scheduleNotification));
-                    } else {
-                        Log.d(TAG, "Alarm time set to never");
-                    }
-
-
-                } catch (Exception e) {
-                    e.printStackTrace(); // in case you want to see the stacktrace in your log cat output
                 }
-            } else {
-                Log.d(TAG, "AlarmManager already active");
+
+                Log.d(TAG, "AlarmManager current Alarm: " + (nextAlarmPref / Var.MINUTE_MILLI) + ", next: "+ ((nextAlarm + now) / Var.MINUTE_MILLI));
+                if (nextAlarm > 0L && (((nextAlarm + now) / Var.MINUTE_MILLI) != (nextAlarmPref / Var.MINUTE_MILLI))) {
+                    intent.putExtra(Var.NOTIFY_NOTIFICATION_ID, notificationId);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+                    Var.setLongPreference(context, Var.PREF_NEXT_ALARM, (nextAlarm + now));
+
+
+                    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                    alarmManager.set(AlarmManager.RTC, (nextAlarm + now), pendingIntent);
+                    Log.d(TAG, "AlarmManager update was set to run in " + nextAlarm);
+                } else {
+                    Log.d(TAG, "Alarm not set");
+                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace(); // in case you want to see the stacktrace in your log cat output
             }
+            //} else {
+            //    Log.d(TAG, "AlarmManager already active");
+            //}
         }
     }
 
+
+    public static String getNextNotificationAlarm(Notification notification, Notification scheduleNotification) {
+
+        Alarm nextAlarm = null; //for debug log
+        Calendar nextAlarmTime = null;
+
+        for(Alarm alarm: notification.getAlarms()){
+            Calendar alarmTime = Var.getNextAlarmTime(alarm, scheduleNotification);
+            if(nextAlarmTime == null || alarmTime.before(nextAlarmTime)) {
+                nextAlarmTime = alarmTime;
+                nextAlarm = alarm;
+            }
+        }
+
+        return "Next check: " + Var.getNextAlarmTimeText(nextAlarm, scheduleNotification);
+
+    }
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
     //Second return integer is for month value
@@ -410,6 +432,22 @@ public class Var {
     public static void setBoolPreference(Context context, String pref, boolean state) {
         SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
         settings.putBoolean(pref, state);
+        if (android.os.Build.VERSION.SDK_INT >= 9) {
+            settings.apply();
+        } else {
+            settings.commit();
+        }
+    }
+
+    public static long getLongPreference(Context context, String pref) {
+        SharedPreferences settings = context.getSharedPreferences(Var.PREFS, 0);
+        return settings.getLong(pref, 0L);
+    }
+
+    @SuppressLint("NewApi")
+    public static void setLongPreference(Context context, String pref, long l) {
+        SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
+        settings.putLong(pref, l);
         if (android.os.Build.VERSION.SDK_INT >= 9) {
             settings.apply();
         } else {
