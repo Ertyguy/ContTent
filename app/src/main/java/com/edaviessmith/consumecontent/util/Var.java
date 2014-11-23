@@ -68,8 +68,8 @@ public class Var {
     public static final int ALARM_BETWEEN = 2; // Alarm Range
 
     //Fragment feed state
-    public static final int FEED_LOADING = 0;
-    public static final int FEED_WAITING = 1;
+    public static final int FEED_WAITING = 0;
+    public static final int FEED_LOADING = 1;
     public static final int FEED_WARNING = 2;
     public static final int FEED_OFFLINE = 3;
 

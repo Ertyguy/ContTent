@@ -28,6 +28,8 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
     private Context context;
     private YoutubeFeed youtubeFeed;
     private Handler handler;
+
+    private boolean cancel;
     
     public YoutubeFeedAsyncTask(Context context, YoutubeFeed youtubeFeed, Handler handler) {
         this.context = context;
@@ -44,6 +46,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
             //TODO make this a beautiful toast like Chrome (use Handler)
             if (!Var.isNetworkAvailable(context)) {
                 handler.sendMessage(handler.obtainMessage(1, Var.FEED_OFFLINE, youtubeFeed.getId(), null));
+                cancel = true;
                 return null;
             }
 
@@ -219,6 +222,8 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
             Log.e(TAG, "getFeed failed");
             t.printStackTrace();
             handler.sendMessage(handler.obtainMessage(1, Var.FEED_WARNING, youtubeFeed.getId(), null));
+            cancel = true;
+            return null;
         }
 
         Collections.sort(youtubeItems, new Comparator<YoutubeItem>() {
@@ -235,7 +240,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
         Log.d(TAG,"adding youtube items "+youtubeItems.size());
         boolean updated = youtubeFeed.addItems(youtubeItems);
 
-        handler.sendMessage(handler.obtainMessage(0, (updated? 1: 0), youtubeFeed.getId(), null));
+        if(!cancel) handler.sendMessage(handler.obtainMessage(0, (updated? 1: 0), youtubeFeed.getId(), null));
     }
 
 

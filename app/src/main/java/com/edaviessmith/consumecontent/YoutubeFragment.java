@@ -33,8 +33,8 @@ public class YoutubeFragment extends Fragment{
     private ContentActivity act;
     private int pos, tab;
 
-    private boolean isSearchBusy; //Only make a single request to API
-    private int feedState = Var.FEED_LOADING;
+    //private boolean isSearchBusy; //Only make a single request to API
+    private int feedState = Var.FEED_WAITING;
 
     private RecyclerView feed_rv;
     private YoutubeItemAdapter itemAdapter;
@@ -77,8 +77,10 @@ public class YoutubeFragment extends Fragment{
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                isSearchBusy = true;
-                new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                if(feedState != Var.FEED_LOADING) {
+                    setFeedState(Var.FEED_LOADING);
+                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                }
             }
         });
 
@@ -96,8 +98,8 @@ public class YoutubeFragment extends Fragment{
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if(!isSearchBusy && linearLayoutManager.findLastVisibleItemPosition() > linearLayoutManager.getItemCount() - Var.SCROLL_OFFSET) {
-                    isSearchBusy = true;
+                if(feedState == Var.FEED_WAITING && linearLayoutManager.findLastVisibleItemPosition() > linearLayoutManager.getItemCount() - Var.SCROLL_OFFSET) {
+                    setFeedState(Var.FEED_LOADING);
                     new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
                     Log.d(TAG,"onScrolled getFeed called");
                 }
@@ -138,7 +140,7 @@ public class YoutubeFragment extends Fragment{
                             Log.d(TAG,"adding local items "+localItems.size());
                             getFeed().setItems(localItems);
                             itemAdapter.notifyDataSetChanged();
-                            isSearchBusy = true;
+                            setFeedState(Var.FEED_LOADING);
                             new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
                         }
                     });
@@ -154,12 +156,10 @@ public class YoutubeFragment extends Fragment{
 
 
     public void setFeedState(int feedState) {
+        boolean change = (this.feedState != feedState);
         this.feedState = feedState;
-        //Set back to loading so make another request
-        if(feedState == Var.FEED_LOADING) new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
-        Log.e(TAG, "setFeedState "+feedState);
-        itemAdapter.notifyDataSetChanged();
-        //notifyItemChanged(getItemCount());
+        if(change) itemAdapter.notifyDataSetChanged();
+        //itemAdapter.notifyItemChanged(itemAdapter.getItemCount());
     }
 
     public class YoutubeItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
@@ -205,7 +205,11 @@ public class YoutubeFragment extends Fragment{
         public void onClick(final View view) {
             int itemPosition = feed_rv.getChildPosition(view);
             if(itemPosition < getItemCount() - 1)  act.startVideo(getFeed().getItems().get(itemPosition));
-            else if(feedState != Var.FEED_LOADING) setFeedState(Var.FEED_LOADING);
+            else if(feedState == Var.FEED_WARNING || feedState == Var.FEED_OFFLINE) {
+                setFeedState(Var.FEED_LOADING);
+                new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+
+            }
 
         }
 
@@ -254,9 +258,11 @@ public class YoutubeFragment extends Fragment{
             if (viewHolder instanceof ViewHolderFooter) {
                 ViewHolderFooter footer = (ViewHolderFooter) viewHolder;
 
-                footer.loading_v.setVisibility(feedState == Var.FEED_LOADING? View.VISIBLE: View.GONE);
-                footer.warning_iv.setVisibility(feedState == Var.FEED_LOADING? View.GONE: View.VISIBLE);
-                footer.warning_tv.setVisibility(feedState == Var.FEED_LOADING? View.GONE: View.VISIBLE);
+                boolean loading = (feedState == Var.FEED_WAITING || feedState == Var.FEED_LOADING);
+
+                footer.loading_v.setVisibility (loading? View.VISIBLE: View.GONE);
+                footer.warning_iv.setVisibility(loading? View.GONE: View.VISIBLE);
+                footer.warning_tv.setVisibility(loading? View.INVISIBLE: View.VISIBLE);
 
                 if(feedState != Var.FEED_LOADING) {
                     footer.warning_iv.setImageResource(feedState == Var.FEED_WARNING ?
@@ -320,8 +326,8 @@ public class YoutubeFragment extends Fragment{
         public void handleMessage(Message msg) {
 
             if(msg.what == 0) {
-                isSearchBusy = false;
-                itemAdapter.notifyDataSetChanged();
+                setFeedState(Var.FEED_WAITING);
+                //itemAdapter.notifyDataSetChanged();
                 if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
 
                 if(msg.arg1 == 1 && getFeed().getId() == msg.arg2) {
