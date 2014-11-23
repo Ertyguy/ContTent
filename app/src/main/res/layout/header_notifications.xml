@@ -11,35 +11,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@android:color/white"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingBottom="22dp" >
 
 
-        <LinearLayout
-            android:id="@+id/all_notifications_v"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:background="@drawable/selector_accent"
-            android:orientation="horizontal">
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/all_notifications_v" >
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:textSize="16sp"
-                android:gravity="center_vertical"
-                android:textColor="@color/dark_gray"
-                android:text="@string/all_notifications"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+            <TextView style="@style/list_item_text"
+                android:text="@string/all_notifications" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/all_notifications_sw"
@@ -53,29 +32,11 @@
             android:layout_height="1.5dp"/>
 
 
-        <LinearLayout
-            android:id="@+id/mobile_notifications_v"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:background="@drawable/selector_accent"
-            android:orientation="horizontal">
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/mobile_notifications_v">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:gravity="center_vertical"
-                android:textColor="@color/dark_gray"
-                android:text="@string/enable_notification_on_mobile"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+            <TextView style="@style/list_item_text"
+                android:text="@string/enable_notification_on_mobile" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/mobile_notifications_sw"
@@ -90,29 +51,11 @@
             android:layout_height="1.5dp"/>
 
 
-        <LinearLayout
-            android:id="@+id/vibrations_v"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:background="@drawable/selector_accent"
-            android:orientation="horizontal">
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/vibrations_v">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:gravity="center_vertical"
-                android:textColor="@color/dark_gray"
-                android:text="@string/vibrations_enabled"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+            <TextView style="@style/list_item_text"
+                android:text="@string/vibrations_enabled" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/vibrations_sw"
@@ -126,29 +69,11 @@
             android:layout_height="1.5dp"/>
 
 
-        <LinearLayout
-            android:id="@+id/play_sound_v"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:background="@drawable/selector_accent"
-            android:orientation="horizontal">
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/play_sound_v" >
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:gravity="center_vertical"
-                android:textColor="@color/dark_gray"
-                android:text="@string/play_sound"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+            <TextView style="@style/list_item_text"
+                android:text="@string/play_sound" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/play_sound_sw"
@@ -161,30 +86,11 @@
             android:layout_width="match_parent"
             android:layout_height="1.5dp"/>
 
-        <LinearLayout
-            android:id="@+id/schedule_v"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/selector_accent"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/schedule_v">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/alarm_schedule"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:id="@+id/name_tv"
-                android:textColor="@color/dark_gray"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="16sp"
-                android:gravity="center_vertical" />
+            <TextView style="@style/list_item_text"
+                android:text="@string/alarm_schedule" />
 
 
             <ImageView

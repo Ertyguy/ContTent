@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/toolbar"
+        android:background="@color/primary"
+        android:minHeight="@dimen/abc_action_bar_default_height_material"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:color/white" >
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/gray">
+
+                <View style="@style/divider"/>
+
+                <View style="@style/shadow_bottom"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_accent"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="14dp"
+                    android:layout_marginTop="5dp"
+                    android:text="General"
+                    android:layout_marginBottom="5dp"/>
+            </LinearLayout>
+
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/hires_wifi_v" >
+
+            <TextView style="@style/list_item_text"
+                android:text="On Wifi load HiRes images" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/hires_wifi_sw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false" />
+        </LinearLayout>
+
+        <View style="@style/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1.5dp"/>
+
+        <LinearLayout style="@style/list_item"
+            android:id="@+id/hires_mobile_v" >
+
+            <TextView style="@style/list_item_text"
+                android:text="On Mobile load HiRes images" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/hires_mobile_sw"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false" />
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/gray">
+
+                <View style="@style/divider"/>
+
+                <View style="@style/shadow_bottom"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/gray_accent"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="14dp"
+                    android:layout_marginTop="5dp"
+                    android:text="About"
+                    android:layout_marginBottom="5dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/version_v"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="@drawable/selector_accent"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
+                        android:gravity="center_vertical"
+                        android:textColor="@color/dark_gray"
+                        android:text="Version: "
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
+                        android:id="@+id/version_tv"
+                        android:textColor="@color/dark_gray"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:text="1.0" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/gray_accent"
+                    android:textSize="13sp"
+                    android:text="View the Changelog" />
+
+            </LinearLayout>
+
+
+            <View style="@style/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1.5dp"/>
+
+
+            <LinearLayout
+                android:id="@+id/contact_v"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="@drawable/selector_accent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/dark_gray"
+                    android:text="Contact the developer"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/gray_accent"
+                    android:textSize="13sp"
+                    android:text="Have your voice be heard. Let the developer know your opinion of this app, any bugs you find, or features you want to see in the next release." />
+
+            </LinearLayout>
+
+            <View style="@style/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1.5dp"/>
+
+            <LinearLayout
+                android:id="@+id/rate_app_v"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="@drawable/selector_accent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/dark_gray"
+                    android:text="Rate App"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/gray_accent"
+                    android:textSize="13sp"
+                    android:text="Support this app by giving it a good rating, if you're having issues, send the developer an email." />
+
+            </LinearLayout>
+
+            <View style="@style/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1.5dp"/>
+
+            <LinearLayout
+                android:id="@+id/licenses_v"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="@drawable/selector_accent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/dark_gray"
+                    android:text="Licenses"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/gray_accent"
+                    android:textSize="13sp"
+                    android:text="Open source projects licenses" />
+
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@color/gray">
+
+                <View style="@style/divider"/>
+
+                <View style="@style/shadow_bottom"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+</LinearLayout>

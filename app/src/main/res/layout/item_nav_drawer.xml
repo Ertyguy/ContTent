@@ -23,7 +23,7 @@
         android:id="@+id/title_tv"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="22sp"
+        android:textSize="20sp"
         android:textColor="@color/dark_gray"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/thumbnail_iv"

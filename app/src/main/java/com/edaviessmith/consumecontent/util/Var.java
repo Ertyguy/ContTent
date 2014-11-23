@@ -84,7 +84,8 @@ public class Var {
     public static final String PREF_VIBRATIONS = "vibrations";
     public static final String PREF_PLAY_SOUND = "play_sound";
     public static final String PREF_NEXT_ALARM = "next_alarm";
-
+    public static final String PREF_HIRES_WIFI = "hires_wifi";
+    public static final String PREF_HIRES_MOBILE = "hires_mobile";
 
     static public final String NOTIFY_ACTION = "notify_action";
     static public final String NOTIFY_NOTIFICATION_ID = "notification_id";

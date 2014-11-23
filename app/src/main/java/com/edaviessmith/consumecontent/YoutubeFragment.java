@@ -79,7 +79,7 @@ public class YoutubeFragment extends Fragment{
             public void onRefresh() {
                 if(feedState != Var.FEED_LOADING) {
                     setFeedState(Var.FEED_LOADING);
-                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute("");
                 }
             }
         });
@@ -158,8 +158,8 @@ public class YoutubeFragment extends Fragment{
     public void setFeedState(int feedState) {
         boolean change = (this.feedState != feedState);
         this.feedState = feedState;
-        if(change) itemAdapter.notifyDataSetChanged();
-        //itemAdapter.notifyItemChanged(itemAdapter.getItemCount());
+        if(change) //itemAdapter.notifyDataSetChanged();
+        itemAdapter.notifyItemChanged(itemAdapter.getItemCount() - 1);
     }
 
     public class YoutubeItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{

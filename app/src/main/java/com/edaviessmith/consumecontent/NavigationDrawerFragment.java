@@ -185,7 +185,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
             startActivity(i);
         }
         if(v == settings_v) {
-            Intent i = new Intent(act, AddActivity.class);
+            Intent i = new Intent(act, SettingsActivity.class);
             startActivity(i);
         }
     }

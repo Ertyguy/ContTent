@@ -108,9 +108,9 @@ public class MediaFeedActivityService extends IntentService {
         @Override
         public void handleMessage(Message msg) {
 
-            if(msg.what == 0) {
-                threadCounter --;
+            threadCounter --;
 
+            if(msg.what == 0) {
                 if(msg.arg1 == 1) {     //Feed has new content
                     updatedMediaFeedIds.add(msg.arg2);
                 }

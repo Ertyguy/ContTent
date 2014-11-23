@@ -43,7 +43,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	 */
 	private CharSequence mTitle;
 	private static final String TAG_TASK_FRAGMENT = "task_fragment";
-	private TaskFragment taskFragment;
+	private MediaFeedFragment mediaFeedFragment;
 	private List<User> users;
     Toolbar toolbar;
     public ImageLoader imageLoader;
@@ -82,9 +82,9 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
 
-	    taskFragment = (TaskFragment) getSupportFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT);
-	    taskFragment = TaskFragment.newInstance(this);
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
+	    mediaFeedFragment = (MediaFeedFragment) getSupportFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT);
+	    mediaFeedFragment = MediaFeedFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment, TAG_TASK_FRAGMENT).commit();
 
         actionSettings = (ImageView) findViewById(R.id.action_settings);
         actionSettings.setOnClickListener(new View.OnClickListener() {
@@ -128,9 +128,9 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		if(users != null) {
             userPos = position;
 			FragmentManager fragmentManager = getSupportFragmentManager();
-		    taskFragment = (TaskFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
-		    taskFragment = TaskFragment.newInstance(this);
-		    fragmentManager.beginTransaction().replace(R.id.container, taskFragment, TAG_TASK_FRAGMENT).commit();
+		    mediaFeedFragment = (MediaFeedFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
+		    mediaFeedFragment = MediaFeedFragment.newInstance();
+		    fragmentManager.beginTransaction().replace(R.id.container, mediaFeedFragment, TAG_TASK_FRAGMENT).commit();
 		}
 
 	}

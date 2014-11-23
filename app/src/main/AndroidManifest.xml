@@ -48,8 +48,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.edaviessmith.consumecontent.ContentActivity" />
         </activity>
+        <activity
+            android:name="com.edaviessmith.consumecontent.SettingsActivity"
+            android:label="@string/settings"
+            android:parentActivityName=".ContentActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.edaviessmith.consumecontent.ContentActivity" />
+        </activity>
 
-        <activity android:name="com.edaviessmith.consumecontent.db.AndroidDatabaseManager"  />
+
 
         <receiver
             android:name="com.edaviessmith.consumecontent.util.AlarmBroadcastReceiver"
@@ -64,6 +72,8 @@
             android:label="Notification Listener"
             android:exported="false" />
 
+
+        <activity android:name="com.edaviessmith.consumecontent.db.AndroidDatabaseManager"  />
     </application>
 
 </manifest>

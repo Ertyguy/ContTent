@@ -14,28 +14,21 @@ import com.edaviessmith.consumecontent.view.FragmentStateCachePagerAdapter;
 import com.edaviessmith.consumecontent.view.PagerAdapter;
 import com.edaviessmith.consumecontent.view.SlidingTabLayout;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class TaskFragment extends Fragment {
 
-    private static final String ARG_USER = "arg_user";
+public class MediaFeedFragment extends Fragment {
+
     public FragmentStateCachePagerAdapter adapterViewPager;
     public SlidingTabLayout slidingTabLayout;
-    static ContentActivity act;
+    private ContentActivity act;
 
-
-    public static TaskFragment newInstance(ContentActivity act) {
-        TaskFragment.act = act;
-        TaskFragment fragment = new TaskFragment();
-
-        return fragment;
+    public static MediaFeedFragment newInstance() {
+        return new MediaFeedFragment();
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_content, container, false);
+        act = (ContentActivity) getActivity();
 
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
         adapterViewPager = new PagerAdapter(act, act.getUser());
@@ -53,14 +46,7 @@ public class TaskFragment extends Fragment {
                     return act.getResources().getColor(R.color.blue_twitter);
                 }
 
-                /*if(position < act.getUser().getYoutubeChannel().getYoutubeFeeds().size()) {
-                    return act.getResources().getColor(R.color.red_youtube);
-                } else if(act.getUser().getTwitterFeed() != null && position == act.getUser().getYoutubeChannel().getYoutubeFeeds().size() ) {
-                    return act.getResources().getColor(R.color.blue_twitter);
-                }*/
                 return act.getResources().getColor(R.color.accent);
-
-
             }
 
             @Override
