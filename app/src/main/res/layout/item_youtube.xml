@@ -14,24 +14,41 @@
         android:paddingRight="20dp"
         android:paddingBottom="25dp">
 
-        <ImageView
-            android:id="@+id/thumbnail_iv"
+        <RelativeLayout
+            android:id="@+id/thumbnail_v"
             android:layout_width="96dp"
             android:layout_height="53dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_youtube_icon"
             android:layout_marginRight="10dp"
-            android:background="@android:color/black" />
+            android:layout_marginEnd="10dp">
+
+
+            <ImageView
+                android:id="@+id/thumbnail_iv"
+                android:layout_width="96dp"
+                android:layout_height="53dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="@null"
+                android:src="@null"
+                android:background="@android:color/black" />
+
+            <ProgressBar
+                style="?android:attr/android:progressBarStyle"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:id="@+id/thumbnail_pb" />
+
+        </RelativeLayout>
+
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Youtube Title"
             android:id="@+id/title_tv"
-            android:layout_alignTop="@+id/thumbnail_iv"
-            android:layout_toRightOf="@+id/thumbnail_iv"
-            android:layout_toEndOf="@+id/thumbnail_iv"
+            android:layout_alignTop="@+id/thumbnail_v"
+            android:layout_toRightOf="@+id/thumbnail_v"
+            android:layout_toEndOf="@+id/thumbnail_v"
             android:textColor="@color/dark_gray"
             android:minLines="2"
             android:maxLines="2"
@@ -42,9 +59,9 @@
             android:layout_height="wrap_content"
             android:text="00:00"
             android:id="@+id/length_tv"
-            android:layout_alignBottom="@+id/thumbnail_iv"
-            android:layout_alignRight="@+id/thumbnail_iv"
-            android:layout_alignEnd="@+id/thumbnail_iv"
+            android:layout_alignBottom="@+id/thumbnail_v"
+            android:layout_alignRight="@+id/thumbnail_v"
+            android:layout_alignEnd="@+id/thumbnail_v"
             android:textSize="12sp"
             android:textColor="@android:color/white"
             android:padding="2dp"
@@ -60,21 +77,21 @@
             android:text="10K views"
             android:id="@+id/views_tv"
             android:textColor="@color/gray_accent"
-            android:layout_toEndOf="@+id/thumbnail_iv"
-            android:layout_alignBottom="@+id/thumbnail_iv"
-            android:layout_toRightOf="@+id/thumbnail_iv"
+            android:layout_toEndOf="@+id/thumbnail_v"
+            android:layout_alignBottom="@+id/thumbnail_v"
+            android:layout_toRightOf="@+id/thumbnail_v"
             android:textSize="12sp" />
-<!--
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nov 11"
-            android:id="@+id/date_tv"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="10sp"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/status_tv"
-            android:layout_alignEnd="@+id/status_tv" />-->
+        <!--
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nov 11"
+                    android:id="@+id/date_tv"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="10sp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignRight="@+id/status_tv"
+                    android:layout_alignEnd="@+id/status_tv" />-->
 
         <TextView
             android:layout_width="wrap_content"
@@ -82,9 +99,9 @@
             android:text="Status"
             android:id="@+id/status_tv"
             android:textColor="@color/dark_gray"
-            android:gravity="right"
+            android:gravity="end"
             android:layout_toEndOf="@+id/views_tv"
-            android:layout_alignBottom="@+id/thumbnail_iv"
+            android:layout_alignBottom="@+id/thumbnail_v"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
 

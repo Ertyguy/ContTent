@@ -5,7 +5,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +28,7 @@ public class ImageLoader {
     private static String TAG = "ImageLoader";
     MemoryCache memoryCache=new MemoryCache();
     FileCache fileCache;
-    private Map<ImageView, String> imageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
+    private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     ExecutorService executorService;
     final int buffer_size = 1024;
 
@@ -37,10 +39,9 @@ public class ImageLoader {
      
     //final int stub_id = R.drawable.ic_launcher;
     
-    public void DisplayImage(String url, ImageView imageView)
-    {
+    public void DisplayImage(String url, ImageView imageView) {
         imageViews.put(imageView, url);
-        Bitmap bitmap=memoryCache.get(url);
+        Bitmap bitmap = memoryCache.get(url);
         if(bitmap != null)
             imageView.setImageBitmap(bitmap);
         else {
@@ -48,10 +49,29 @@ public class ImageLoader {
             //imageView.setImageResource(stub_id);
         }
     }
+
+    public void DisplayImage(String url, ImageView imageView, ProgressBar progressBar) {
+        imageViews.put(imageView, url);
+        Bitmap bitmap = memoryCache.get(url);
+        if (bitmap != null){
+            imageView.setImageBitmap(bitmap);
+            progressBar.setVisibility(View.GONE);
+        } else {
+            progressBar.setVisibility(View.VISIBLE);
+            imageView.setImageResource(android.R.color.transparent);
+            queuePhoto(url, imageView, progressBar);
+
+        }
+    }
          
     private void queuePhoto(String url, ImageView imageView)
     {
         PhotoToLoad p = new PhotoToLoad(url, imageView);
+        executorService.submit(new PhotosLoader(p));
+    }
+    private void queuePhoto(String url, ImageView imageView, ProgressBar progressBar)
+    {
+        PhotoToLoad p = new PhotoToLoad(url, imageView, progressBar);
         executorService.submit(new PhotosLoader(p));
     }
      
@@ -75,10 +95,10 @@ public class ImageLoader {
             OutputStream os = new FileOutputStream(f);
 
             try {
-                byte[] bytes=new byte[buffer_size];
+                byte[] bytes = new byte[buffer_size];
                 for(;;) {
                     int count=is.read(bytes, 0, buffer_size);
-                    if(count==-1)
+                    if(count == -1)
                         break;
                     os.write(bytes, 0, count);
                 }
@@ -125,6 +145,7 @@ public class ImageLoader {
 	                // scale to max possible inSampleSize that still yields an thumbnail
 	                // larger than target
 	                options = new BitmapFactory.Options();
+                    options.inPreferredConfig = Bitmap.Config.RGB_565;
 	                options.inSampleSize = scale;
 	                bitmap = BitmapFactory.decodeStream(new FlushedInputStream(inputStream), null, options);
 	
@@ -151,36 +172,6 @@ public class ImageLoader {
         	}
     	}
         return bitmap;
-        	
-        	/*
-            //decode thumbnail size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
-             
-            //Find the correct scale value. It should be the power of 2.
-            
-            //TODO figure out at what samplesize should be used (thumbnail size here?)
-            // MAKES IMAGE LOOK LIKE GARBAGE
-            
-            final int REQUIRED_SIZE=70;
-            int width_tmp=o.outWidth, height_tmp=o.outHeight;
-            int scale=1;
-            while(true){
-                if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE)
-                    break;
-                width_tmp/=2;
-                height_tmp/=2;
-                scale*=2;
-            }
-             
-            //decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize=1;//scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {}
-        return null;*/
-    	
     }
      
     //Task for the queue
@@ -188,16 +179,23 @@ public class ImageLoader {
     {
         public String url;
         public ImageView imageView;
+        public ProgressBar progressBar;
+
         public PhotoToLoad(String u, ImageView i){
             url = u; 
             imageView = i;
+        }
+        public PhotoToLoad(String u, ImageView i, ProgressBar p){
+            url = u;
+            imageView = i;
+            progressBar = p;
         }
     }
      
     class PhotosLoader implements Runnable {
         PhotoToLoad photoToLoad;
         PhotosLoader(PhotoToLoad photoToLoad){
-            this.photoToLoad=photoToLoad;
+            this.photoToLoad = photoToLoad;
         }
          
         @Override
@@ -235,10 +233,12 @@ public class ImageLoader {
         {
             if(imageViewReused(photoToLoad))
                 return;
-            if(bitmap!=null)
+            if(bitmap != null)
                 photoToLoad.imageView.setImageBitmap(bitmap);
             else
                 photoToLoad.imageView.setImageDrawable(null);
+            if(photoToLoad.progressBar != null)
+            photoToLoad.progressBar.setVisibility(View.GONE);
         }
     }
  

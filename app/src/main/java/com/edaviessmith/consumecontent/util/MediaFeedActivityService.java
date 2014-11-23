@@ -25,7 +25,7 @@ public class MediaFeedActivityService extends IntentService {
 
     private static String TAG = "MemberActivityService";
 
-    private static int threadCounter;
+    private int threadCounter;
     private List<Integer> updatedMediaFeedIds;
 
 
@@ -43,28 +43,23 @@ public class MediaFeedActivityService extends IntentService {
 
         List<YoutubeFeed> youtubeFeeds = MediaFeedORM.getMediaFeedsByNotificationId(this, notificationId);
         updatedMediaFeedIds = new ArrayList<Integer>();
+
         threadCounter = 0;
-
         for(YoutubeFeed youtubeFeed : youtubeFeeds) {
-
-            //if(youtubeFeed.getItems().size() == 0) {    //No videos for the user
-                threadCounter ++;
-                new YoutubeFeedAsyncTask(this, youtubeFeed, handler).execute("");
-            //}
+            threadCounter ++;
+            new YoutubeFeedAsyncTask(this, youtubeFeed, handler).execute("");
 
         }
 
-        checkMediaFeedUpdated();
     }
 
 
-    //Update latestVideo if checked member exists in memberActivities or add then start notification
     private void checkMediaFeedUpdated() {
-
-        //Only create notifications after all thread have completed
         if(threadCounter > 0) return;
-
         threadCounter = 0;
+
+        if(updatedMediaFeedIds.size() == 0) return;
+
 
         List<User> users = UserORM.getUsersByMediaFeeds(this, updatedMediaFeedIds);
 
@@ -116,9 +111,11 @@ public class MediaFeedActivityService extends IntentService {
             if(msg.what == 0) {
                 threadCounter --;
 
-                //if(msg.arg1 == 1) {     //Feed had new content
+                if(msg.arg1 == 1) {     //Feed has new content
                     updatedMediaFeedIds.add(msg.arg2);
-                //}
+                }
+
+                checkMediaFeedUpdated();
             }
 
         }

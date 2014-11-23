@@ -145,14 +145,14 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         View header = getLayoutInflater().inflate(R.layout.header_add, null, false);
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
-        View footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
+        footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
         footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
-
-        feed_lv = (ListView) findViewById(R.id.feed_lv);
-        feed_lv.addHeaderView(header, null, false);
-
+        footer.setVisibility(View.GONE);
 
         feedAdapter = new FeedAdapter(this);
+        feed_lv = (ListView) findViewById(R.id.feed_lv);
+        feed_lv.addHeaderView(header, null, false);
+        feed_lv.addFooterView(footer, null, false);
         feed_lv.setAdapter(feedAdapter);
 
         //Header

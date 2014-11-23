@@ -46,12 +46,13 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	private TaskFragment taskFragment;
 	private List<User> users;
     Toolbar toolbar;
-    ImageLoader imageLoader;
+    public ImageLoader imageLoader;
     ImageView actionSettings;
     VideoPlayerFragment videoPlayerFragment;
 
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
+    public int userPos;
     //boolean isVideoPlaying;
 
 	@Override
@@ -112,7 +113,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     @Override
     protected void onResume() {
         super.onResume();
-        users = UserORM.getUsers(this);
+        //users = UserORM.getUsers(this);
+
         mNavigationDrawerFragment.adapter.notifyDataSetChanged();
     }
 
@@ -133,11 +135,14 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
 	}
 
-    int userPos;
+
     public User getUser() {
         return (userPos < users.size() ? users.get(userPos): null);
     }
 
+    public User getUser(int pos) {
+        return (pos < users.size() ? users.get(pos): null);
+    }
 
     public void startVideo(YoutubeItem youtubeItem) {
         videoPlayerFragment = VideoPlayerFragment.newInstance(this);
@@ -154,7 +159,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
 
     public boolean isVideoPlaying() {
-        return videoPlayerFragment == null || videoPlayerFragment.activePlayer == null || videoPlayerFragment.activePlayer.isPlaying();
+        return videoPlayerFragment != null && videoPlayerFragment.activePlayer != null && videoPlayerFragment.activePlayer.isPlaying();
+        //return videoPlayerFragment == null || videoPlayerFragment.activePlayer == null || videoPlayerFragment.activePlayer.isPlaying();
     }
 
     public void setVideoPlaying(boolean isVideoPlaying) {

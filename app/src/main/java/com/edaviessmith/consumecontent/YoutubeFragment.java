@@ -14,13 +14,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
-import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
@@ -30,41 +30,42 @@ import java.util.List;
 public class YoutubeFragment extends Fragment{
 
     private static String TAG = "YoutubeFragment";
-    private static YoutubeFragment youtubeFragment;
-    private static ContentActivity act;
-    private int pos;
-
-    private ImageLoader imageLoader;
-    private RecyclerView feed_rv;
-    private YoutubeItemAdapter itemAdapter;
+    private ContentActivity act;
+    private int pos, tab;
 
     private boolean isSearchBusy; //Only make a single request to API
+    private int feedState = Var.FEED_LOADING;
+
+    private RecyclerView feed_rv;
+    private YoutubeItemAdapter itemAdapter;
+    private LinearLayoutManager linearLayoutManager;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
 
 
-    public static YoutubeFragment newInstance(int pos) {
-        Log.i(TAG, "newInstance");
-
+    public static YoutubeFragment newInstance(int pos, int tab) {
         Bundle args = new Bundle();
         args.putInt("pos", pos);
-
-        youtubeFragment = new YoutubeFragment();
+        args.putInt("tab", tab);
+        YoutubeFragment youtubeFragment = new YoutubeFragment();
         youtubeFragment.setArguments(args);
         return youtubeFragment;
     }
 
     public YoutubeFragment() { }
 
-    LinearLayoutManager linearLayoutManager;
-    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_youtube, container, false);
-        pos = getArguments() != null ? getArguments().getInt("pos") : -1;
-        view.setId(pos);
         act = (ContentActivity) getActivity();
-        imageLoader = new ImageLoader(act);
+        pos = getArguments() != null ? getArguments().getInt("pos") : -1;
+        tab = getArguments() != null ? getArguments().getInt("tab") : -1;
+
+        View view = inflater.inflate(R.layout.fragment_youtube, container, false);
+        view.setId(pos);
+
+        //footer = inflater.inflate(R.layout.item_loading_footer, null, false);
+
 
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
         linearLayoutManager = new LinearLayoutManager(act);
@@ -81,7 +82,6 @@ public class YoutubeFragment extends Fragment{
             }
         });
 
-        //handler.sendMessage(handler.obtainMessage(what, 1, 0, authUrl));
 
         itemAdapter = new YoutubeItemAdapter(act);
         feed_rv.setAdapter(itemAdapter);
@@ -149,87 +149,136 @@ public class YoutubeFragment extends Fragment{
 
 
     private YoutubeFeed getFeed() {
-        return (YoutubeFeed) act.getUser().getMediaFeed().get(pos);
+        return (YoutubeFeed) act.getUser(tab).getMediaFeed().get(pos);
     }
 
 
-    public class YoutubeItemAdapter extends RecyclerView.Adapter<YoutubeItemAdapter.ViewHolder> implements View.OnClickListener{
+    public void setFeedState(int feedState) {
+        this.feedState = feedState;
+        //Set back to loading so make another request
+        if(feedState == Var.FEED_LOADING) new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+        Log.e(TAG, "setFeedState "+feedState);
+        itemAdapter.notifyDataSetChanged();
+        //notifyItemChanged(getItemCount());
+    }
 
-        private final int TYPE_DIV = 0;
-        private final int TYPE_ITEM = 1;
-        private Context mContext;
+    public class YoutubeItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
+
+        private static final int TYPE_DIV = 0;
+        private static final int TYPE_ITEM = 1;
+        private static final int TYPE_FOOTER = 2;
+        private Context context;
+
+
 
         public YoutubeItemAdapter( Context context) {
-
-            this.mContext = context;
+            this.context = context;
         }
 
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View v = null;
             if(i == TYPE_DIV) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube_divider, viewGroup, false);
             else if(i == TYPE_ITEM) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_youtube, viewGroup, false);
-            v.setOnClickListener(this);
-            return new ViewHolder(v);
+            else if(i == TYPE_FOOTER) v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_loading_footer, viewGroup, false);
+
+            if(v != null) v.setOnClickListener(this);
+            if(i == TYPE_DIV || i == TYPE_ITEM)  return new ViewHolderItem(v);
+            if(i == TYPE_FOOTER) return new ViewHolderFooter(v);
+            return null;
         }
 
         @Override
         public int getItemViewType(int position) {
+            if(position >= getItemCount() - 1) return TYPE_FOOTER;
             if(position == 0) return TYPE_DIV;
+
             int[] prevItemCat = Var.getTimeCategory(( getFeed().getItems().get(position - 1)).getDate());
             int[] itemCat = Var.getTimeCategory((getFeed().getItems().get(position)).getDate());
             if((prevItemCat[0] == Var.DATE_DAY && itemCat[0] == Var.DATE_DAY && prevItemCat[1] != itemCat[1])) return TYPE_DIV;
             if((prevItemCat[0] == Var.DATE_MONTH && itemCat[0] == Var.DATE_MONTH && prevItemCat[1] != itemCat[1])) return TYPE_DIV;
             if(prevItemCat[0] != itemCat[0]) return TYPE_DIV;
-            //TODO account for different months as well
             return TYPE_ITEM;
         }
 
         @Override
         public void onClick(final View view) {
             int itemPosition = feed_rv.getChildPosition(view);
-            act.startVideo(getFeed().getItems().get(itemPosition));
+            if(itemPosition < getItemCount() - 1)  act.startVideo(getFeed().getItems().get(itemPosition));
+            else if(feedState != Var.FEED_LOADING) setFeedState(Var.FEED_LOADING);
+
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder viewHolder, int i) {
-            if(getFeed().getItems().size() > i) {
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
+            if (viewHolder instanceof ViewHolderItem) {
+                //if (getFeed().getItems().size() > i) {
+                ViewHolderItem holder = (ViewHolderItem) viewHolder;
                 YoutubeItem item = getFeed().getItems().get(i);
 
-                imageLoader.DisplayImage(item.getImageMed(), viewHolder.thumbnail_iv);
-                viewHolder.title_tv.setText(item.getTitle());
-                viewHolder.length_tv.setText(item.getDuration());
-                viewHolder.views_tv.setText(Var.displayViews(item.getViews()));
-                //viewHolder.views_tv.setText(Var.simpleDate.format(new Date(item.getDate())));
+                act.imageLoader.DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
+                holder.title_tv.setText(item.getTitle());
+                holder.length_tv.setText(item.getDuration());
 
-                if(getItemViewType(i) == TYPE_DIV) {
+                if (getFeed().getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
+                    holder.views_tv.setText(Var.displayViews(item.getViews()));
+                }
+                if (getFeed().getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
+                    holder.views_tv.setText(Var.displayActivity(item.getType()));
+                }
+                //holder.views_tv.setText(Var.simpleDate.format(new Date(item.getDate())));
+
+                if (getItemViewType(i) == TYPE_DIV) {
                     int[] dateCats = Var.getTimeCategory((getFeed().getItems().get(i)).getDate());
                     String dividerTitle = "";
-                    switch(dateCats[0]) {
+                    switch (dateCats[0]) {
                         case Var.DATE_DAY:
                             dividerTitle = Var.DAYS[dateCats[1]];
                             break;
-                        case Var.DATE_THIS_WEEK: dividerTitle = "This Week"; break;
-                        case Var.DATE_LAST_WEEK: dividerTitle = "Last Week"; break;
-                        case Var.DATE_MONTH: dividerTitle = Var.MONTHS[dateCats[1]];
-                            if(dateCats.length == 3) dividerTitle += " "+dateCats[2]; //Optional year
+                        case Var.DATE_THIS_WEEK:
+                            dividerTitle = "This Week";
+                            break;
+                        case Var.DATE_LAST_WEEK:
+                            dividerTitle = "Last Week";
+                            break;
+                        case Var.DATE_MONTH:
+                            dividerTitle = Var.MONTHS[dateCats[1]];
+                            if (dateCats.length == 3)
+                                dividerTitle += " " + dateCats[2]; //Optional year
                             break;
                     }
-                    viewHolder.div_tv.setText(dividerTitle);
+                    holder.div_tv.setText(dividerTitle);
+                }
+                //}
+            }
+            if (viewHolder instanceof ViewHolderFooter) {
+                ViewHolderFooter footer = (ViewHolderFooter) viewHolder;
+
+                footer.loading_v.setVisibility(feedState == Var.FEED_LOADING? View.VISIBLE: View.GONE);
+                footer.warning_iv.setVisibility(feedState == Var.FEED_LOADING? View.GONE: View.VISIBLE);
+                footer.warning_tv.setVisibility(feedState == Var.FEED_LOADING? View.GONE: View.VISIBLE);
+
+                if(feedState != Var.FEED_LOADING) {
+                    footer.warning_iv.setImageResource(feedState == Var.FEED_WARNING ?
+                                                        R.drawable.ic_warning_amber_36dp :
+                                                        R.drawable.ic_error_red_36dp);
+
+                    if(feedState == Var.FEED_WARNING) footer.warning_tv.setText("Could not connect to Youtube");
+                    if(feedState == Var.FEED_OFFLINE) footer.warning_tv.setText("No Internet connection");
                 }
 
             }
-
         }
 
         @Override
         public int getItemCount() {
-            return getFeed().getItems() == null ? 0 : getFeed().getItems().size();
+            return getFeed().getItems() == null ? 1 : getFeed().getItems().size() + 1;
         }
 
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolderItem extends RecyclerView.ViewHolder {
             public ImageView thumbnail_iv;
+            public ProgressBar thumbnail_pb;
             public TextView title_tv;
             public TextView length_tv;
             public TextView views_tv;
@@ -237,17 +286,29 @@ public class YoutubeFragment extends Fragment{
 
             public TextView div_tv;
 
-            public ViewHolder(View itemView) {
+            public ViewHolderItem(View itemView) {
                 super(itemView);
                 thumbnail_iv = (ImageView) itemView.findViewById(R.id.thumbnail_iv);
+                thumbnail_pb = (ProgressBar) itemView.findViewById(R.id.thumbnail_pb);
                 title_tv = (TextView) itemView.findViewById(R.id.title_tv);
                 length_tv = (TextView) itemView.findViewById(R.id.length_tv);
                 views_tv = (TextView) itemView.findViewById(R.id.views_tv);
                 status_tv = (TextView) itemView.findViewById(R.id.status_tv);
-
                 div_tv = (TextView) itemView.findViewById(R.id.text_tv);
             }
+        }
 
+        class ViewHolderFooter extends RecyclerView.ViewHolder {
+            public View loading_v;
+            public ImageView warning_iv;
+            public TextView warning_tv;
+
+            public ViewHolderFooter(View itemView) {
+                super(itemView);
+                loading_v = itemView.findViewById(R.id.loading_pb);
+                warning_iv = (ImageView) itemView.findViewById(R.id.warning_iv);
+                warning_tv = (TextView) itemView.findViewById(R.id.warning_tv);
+            }
         }
     }
 
@@ -267,10 +328,15 @@ public class YoutubeFragment extends Fragment{
                     new Thread() {
                         @Override
                         public void run() {
-                            if (getFeed().getItems().size() > 0) MediaFeedORM.saveMediaItems(act, getFeed());
+                            Log.d(TAG, "check" + (getFeed().getItems() != null));
+                            if (getFeed().getItems().size() > 0) {
+                                MediaFeedORM.saveMediaItems(act, getFeed());
+                            }
                         }
                     }.start();
                 }
+            } else {
+                if(getFeed().getId() == msg.arg2) setFeedState(msg.arg1);
             }
 
             /*if (msg.what == 1) {

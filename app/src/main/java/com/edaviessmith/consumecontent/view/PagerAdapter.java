@@ -35,7 +35,7 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     public Fragment getItem(int position) {
         int type = ((MediaFeed) act.getUser().getMediaFeed().get(position)).getType();
         if(Var.isTypeYoutube(type)) {
-            return YoutubeFragment.newInstance(act, position);
+            return YoutubeFragment.newInstance(position, act.userPos);
         } else if(type == Var.TYPE_TWITTER) {
             return TwitterFragment.newInstance(act, position);
         }

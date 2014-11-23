@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:paddingBottom="10dp"
+    android:background="@color/gray">
+
+    <View style="@style/divider"/>
+
+    <View style="@style/shadow_bottom"/>
+
+    <ProgressBar
+        style="?android:attr/android:progressBarStyle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:paddingTop="10dp"
+        android:layout_gravity="center"
+        android:id="@+id/loading_pb" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:id="@+id/warning_iv"
+        android:src="@drawable/ic_warning_amber_36dp"
+        android:visibility="gone"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gray_accent"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="No connection found"
+
+        android:visibility="gone"
+        android:id="@+id/warning_tv"/>
+
+
+</LinearLayout>

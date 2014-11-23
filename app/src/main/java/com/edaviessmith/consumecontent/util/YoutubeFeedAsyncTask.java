@@ -42,7 +42,10 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
             final Map<String, YoutubeItem> youtubeItemMap = new HashMap<String, YoutubeItem>();
 
             //TODO make this a beautiful toast like Chrome (use Handler)
-            if (!Var.isNetworkAvailable(context)) return null;
+            if (!Var.isNetworkAvailable(context)) {
+                handler.sendMessage(handler.obtainMessage(1, Var.FEED_OFFLINE, youtubeFeed.getId(), null));
+                return null;
+            }
 
             String url = null;
 
@@ -215,6 +218,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
         } catch (Throwable t) {
             Log.e(TAG, "getFeed failed");
             t.printStackTrace();
+            handler.sendMessage(handler.obtainMessage(1, Var.FEED_WARNING, youtubeFeed.getId(), null));
         }
 
         Collections.sort(youtubeItems, new Comparator<YoutubeItem>() {
@@ -230,7 +234,8 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         Log.d(TAG,"adding youtube items "+youtubeItems.size());
         boolean updated = youtubeFeed.addItems(youtubeItems);
-        handler.sendMessage(handler.obtainMessage(0, updated? 1: 0, youtubeFeed.getId(), null));
+
+        handler.sendMessage(handler.obtainMessage(0, (updated? 1: 0), youtubeFeed.getId(), null));
     }
 
 

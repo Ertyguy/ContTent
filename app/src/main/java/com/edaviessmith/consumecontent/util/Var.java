@@ -67,6 +67,12 @@ public class Var {
     public static final int ALARM_EVERY = 1;
     public static final int ALARM_BETWEEN = 2; // Alarm Range
 
+    //Fragment feed state
+    public static final int FEED_LOADING = 0;
+    public static final int FEED_WAITING = 1;
+    public static final int FEED_WARNING = 2;
+    public static final int FEED_OFFLINE = 3;
+
     //Handler (currently not used)
     public static final int HANDLER_COMPLETE = 0;
     public static final int HANDLER_ERROR = 1;
@@ -412,7 +418,6 @@ public class Var {
 
 
     public static String displayViews(int views) {
-
         if (views > 1000000) {
             return (views / 1000000) + "M views";
         } else if (views > 1000) {
@@ -420,7 +425,17 @@ public class Var {
         } else {
             return (views == 301 ? views + "+" : views) + " views";
         }
+    }
 
+
+    public static String displayActivity(int type) {
+        switch (type) {
+            case Var.TYPE_UPLOAD: return "Uploaded";
+            case Var.TYPE_LIKE: return "Liked";
+            case Var.TYPE_FAVORITE: return "Favorited";
+            case Var.TYPE_ADD_TO_PLAYLIST: return "Added to Playlist";
+        }
+        return "";
     }
 
     public static boolean getBoolPreference(Context context, String pref) {
@@ -575,4 +590,5 @@ public class Var {
 
         return nextAlarm;
     }
+
 }
