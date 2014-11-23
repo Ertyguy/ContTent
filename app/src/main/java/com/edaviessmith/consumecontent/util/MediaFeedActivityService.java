@@ -47,10 +47,10 @@ public class MediaFeedActivityService extends IntentService {
 
         for(YoutubeFeed youtubeFeed : youtubeFeeds) {
 
-            if(youtubeFeed.getItems().size() == 0) {    //No videos for the user
+            //if(youtubeFeed.getItems().size() == 0) {    //No videos for the user
                 threadCounter ++;
                 new YoutubeFeedAsyncTask(this, youtubeFeed, handler).execute("");
-            }
+            //}
 
         }
 
@@ -116,9 +116,9 @@ public class MediaFeedActivityService extends IntentService {
             if(msg.what == 0) {
                 threadCounter --;
 
-                if(msg.arg1 == 1) {     //Feed had new content
+                //if(msg.arg1 == 1) {     //Feed had new content
                     updatedMediaFeedIds.add(msg.arg2);
-                }
+                //}
             }
 
         }

@@ -1,5 +1,6 @@
 package com.edaviessmith.consumecontent.view;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.ContentActivity;
@@ -51,6 +52,12 @@ public class VideoPlayerFragment extends YouTubePlayerSupportFragment {
                             activePlayer.pause();
                             tryStop = false;
                         }
+
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                act.updateUIVisibility();
+                            }
+                        }, 5000);
                     }
 
                     @Override

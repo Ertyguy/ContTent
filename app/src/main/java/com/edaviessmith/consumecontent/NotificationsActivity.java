@@ -42,7 +42,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
     AlarmAdapter alarmAdapter;
 
     Fab add_fab, addAlarm_fab, save_fab;
-    View alarm_v, allNotifications_v, mobileNotifications_v, vibrations_v, playSound_v, schedule_v;
+    View alarm_v, allNotifications_v, mobileNotifications_v, vibrations_v, playSound_v, schedule_v, footer;
     SwitchCompat allNotifications_sw, mobileNotifications_sw, vibrations_sw, playSound_sw;
     boolean isAllNotificationsEnabled, isMobileNotificationsEnabled, isVibrationsEnabled, isPlaySoundEnabled;
     EditText notificationName_tv;
@@ -65,8 +65,6 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
 
         notificationList = new NotificationList(this);
-
-
         editNotification = new Notification();
 
         isAllNotificationsEnabled = Var.getBoolPreference(this, Var.PREF_ALL_NOTIFICATIONS);
@@ -76,7 +74,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
         View header = getLayoutInflater().inflate(R.layout.header_notifications, null, false);
         View alarmHeader = getLayoutInflater().inflate(R.layout.header_alarms, null, false);
-        View footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
+        footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
         footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
 
         alarm_v = findViewById(R.id.alarm_v);
@@ -144,6 +142,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             notificationName_tv.setEnabled(editNotification.getType() == Var.NOTIFICATION_ALARM);
             scheduleTimeExplanation_tv.setVisibility(editNotification.getType() == Var.NOTIFICATION_SCHEDULE? View.VISIBLE: View.GONE);
             alarmAdapter.notifyDataSetChanged();
+
         }
     }
 
@@ -239,6 +238,12 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         @Override
         public long getItemId(int position) {
             return position;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+            footer.setVisibility(getCount() == 0? View.GONE: View.VISIBLE);
         }
 
         @Override

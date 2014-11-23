@@ -9,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -79,7 +78,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		users = UserORM.getUsers(this);
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), users);
+		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
 
 	    taskFragment = (TaskFragment) getSupportFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT);
@@ -105,10 +104,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
                             // TODO: The system bars are NOT visible. Make any desired adjustments to your UI, such as hiding the action bar or other navigational controls.
                         }
                         videoPlayerLayout.invalidate();
-                        videoPlayerLayout.requestLayout();
-                        Log.d(TAG, "system ui listener resize view here");
-                    }
-                });
+                        //Log.d(TAG, "system ui listener resize view here");
+            }});
 
     }
 
@@ -116,12 +113,14 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     protected void onResume() {
         super.onResume();
         users = UserORM.getUsers(this);
-
-
+        mNavigationDrawerFragment.adapter.notifyDataSetChanged();
     }
 
+    public List<User> getUsers() {
+        return users;
+    }
 
-	@Override
+    @Override
 	public void onNavigationDrawerItemSelected(int position) {
 		// update the main content by replacing fragments
 		if(users != null) {

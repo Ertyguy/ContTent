@@ -41,8 +41,8 @@ public class VideoPlayerLayout extends RelativeLayout {
     private float dragOffset;
 
 
-    private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 204);
-    private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 114);
+    private int playerMinWidth = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 199);   //Says the min is 200 but the ratio of 16/9 makes it 195
+    private int playerMinHeight = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 114);  //Plus 4 padding
 
     private int minimizedMargin = Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 2);
     private int animationSpeed = 200;
@@ -274,15 +274,15 @@ public class VideoPlayerLayout extends RelativeLayout {
             //description_v.setAlpha(1 - dragOffset);
 
             shade_v.setAlpha(1 - dragOffset);
-            act.toggleVideoControls(false);
+            act.toggleVideoControls(false); //TODO not accounting for all the times when controls should hide/show
             if(!isDismiss) {
                 Log.d(TAG, "onViewPositionChanged isMinimized false");
                 //isMinimized = false;
             }
 
-            header_v.invalidate();
+            //header_v.invalidate();
             header_v.requestLayout();
-            shade_v.requestLayout();
+            //shade_v.requestLayout();
             requestLayout();
         }
 
@@ -402,7 +402,8 @@ public class VideoPlayerLayout extends RelativeLayout {
             //Log.d(TAG, "dragging bottom: min:"+isMinimized +" pos "+left);
             isDismiss = true;
             left = (int) (initialX - ev.getX());
-            return true;
+            //header_v.dispatchTouchEvent(MotionEvent.obtain(ev.getDownTime(), ev.getEventTime(), MotionEvent.ACTION_CANCEL, ev.getX(), ev.getY(), ev.getMetaState()));
+            return true;  //TODO testing this
         }
 
         if (!isDismiss && isMinimized && ev.getAction() == MotionEvent.ACTION_UP) {
@@ -445,25 +446,28 @@ public class VideoPlayerLayout extends RelativeLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int right, int bottom) {
 
-        headerWidth = (int) (playerMinWidth + ((right - l - playerMinWidth) * (1 - dragOffset)));
-        headerHeight = (int) (playerMinHeight + ((((right - l)/ (16f / 9f)) - playerMinHeight) * (1 - dragOffset)));//Math.floor(headerWidth / (16f / 9f));
+        float width = (playerMinWidth + (((right - l - playerMinWidth)) * (1 - dragOffset)));
+        float height = (playerMinHeight + ((((right - l  - playerMinWidth) /  (16f / 9f))) * (1 - dragOffset)));
+
+        headerWidth = (int) Math.floor(width);
+        headerHeight = (int) Math.floor(height);//(headerWidth / (16f / 9f));
+
         if(headerHeight > getMeasuredHeight()) headerHeight = getMeasuredHeight(); //Ratio is bigger than screen size
 
 
         dragRange = ((bottom - t) - playerMinHeight);// - minimizedMargin * 2; // headerHeight
-        Log.d(TAG, "onLayout" + " range: "+dragRange +", top:"+top+" hight:"+getHeight());
+        Log.d(TAG, "onLayout" + " off: "+dragOffset +", w:"+Var.getDp(headerWidth)+" h:"+Var.getDp(headerHeight));
         if(isMinimized && top != dragRange) {
-
             top = dragRange; //Resize minimized (for configChange)
         }
 
         if(header_v != null) {
             header_v.getLayoutParams().width = headerWidth;
             header_v.getLayoutParams().height = headerHeight;
-            header_v.setPadding((int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset), (int) (minimizedMargin * dragOffset));
+            header_v.setPadding((int) Math.floor(minimizedMargin * dragOffset), (int) Math.floor(minimizedMargin * dragOffset), (int) Math.floor(minimizedMargin * dragOffset), (int) Math.floor(minimizedMargin * dragOffset));
 
             header_v.layout(right - left - headerWidth, top, right - left, top + headerHeight);
-            //header_v.layout(right - l - headerWidth, top, right, top + headerHeight);
+            //header_v.layout(right - left - headerWidth, top, right - left, top + headerHeight);
         }
         if(description_v != null)  description_v.layout(0, (int) (top + (headerHeight * (dragOffset + 1))), right, top + bottom);
         if(shade_v != null)  shade_v.layout(l, t, right, bottom);

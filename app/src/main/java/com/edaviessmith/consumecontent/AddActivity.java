@@ -13,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,7 +84,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     NotificationList notificationList;
 
     List<String> userPictureThumbnails;
-    View search_v, searchTwitter_v, searchDiv_v, channel_v;
+    View search_v, searchTwitter_v, searchDiv_v, channel_v, footer;
 
     //Searching users
     public static final int SEARCH_NONE = 0;
@@ -144,6 +145,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         View header = getLayoutInflater().inflate(R.layout.header_add, null, false);
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
+        View footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
+        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
 
         feed_lv = (ListView) findViewById(R.id.feed_lv);
         feed_lv.addHeaderView(header, null, false);
@@ -287,7 +290,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             dismissSearch();
             action_fab.setVisibility(View.VISIBLE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            clearSearchOptions();
+            clearSearchOptions(1);
         } else if(searchMode == SEARCH_YOUTUBE || searchMode == SEARCH_TWITTER) {
             search_edt.setHint((searchMode == SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
             app.postFocusText(search_edt);
@@ -305,8 +308,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         return (searchMode == SEARCH_NONE || searchMode == SEARCH_OPTIONS);
     }
 
-    private void clearSearchOptions() {
-        for (int i = 0; i < search_lv.getCount(); i++) search_lv.setItemChecked(i, false); //Unselect all options
+    private void clearSearchOptions(int selected) {
+        for (int i = 0; i < search_lv.getCount(); i++) search_lv.setItemChecked(i, (i == selected)); //Unselect all options
     }
 
 
@@ -435,12 +438,13 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                     if(checked.valueAt(i)) {
                         YoutubeFeed youtubeFeed = (YoutubeFeed) search_lv.getItemAtPosition(checked.keyAt(i));
                         youtubeFeed.setChannelHandle(searchChannel.getFeedId());
+                        addThumbnail(youtubeFeed.getThumbnail());
                         editUser.getMediaFeed().add(youtubeFeed);
                     }
                 }
 
                 feedAdapter.notifyDataSetChanged();
-                clearSearchOptions();
+                clearSearchOptions(-1);
 
                 toggleSearch(SEARCH_NONE);
             }
@@ -713,6 +717,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         @Override
         public long getItemId(int position) {
             return position;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+            footer.setVisibility(getCount() == 0? View.GONE: View.VISIBLE);
         }
 
         @Override

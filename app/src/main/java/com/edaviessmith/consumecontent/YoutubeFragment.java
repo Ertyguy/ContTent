@@ -42,16 +42,14 @@ public class YoutubeFragment extends Fragment{
 
 
 
-    public static YoutubeFragment newInstance(ContentActivity activity, int pos) {
+    public static YoutubeFragment newInstance(int pos) {
         Log.i(TAG, "newInstance");
-        act = activity;
-
-        youtubeFragment = new YoutubeFragment();
 
         Bundle args = new Bundle();
         args.putInt("pos", pos);
-        youtubeFragment.setArguments(args);
 
+        youtubeFragment = new YoutubeFragment();
+        youtubeFragment.setArguments(args);
         return youtubeFragment;
     }
 
@@ -65,6 +63,7 @@ public class YoutubeFragment extends Fragment{
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
         pos = getArguments() != null ? getArguments().getInt("pos") : -1;
         view.setId(pos);
+        act = (ContentActivity) getActivity();
         imageLoader = new ImageLoader(act);
 
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
@@ -264,11 +263,11 @@ public class YoutubeFragment extends Fragment{
                 itemAdapter.notifyDataSetChanged();
                 if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
 
-                if(msg.arg1 == 1) {
+                if(msg.arg1 == 1 && getFeed().getId() == msg.arg2) {
                     new Thread() {
                         @Override
                         public void run() {
-                            if (getFeed() != null && getFeed().getItems().size() > 0) MediaFeedORM.saveMediaItems(act, getFeed());
+                            if (getFeed().getItems().size() > 0) MediaFeedORM.saveMediaItems(act, getFeed());
                         }
                     }.start();
                 }
