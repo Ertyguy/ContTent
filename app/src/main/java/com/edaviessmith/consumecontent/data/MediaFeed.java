@@ -144,8 +144,16 @@ public class MediaFeed {
         this.lastUpdate = lastUpdate;
     }
 
+    @Override
     public String toString() {
-        return "MediaFeed ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";
+        return "add(new MediaFeed(" + id +
+                ", " + sort +
+                ", \"" + name + '"' +
+                ", \"" + thumbnail + '"' +
+                ", \"" + channelHandle + '"' +
+                ", \"" + feedId + '\"' +
+                ", " + type +
+                ", " + notificationId +
+                "));";
     }
-
 }

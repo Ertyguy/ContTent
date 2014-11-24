@@ -25,6 +25,16 @@ public class YoutubeFeed extends MediaFeed {
         super(id, sort, name, thumbnail, channelHandle, feedId, type, notificationId, lastUpdate);
     }
 
+    public YoutubeFeed(int sort, String name, String thumbnail, String channelHandle, String feedId, int type, int notificationId){
+        setSort(sort);
+        setName(name);
+        setThumbnail(thumbnail);
+        setChannelHandle(channelHandle);
+        setFeedId(feedId);
+        setType(type);
+        setNotificationId(notificationId);
+    }
+
     public List<YoutubeItem> getItems() {
         return (List<YoutubeItem>) super.getItems();
     }
@@ -88,8 +98,21 @@ public class YoutubeFeed extends MediaFeed {
         return newer <= DB.PAGE_SIZE;
     }
 
-    public String toString() {
+    /*public String toString() {
         return "YoutubeFeed ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";
+    }*/
+
+    @Override
+    public String toString() {
+        return "\tadd(new YoutubeFeed(" + getId() +
+                ", " + getSort() +
+                ", \"" + getName() + '"' +
+                ", \"" + getThumbnail() + '"' +
+                ", \"" + getChannelHandle() + '"' +
+                ", \"" + getFeedId() + '\"' +
+                ", " + getType() +
+                ", " + getNotificationId() +
+                "));";
     }
 
 }

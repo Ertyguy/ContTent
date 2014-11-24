@@ -44,5 +44,7 @@
     <string name="enable_notification_on_mobile">Enable notifications on mobile</string>
     <string name="alarm_schedule">Alarm Schedule</string>
     <string name="schedule_time_example">The schedule time is used to limit when the app will trigger hourly notifications. (Every x hours)\n\nFor example if you set a new time from 8:00am to 9:30pm, you will start receiving notifications after 8 in the morning until 9:30 that night.\n(This won\'t stop alarms set to a specific time)</string>
+    <string name="edit">Edit</string>
+    <string name="groups">Groups</string>
 
 </resources>

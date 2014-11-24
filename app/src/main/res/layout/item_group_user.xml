@@ -18,7 +18,7 @@
 
 
         <RelativeLayout
-            android:id="@+id/icon_v"
+            android:id="@+id/thumbnail_v"
             android:layout_width="50dp"
             android:layout_height="45dp"
             android:layout_marginRight="10dp"
@@ -28,7 +28,7 @@
             <ImageView
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                    android:id="@+id/icon_iv"
+                    android:id="@+id/thumbnail_iv"
                     android:scaleType="fitCenter"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_group_grey600_36dp"/>
@@ -38,17 +38,17 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_centerInParent="true"
-                    android:id="@+id/icon_pb" />
+                    android:id="@+id/thumbnail_pb" />
         </RelativeLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Group Name"
+            android:text="Name"
             android:id="@+id/name_tv"
-            android:layout_alignTop="@+id/icon_v"
-            android:layout_toRightOf="@+id/icon_v"
-            android:layout_toEndOf="@+id/icon_v"
+            android:layout_alignTop="@+id/thumbnail_v"
+            android:layout_toRightOf="@+id/thumbnail_v"
+            android:layout_toEndOf="@+id/thumbnail_v"
             android:textColor="@color/gray_accent"
             android:minLines="1"
             android:maxLines="1"
@@ -56,31 +56,15 @@
             android:textSize="22sp"
             android:gravity="center_vertical" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="X users"
-            android:id="@+id/user_count_tv"
-            android:layout_below="@+id/name_tv"
-            android:layout_toRightOf="@+id/icon_v"
-            android:layout_toEndOf="@+id/icon_v"
-            android:textColor="@color/gray_accent"
-            android:minLines="1"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textSize="14sp"
-            android:gravity="center_vertical" />
-
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/notification_v"
-            android:layout_toEndOf="@+id/icon_v"
+            android:layout_toEndOf="@+id/thumbnail_v"
+            android:layout_toRightOf="@+id/thumbnail_v"
             android:background="@drawable/selector_accent"
-            android:layout_below="@+id/icon_v"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
+            android:layout_below="@+id/name_tv">
 
             <ImageView
                 android:id="@+id/notification_iv"
@@ -95,8 +79,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Watching X users"
-                android:id="@+id/watching_count_tv"
+                android:text="Not watching"
+                android:id="@+id/next_alarm_tv"
                 android:textColor="@color/gray_accent"
                 android:minLines="1"
                 android:maxLines="1"

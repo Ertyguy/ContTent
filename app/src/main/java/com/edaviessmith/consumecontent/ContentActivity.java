@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -15,9 +14,13 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.edaviessmith.consumecontent.data.Group;
+import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
+import com.edaviessmith.consumecontent.db.DB;
+import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
@@ -30,32 +33,33 @@ import java.util.List;
 public class ContentActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private static String TAG = "ContentActivity";
-	/**
-	 * Fragment managing the behaviors, interactions and presentation of the
-	 * navigation drawer.
-	 */
-	private NavigationDrawerFragment mNavigationDrawerFragment;
+
+    private static final String TAG_MEDIA_FEED_FRAGMENT = "media_fragment";
+    private static final String TAG_GROUP_FRAGMENT = "group_fragment";
+
+
+    private NavigationDrawerFragment navigationDrawerFragment;
+    private MediaFeedFragment mediaFeedFragment;
+    private GroupFragment groupFragment;
     private VideoPlayerLayout videoPlayerLayout;
+    private VideoPlayerFragment videoPlayerFragment;
 
-	/**
-	 * Used to store the last screen title. For use in
-	 * {@link #restoreActionBar()}.
-	 */
-	private CharSequence mTitle;
-	private static final String TAG_TASK_FRAGMENT = "task_fragment";
-	private MediaFeedFragment mediaFeedFragment;
-	private List<User> users;
+    private List<Group> groups;
+    private List<User> users;
+    public NotificationList notificationList;
+
     Toolbar toolbar;
+    private CharSequence actionBarTitle;
     public ImageLoader imageLoader;
-    ImageView actionSettings;
-    VideoPlayerFragment videoPlayerFragment;
-
+    ImageView actionSettings, actionEdit;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
-    public int userPos;
-    //boolean isVideoPlaying;
+    public int selectedUser, selectedGroup, contentState = Var.LIST_USERS;
 
-	@Override
+    public ContentActivity() { }
+
+
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_content);
@@ -72,19 +76,23 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         videoPlayerLayout = (VideoPlayerLayout) findViewById(R.id.video_player_v);
         videoPlayerLayout.init(this);
 
-		mTitle = getTitle();
+		actionBarTitle = getTitle();
         imageLoader = new ImageLoader(this);
 
+        selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
 
-		users = UserORM.getUsers(this);
-
-		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-		mNavigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+        notificationList = new NotificationList(this);
 
 
-	    mediaFeedFragment = (MediaFeedFragment) getSupportFragmentManager().findFragmentByTag(TAG_TASK_FRAGMENT);
-	    mediaFeedFragment = MediaFeedFragment.newInstance();
-        getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment, TAG_TASK_FRAGMENT).commit();
+		//users = UserORM.getUsers(this);
+
+        actionEdit = (ImageView) findViewById(R.id.action_edit);
+        actionEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                groupFragment.setState(GroupFragment.GROUPS_ALL);
+            }
+        });
 
         actionSettings = (ImageView) findViewById(R.id.action_settings);
         actionSettings.setOnClickListener(new View.OnClickListener() {
@@ -108,14 +116,22 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
                         //Log.d(TAG, "system ui listener resize view here");
             }});
 
+        setState(contentState);
+
+
+        //Init Navigation Drawer
+        navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        navigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //users = UserORM.getUsers(this);
 
-        mNavigationDrawerFragment.adapter.notifyDataSetChanged();
+        //TODO update users
+        //users = UserORM.getUsers(this);
+        //navigationDrawerFragment.adapter.notifyDataSetChanged();
     }
 
     public List<User> getUsers() {
@@ -125,19 +141,17 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     @Override
 	public void onNavigationDrawerItemSelected(int position) {
 		// update the main content by replacing fragments
-		if(users != null) {
-            userPos = position;
-			FragmentManager fragmentManager = getSupportFragmentManager();
-		    mediaFeedFragment = (MediaFeedFragment) fragmentManager.findFragmentByTag(TAG_TASK_FRAGMENT);
-		    mediaFeedFragment = MediaFeedFragment.newInstance();
-		    fragmentManager.beginTransaction().replace(R.id.container, mediaFeedFragment, TAG_TASK_FRAGMENT).commit();
+
+        if(contentState != Var.LIST_USERS || selectedUser != position) {
+            selectedUser = position;
+            setState(Var.LIST_USERS);    //TODO need to change state
 		}
 
 	}
 
 
     public User getUser() {
-        return (userPos < users.size() ? users.get(userPos): null);
+        return (selectedUser < users.size() ? users.get(selectedUser): null);
     }
 
     public User getUser(int pos) {
@@ -207,12 +221,12 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-		actionBar.setTitle(mTitle);
+		actionBar.setTitle(actionBarTitle);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		/*if (!mNavigationDrawerFragment.isDrawerOpen()) {
+		/*if (!navigationDrawerFragment.isDrawerOpen()) {
 			// Only show items in the action bar relevant to this screen if the drawer is not showing. Otherwise, let the drawer decide what to show in the action bar.
 			getMenuInflater().inflate(R.menu.content, menu);
 			restoreActionBar();
@@ -226,12 +240,12 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
+		/*int id = item.getItemId();
 		if (id == R.id.action_settings) {
             Intent dbmanager = new Intent(this, AndroidDatabaseManager.class);
             startActivity(dbmanager);
 			return true;
-		}
+		}*/
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -243,5 +257,44 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         } else {
             super.onBackPressed();
         }
+    }
+
+    public List<Group> getGroups() {
+        return groups;
+    }
+
+    public void setState(int state) {
+        this.contentState = state;
+
+
+        if(DB.isValid(selectedGroup) && contentState == Var.LIST_USERS) {
+            users = UserORM.getUsersByGroup(this, selectedGroup);
+
+
+            //Init MediaFeed
+            mediaFeedFragment = MediaFeedFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
+        }
+
+        if(!DB.isValid(selectedGroup) || contentState == Var.LIST_GROUPS) {
+            users = UserORM.getUsers(this); //Debug//
+
+            contentState = Var.LIST_GROUPS;
+            groups = GroupORM.getGroups(this);
+            //Init Groups
+            groupFragment = GroupFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
+        }
+
+
+    }
+
+    public void setGroup(Group group) {
+
+        Var.setIntPreference(this, Var.PREF_SELECTED_GROUP, group.getId());
+        selectedGroup = group.getId();
+        setState(Var.LIST_USERS);
+
+
     }
 }

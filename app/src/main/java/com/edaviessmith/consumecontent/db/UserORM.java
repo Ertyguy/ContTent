@@ -38,6 +38,7 @@ public class UserORM {
                 while (!cursor.isAfterLast()) {
                     User user = cursorToUser(cursor);
 
+                    Log.e(TAG, user.toString());
                     user.setGroups(GroupORM.getUserGroups(database, user.getId()));
                     user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
 
@@ -46,7 +47,7 @@ public class UserORM {
                 }
 
             }
-            Log.i("UserORM", "Users loaded successfully :"+users.size());
+            Log.i(TAG, "Users loaded successfully :"+users.size());
         }catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -86,6 +87,45 @@ public class UserORM {
         return user;
     }
 
+    public static List<User> getUsersByGroup(Context context, int groupId) {
+        DB databaseHelper = new DB(context);
+        List<User> users = new ArrayList<User>();
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+
+            Cursor cursor = database.rawQuery("SELECT U.* FROM "+DB.TABLE_USER+" U INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
+                    "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId, null);
+                    //"WHERE GU."+DB.COL_GROUP+" = "+groupId, null) ;
+
+            Log.i(TAG, "query: "+ "SELECT U.* FROM "+DB.TABLE_USER+" U INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
+                    "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    User user = cursorToUser(cursor);
+
+                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+                    user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
+
+                    users.add(user);
+                    cursor.moveToNext();
+                }
+
+            }
+            Log.i("UserORM", "Users loaded successfully :"+users.size());
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return users;
+    }
+
 
     public static List<User> getUsersByMediaFeeds(Context context, List<Integer> mediaFeedIds) {
         DB databaseHelper = new DB(context);
@@ -98,8 +138,6 @@ public class UserORM {
             Cursor cursor = database.rawQuery("SELECT U.* FROM "+DB.TABLE_USER+" AS U INNER JOIN "+DB.TABLE_MEDIA_FEED+" MF " +
                                               "ON (U."+DB.COL_ID+" = MF."+DB.COL_USER+") " +
                                               "WHERE MF."+DB.COL_ID+" IN ("+DB.integerListToString(mediaFeedIds)+")", null) ;
-
-            //Cursor cursor = database.query(false, DB.TABLE_USER, null, null, null, null, null, DB.ORDER_BY_SORT, null);
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
@@ -114,7 +152,7 @@ public class UserORM {
                 }
 
             }
-            Log.i("UserORM", "Users loaded successfully :"+users.size());
+            Log.i(TAG, "Users loaded successfully :"+users.size());
         }catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -151,9 +189,34 @@ public class UserORM {
             database.endTransaction();
             database.close();
         }
-
     }
 
+
+
+    public static void saveUsers(SQLiteDatabase database, List<User> users) {
+        for(int i=0; i< users.size(); i++) {
+            saveUser(database, users.get(i), i);
+        }
+    }
+
+    public static void saveUser(SQLiteDatabase database, User user, int sort) {
+
+        user.setSort(sort);
+        if(DB.isValid(user.getId())) {
+            database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = " + user.getId(), null);
+            Log.e(TAG, "why won't update work here");
+        } else {
+            user.setId((int) database.insert(DB.TABLE_USER, null, userToContentValues(user, false)));
+            Log.e(TAG, "why won't update work here");
+        }
+
+
+        MediaFeedORM.saveMediaFeeds(database, user.getMediaFeed(), user.getId());
+        GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
+
+
+
+    }
 
     private static ContentValues userToContentValues(User user, boolean includeId) {
         ContentValues values = new ContentValues();

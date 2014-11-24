@@ -15,6 +15,12 @@ public class Content {
         this.thumbnail = thumbnail;
     }
 
+    public Content(int sort, String name, String thumbnail) {
+        this.sort = sort;
+        this.name = name;
+        this.thumbnail = thumbnail;
+    }
+
     public int getId() {
         return id;
     }
@@ -46,4 +52,5 @@ public class Content {
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
     }
+
 }

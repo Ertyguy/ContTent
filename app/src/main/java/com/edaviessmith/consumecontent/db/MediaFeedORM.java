@@ -47,6 +47,7 @@ public class MediaFeedORM {
 
                 if(Var.isTypeYoutube(type)) mediaFeeds.add((YoutubeFeed) cursorToMediaFeed(cursor, type));
                 else mediaFeeds.add((MediaFeed) cursorToMediaFeed(cursor, type));
+                Log.e(TAG, cursorToMediaFeed(cursor, type).toString());
                 cursor.moveToNext();
             }
             Log.i(TAG, "MediaFeeds loaded successfully.");
@@ -140,6 +141,7 @@ public class MediaFeedORM {
             database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false));
         }
 
+        Log.d(TAG, "saveMediaFeed "+mediaFeed.getSort());
     }
 
     private static ContentValues mediaFeedToContentValues(MediaFeed mediaFeed, int userId, boolean includeId) {

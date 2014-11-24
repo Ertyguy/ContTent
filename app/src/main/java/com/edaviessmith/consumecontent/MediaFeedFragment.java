@@ -27,7 +27,7 @@ public class MediaFeedFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_content, container, false);
+        View view = inflater.inflate(R.layout.fragment_media_feed, container, false);
         act = (ContentActivity) getActivity();
 
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.vp_pager);

@@ -51,6 +51,10 @@ public class ImageLoader {
     }
 
     public void DisplayImage(String url, ImageView imageView, ProgressBar progressBar) {
+        DisplayImage(url, imageView, progressBar, true);
+    }
+
+    public void DisplayImage(String url, ImageView imageView, ProgressBar progressBar, boolean hideImage) {
         imageViews.put(imageView, url);
         Bitmap bitmap = memoryCache.get(url);
         if (bitmap != null){
@@ -58,7 +62,7 @@ public class ImageLoader {
             progressBar.setVisibility(View.GONE);
         } else {
             progressBar.setVisibility(View.VISIBLE);
-            imageView.setImageResource(android.R.color.transparent);
+            if(hideImage) imageView.setImageResource(android.R.color.transparent);
             queuePhoto(url, imageView, progressBar);
 
         }

@@ -9,7 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.Alarm;
+import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.Notification;
+import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
@@ -40,6 +43,100 @@ public class DB extends SQLiteOpenHelper {
         db.execSQL(AlarmORM.SQL_CREATE_TABLE);
 
         addDefaultNotifications(db);
+        addDefaultGroupsUsersMediaFeeds(db);
+    }
+
+    private void addDefaultGroupsUsersMediaFeeds(SQLiteDatabase db) {
+
+        final Group mindcrackGroup = new Group(0, "Mindcrack", "https://yt3.ggpht.com/-9QlCRBfW1nI/AAAAAAAAAAI/AAAAAAAAAAA/O3hR1mPFSDw/s100-c-k-no/photo.jpg", true);
+        final Group roosterTeethGroup = new Group(1, "Rooster Teeth", "https://lh6.googleusercontent.com/-hddEYyXVeZM/AAAAAAAAAAI/AAAAAAAAAAA/ghwEL1-FHdE/photo.jpg", true);
+
+        mindcrackGroup.setUsers(new ArrayList<User>() {{
+                add(new User(0, "Adlingtont", "https://lh4.googleusercontent.com/-6DIByMHfFbw/AAAAAAAAAAI/AAAAAAAAAAA/GMmF_KtKbtQ/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/ecGJWrXgBGM/default.jpg", "UCfhM3yJ8a_sAJj0qOKb40gw", "UUfhM3yJ8a_sAJj0qOKb40gw", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/xc4J9kUPdk8/default.jpg", "UCfhM3yJ8a_sAJj0qOKb40gw", "LLfhM3yJ8a_sAJj0qOKb40gw", 0, -1));
+                        add(new YoutubeFeed(2, "Favorites", "https://i.ytimg.com/vi/J5Vr9Rs8fBs/default.jpg", "UCfhM3yJ8a_sAJj0qOKb40gw", "FLfhM3yJ8a_sAJj0qOKb40gw", 0, -1));
+                        add(new YoutubeFeed(3, "Activity", "null", "UCfhM3yJ8a_sAJj0qOKb40gw", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "AnderZEL", "https://lh3.googleusercontent.com/-3PhwKIB2SZQ/AAAAAAAAAAI/AAAAAAAAAAA/aUoAYV_j-iI/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/LHY08mBxps8/default.jpg", "UC-_VTaWqRsZ1nzZLHQIGwQA", "UU-_VTaWqRsZ1nzZLHQIGwQA", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/EMCrZdNM2tM/default.jpg", "UC-_VTaWqRsZ1nzZLHQIGwQA", "LL-_VTaWqRsZ1nzZLHQIGwQA", 0, -1));
+                        add(new YoutubeFeed(2, "Activity", "null", "UC-_VTaWqRsZ1nzZLHQIGwQA", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "Arkas", "https://lh6.googleusercontent.com/-Tef2i7GdFqQ/AAAAAAAAAAI/AAAAAAAAAAA/7MuQK1LEUq8/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/RmdNI4gzA8k/default.jpg", "UCStPXwuYhdUu-B6fkVgi3vQ", "UUStPXwuYhdUu-B6fkVgi3vQ", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/PSZxmZmBfnU/default.jpg", "UCStPXwuYhdUu-B6fkVgi3vQ", "LLStPXwuYhdUu-B6fkVgi3vQ", 0, -1));
+                        add(new YoutubeFeed(2, "Activity", "null", "UCStPXwuYhdUu-B6fkVgi3vQ", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "Aureylian", "https://lh6.googleusercontent.com/-M0gttE6PTjI/AAAAAAAAAAI/AAAAAAAAAAA/7mbiZA77004/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/pNBkFXF-b44/default.jpg", "UCM2FHDmMP92caH9aK7RwEdw", "UUM2FHDmMP92caH9aK7RwEdw", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/lkL6X4I2BnY/default.jpg", "UCM2FHDmMP92caH9aK7RwEdw", "LLM2FHDmMP92caH9aK7RwEdw", 0, -1));
+                        add(new YoutubeFeed(2, "Activity", "null", "UCM2FHDmMP92caH9aK7RwEdw", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "AvidyaZen", "https://lh4.googleusercontent.com/-b4Bsg4yjL-E/AAAAAAAAAAI/AAAAAAAAAAA/6bNDEdr1ftk/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/qB5uE5hTLjc/default.jpg", "UCDREKsabG-MOTPxmJOHctEw", "UUDREKsabG-MOTPxmJOHctEw", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/YKvNreOw0v4/default.jpg", "UCDREKsabG-MOTPxmJOHctEw", "LLDREKsabG-MOTPxmJOHctEw", 0, -1));
+                        add(new YoutubeFeed(2, "Favorites", "https://i.ytimg.com/vi/nGeKSiCQkPw/default.jpg", "UCDREKsabG-MOTPxmJOHctEw", "FLDREKsabG-MOTPxmJOHctEw", 0, -1));
+                        add(new YoutubeFeed(3, "Activity", "null", "UCDREKsabG-MOTPxmJOHctEw", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "BdoubleO100", "https://lh3.googleusercontent.com/-N9bzILzOWE8/AAAAAAAAAAI/AAAAAAAAAAA/tE8mBnO9E-M/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/a5TMGHUiurY/default.jpg", "UClu2e7S8atp6tG2galK9hgg", "UUlu2e7S8atp6tG2galK9hgg", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/Yvy5FMebvXM/default.jpg", "UClu2e7S8atp6tG2galK9hgg", "LLlu2e7S8atp6tG2galK9hgg", 0, -1));
+                        add(new YoutubeFeed(2, "Activity", "null", "UClu2e7S8atp6tG2galK9hgg", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "BlameTheController", "https://lh3.googleusercontent.com/-MHIPpVzLK7U/AAAAAAAAAAI/AAAAAAAAAAA/XHj6X59K2ko/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/mpPUQesvTxk/default.jpg", "UCmSwqv2aPbuOGiuii2TeaLQ", "UUmSwqv2aPbuOGiuii2TeaLQ", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/cZWsW1a0aNc/default.jpg", "UCmSwqv2aPbuOGiuii2TeaLQ", "LLmSwqv2aPbuOGiuii2TeaLQ", 0, -1));
+                        add(new YoutubeFeed(2, "Activity", "null", "UCmSwqv2aPbuOGiuii2TeaLQ", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+                add(new User(0, "Coestar", "https://lh6.googleusercontent.com/-3KtWXObWKRs/AAAAAAAAAAI/AAAAAAAAAAA/XYDY6AF-Yb8/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                        add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/Hfzds05yO1Q/default.jpg", "UCf-p8DeUzTqmsGW1tFOArTg", "UUf-p8DeUzTqmsGW1tFOArTg", 0, -1));
+                        add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/pNBkFXF-b44/default.jpg", "UCf-p8DeUzTqmsGW1tFOArTg", "LLf-p8DeUzTqmsGW1tFOArTg", 0, -1));
+                        add(new YoutubeFeed(2, "Activity", "null", "UCf-p8DeUzTqmsGW1tFOArTg", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(mindcrackGroup); }}));
+
+            }});
+
+        roosterTeethGroup.setUsers(new ArrayList<User>() {{
+                add(new User(0, "Rooster Teeth", "https://lh6.googleusercontent.com/-hddEYyXVeZM/AAAAAAAAAAI/AAAAAAAAAAA/ghwEL1-FHdE/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                    add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/x3DQhsELdG0/default.jpg", "UCzH3iADRIq1IJlIXjfNgTpA", "UUzH3iADRIq1IJlIXjfNgTpA", 0, -1));
+                    add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/5W2f2MumEng/default.jpg", "UCzH3iADRIq1IJlIXjfNgTpA", "LLzH3iADRIq1IJlIXjfNgTpA", 0, -1));
+                    add(new YoutubeFeed(2, "Activity", "null", "UCzH3iADRIq1IJlIXjfNgTpA", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(roosterTeethGroup); }}));
+
+                add(new User(0, "LetsPlay", "https://lh5.googleusercontent.com/-f70aQff_iKE/AAAAAAAAAAI/AAAAAAAAAAA/-R40EvoOKf0/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                    add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/r69opIlqTI8/default.jpg", "UCkxctb0jr8vwa4Do6c6su0Q", "UUkxctb0jr8vwa4Do6c6su0Q", 0, -1));
+                    add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/VT6VrznzqMY/default.jpg", "UCkxctb0jr8vwa4Do6c6su0Q", "LLkxctb0jr8vwa4Do6c6su0Q", 0, -1));
+                    add(new YoutubeFeed(2, "Activity", "null", "UCkxctb0jr8vwa4Do6c6su0Q", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(roosterTeethGroup); }}));
+
+                add(new User(0, "The Know", "https://lh5.googleusercontent.com/-0lKHa9Wjo54/AAAAAAAAAAI/AAAAAAAAAAA/fVDFDWwii7A/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                    add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/iVsIPFIcrsw/default.jpg", "UC4w_tMnHl6sw5VD93tVymGw", "UU4w_tMnHl6sw5VD93tVymGw", 0, -1));
+                    add(new YoutubeFeed(1, "Activity", "null", "UC4w_tMnHl6sw5VD93tVymGw", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(roosterTeethGroup); }}));
+
+                add(new User(0, "The Slow Mo Guys", "https://lh3.googleusercontent.com/-hdZED2lNuKE/AAAAAAAAAAI/AAAAAAAAAAA/ppDB-or2f7I/photo.jpg", new ArrayList<YoutubeFeed>() {{
+                    add(new YoutubeFeed(0, "Uploads", "https://i.ytimg.com/vi/RkLn2gR7SyE/default.jpg", "UCUK0HBIBWgM2c4vsPhkYY4w", "UUUK0HBIBWgM2c4vsPhkYY4w", 0, -1));
+                    add(new YoutubeFeed(1, "Liked videos", "https://i.ytimg.com/vi/RkLn2gR7SyE/default.jpg", "UCUK0HBIBWgM2c4vsPhkYY4w", "LLUK0HBIBWgM2c4vsPhkYY4w", 0, -1));
+                    add(new YoutubeFeed(2, "Favorites", "https://i.ytimg.com/vi/tmwvt-bNLY0/default.jpg", "UCUK0HBIBWgM2c4vsPhkYY4w", "FLUK0HBIBWgM2c4vsPhkYY4w", 0, -1));
+                    add(new YoutubeFeed(3, "Activity", "null", "UCUK0HBIBWgM2c4vsPhkYY4w", "null", 1, -1));
+                }}, new ArrayList<Group>() {{add(roosterTeethGroup); }}));
+
+        }});
+
+        List<Group> groups = new ArrayList<Group>() {{
+            add(mindcrackGroup);
+            add(roosterTeethGroup);
+        }};
+
+        GroupORM.saveGroups(db, groups);
     }
 
     private void addDefaultNotifications(SQLiteDatabase db) {
@@ -108,6 +205,11 @@ public class DB extends SQLiteOpenHelper {
 
     }
 
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        if (android.os.Build.VERSION.SDK_INT >= 16)
+            db.setForeignKeyConstraintsEnabled(true);
+    }
 
 
     ///// Database Tables //////

@@ -20,7 +20,16 @@ public class User extends Content{
         super(id, sort, name, thumbnail);
     }
 
+    public User(int id, int sort, String name, String thumbnail, List mediaFeed) {
+        super(id, sort, name, thumbnail);
+        this.mediaFeed = mediaFeed;
+    }
 
+    public User(int sort, String name, String thumbnail, List mediaFeed, List<Group> groups) {
+        super(sort, name, thumbnail);
+        this.mediaFeed = mediaFeed;
+        this.groups = groups;
+    }
 
     public List<Group> getGroups() {
         return groups;
@@ -36,5 +45,18 @@ public class User extends Content{
 
     public void setMediaFeed(List mediaFeed) {
         this.mediaFeed = mediaFeed;
+    }
+
+    public List<MediaFeed> getCastMediaFeed() {
+        return mediaFeed;
+    }
+
+    @Override
+    public String toString() {
+        return "}}); \n\nnew User(" + getId() +
+                ", " + getSort() +
+                ", \"" + getName() + '\"' +
+                ", \"" + getThumbnail() + '\"' +
+                ", new ArrayList<YoutubeFeed>(){{";
     }
 }

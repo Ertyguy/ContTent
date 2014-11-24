@@ -31,7 +31,7 @@ import java.util.List;
 
 
 public class NotificationsActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
-    String TAG = "NotificationsActivity";
+    private static final String TAG = "NotificationsActivity";
 
     Toolbar toolbar;
     //List<Notification> notifications;

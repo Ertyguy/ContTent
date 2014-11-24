@@ -26,13 +26,7 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 
-/**
- * Fragment used for managing interactions for and presentation of a navigation
- * drawer. See the <a href=
- * "https://developer.android.com/design/patterns/navigation-drawer.html#Interaction"
- * > design guidelines</a> for a complete explanation of the behaviors
- * implemented here.
- */
+
 public class NavigationDrawerFragment extends Fragment implements View.OnClickListener{
 
     static final String TAG = "NavigationDrawerFragment";
@@ -53,7 +47,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 	private boolean mFromSavedInstanceState;
 	private boolean mUserLearnedDrawer;
     private Fab actionFab;
-    private View notification_v, settings_v;
+    private View notification_v, settings_v, groups_v;
 
     public ListAdapter adapter;
 
@@ -162,6 +156,9 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 			}
 		});
 
+        groups_v = v.findViewById(R.id.groups_v);
+        groups_v.setOnClickListener(this);
+
         actionFab = (Fab) v.findViewById(R.id.action_fab);
         actionFab.setOnClickListener(this);
 
@@ -176,17 +173,20 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
     @Override
     public void onClick(View v) {
-        if(v == actionFab) {
+        if(actionFab == v) {
             Intent i = new Intent(act, AddActivity.class);
             startActivity(i);
         }
-        if(v == notification_v) {
+        if(notification_v == v) {
             Intent i = new Intent(act, NotificationsActivity.class);
             startActivity(i);
         }
-        if(v == settings_v) {
+        if(settings_v == v) {
             Intent i = new Intent(act, SettingsActivity.class);
             startActivity(i);
+        }
+        if(groups_v == v) {
+            act.setState(Var.LIST_USERS);
         }
     }
 
@@ -202,7 +202,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
         @Override
         public int getCount() {
-            return act.getUsers().size();
+            return act.getUsers() == null? 0: act.getUsers().size();
         }
 
         @Override

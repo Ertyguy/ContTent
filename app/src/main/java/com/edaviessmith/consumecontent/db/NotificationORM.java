@@ -128,7 +128,6 @@ public class NotificationORM {
 
                 Log.d(TAG, "Notification saved with id:" + notification.getId());
             }
-
         }catch (Exception e) {
             e.printStackTrace();
         }

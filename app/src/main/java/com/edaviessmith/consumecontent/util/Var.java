@@ -36,6 +36,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -73,6 +74,10 @@ public class Var {
     public static final int FEED_WARNING = 2;
     public static final int FEED_OFFLINE = 3;
 
+    public static final int LIST_USERS  = 0;
+    public static final int LIST_GROUPS = 1;
+
+
     //Handler (currently not used)
     public static final int HANDLER_COMPLETE = 0;
     public static final int HANDLER_ERROR = 1;
@@ -86,6 +91,10 @@ public class Var {
     public static final String PREF_NEXT_ALARM = "next_alarm";
     public static final String PREF_HIRES_WIFI = "hires_wifi";
     public static final String PREF_HIRES_MOBILE = "hires_mobile";
+
+    public static final String PREF_SELECTED_GROUP = "selected_group";
+    public static final String PREF_SELECTED_USER = "selected_user";
+
 
     static public final String NOTIFY_ACTION = "notify_action";
     static public final String NOTIFY_NOTIFICATION_ID = "notification_id";
@@ -258,7 +267,7 @@ public class Var {
 
 
     public static boolean isEmpty(String s) {
-        return (s == null || (s.toString().trim().isEmpty()));
+        return (s == null || (s.trim().isEmpty()));
     }
 
 
@@ -306,17 +315,17 @@ public class Var {
                 int notificationId = -1; //Send id in intent to know which notification to update
                 long nextAlarm = 0L;
 
-                for(Notification notification: notificationList.getNotifications()) {
-                    for(Alarm alarm: notification.getAlarms()){
+                for (Notification notification : notificationList.getNotifications()) {
+                    for (Alarm alarm : notification.getAlarms()) {
                         long alarmCal = Var.getNextAlarmTime(alarm, notificationList.getScheduleNotification()).getTimeInMillis();
-                        if(nextAlarm == 0L || alarmCal < nextAlarm) {
+                        if (nextAlarm == 0L || alarmCal < nextAlarm) {
                             notificationId = notification.getId();
                             nextAlarm = alarmCal;
                         }
                     }
                 }
 
-                Log.d(TAG, "AlarmManager current Alarm: " + (nextAlarmPref / Var.MINUTE_MILLI) + ", next: "+ ((nextAlarm + now) / Var.MINUTE_MILLI));
+                Log.d(TAG, "AlarmManager current Alarm: " + (nextAlarmPref / Var.MINUTE_MILLI) + ", next: " + ((nextAlarm + now) / Var.MINUTE_MILLI));
                 if (nextAlarm > 0L && (((nextAlarm + now) / Var.MINUTE_MILLI) != (nextAlarmPref / Var.MINUTE_MILLI))) {
                     intent.putExtra(Var.NOTIFY_NOTIFICATION_ID, notificationId);
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
@@ -342,6 +351,28 @@ public class Var {
     }
 
 
+
+    public static String getNextNotificationTime(List<Notification> notifications, Notification scheduleNotification) {
+
+        Alarm nextAlarm = null; //for debug log
+        Calendar nextAlarmTime = null;
+
+        for(Notification notification: notifications) {
+            for (Alarm alarm : notification.getAlarms()) {
+                Calendar alarmTime = Var.getNextAlarmTime(alarm, scheduleNotification);
+                if (nextAlarmTime == null || alarmTime.before(nextAlarmTime)) {
+                    nextAlarmTime = alarmTime;
+                    nextAlarm = alarm;
+                }
+            }
+        }
+        String check = Var.getNextAlarmTimeText(nextAlarm, scheduleNotification);
+        return Var.isEmpty(check) ? "Not watching" : "Next check in "+check;
+    }
+
+
+
+
     public static String getNextNotificationAlarm(Notification notification, Notification scheduleNotification) {
 
         Alarm nextAlarm = null; //for debug log
@@ -356,7 +387,6 @@ public class Var {
         }
 
         return "Next check: " + Var.getNextAlarmTimeText(nextAlarm, scheduleNotification);
-
     }
 
     //Used to divide media list by time segments (today, yesterday, this week, last week this month)
@@ -454,6 +484,23 @@ public class Var {
             settings.commit();
         }
     }
+
+    public static int getIntPreference(Context context, String pref) {
+        SharedPreferences settings = context.getSharedPreferences(Var.PREFS, 0);
+        return settings.getInt(pref, -1);
+    }
+
+    @SuppressLint("NewApi")
+    public static void setIntPreference(Context context, String pref, int state) {
+        SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
+        settings.putInt(pref, state);
+        if (android.os.Build.VERSION.SDK_INT >= 9) {
+            settings.apply();
+        } else {
+            settings.commit();
+        }
+    }
+
 
     public static long getLongPreference(Context context, String pref) {
         SharedPreferences settings = context.getSharedPreferences(Var.PREFS, 0);

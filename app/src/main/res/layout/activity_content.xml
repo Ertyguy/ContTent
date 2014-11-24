@@ -24,11 +24,33 @@
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/action_edit"
                     android:id="@+id/action_settings"
                     android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
+
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:paddingRight="@dimen/toolbar_item_padding"
+                    android:paddingEnd="@dimen/toolbar_item_padding"
+                    android:paddingLeft="@dimen/toolbar_item_padding"
+                    android:paddingStart="@dimen/toolbar_item_padding"
+                    android:contentDescription="@string/edit"
+                    android:id="@+id/action_edit"
+                    android:src="@drawable/ic_create_white_24dp"/>
+
+                </RelativeLayout>
+
 
             </android.support.v7.widget.Toolbar>
 
@@ -37,8 +59,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@+id/toolbar"/>
-
-
 
 
         </RelativeLayout>
@@ -170,9 +190,6 @@
                     android:layout_marginTop="-36dp"
                     app:colour="@color/accent"
                     app:drawable="@drawable/ic_add_white_18dp"/>
-
-
-
 
             </RelativeLayout>
 

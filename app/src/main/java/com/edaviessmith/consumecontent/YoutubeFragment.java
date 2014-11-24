@@ -64,9 +64,6 @@ public class YoutubeFragment extends Fragment{
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
         view.setId(pos);
 
-        //footer = inflater.inflate(R.layout.item_loading_footer, null, false);
-
-
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
         linearLayoutManager = new LinearLayoutManager(act);
         feed_rv.setLayoutManager(linearLayoutManager);
@@ -107,7 +104,7 @@ public class YoutubeFragment extends Fragment{
                 Log.d(TAG, "onScrolled " + dy + " : " + act.getSupportActionBar().isShowing());
                 //TODO much thinking needed to hide toolbar on scroll
                 //if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
-                if (android.os.Build.VERSION.SDK_INT >= 12) ;
+                //if (android.os.Build.VERSION.SDK_INT >= 12) ;
                      //act.toolbar.animate().translationY(-act.toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).start();
                     //act.getSupportActionBar().hide();
                 //} else if (dy <= -mActionBarHeight && !act.getSupportActionBar().isShowing()) {

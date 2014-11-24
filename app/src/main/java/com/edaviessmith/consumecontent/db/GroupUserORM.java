@@ -25,9 +25,10 @@ public class GroupUserORM {
     public static void saveUserGroups(SQLiteDatabase database, List<Group> groups, int userId) {
         //clear all groups for user
         database.delete(DB.TABLE_GROUP_USER,  DB.COL_USER + " = "+ userId, null);
-
+        //Log.i(TAG, "removed groupUser "+userId);
         for(Group group : groups) {
             database.insert(DB.TABLE_GROUP_USER, null, groupUserToContentValues(new GroupUser(group.getId(), userId)));
+            //Log.i(TAG, "insert groupUser "+group.getId()+" - "+userId);
         }
     }
 

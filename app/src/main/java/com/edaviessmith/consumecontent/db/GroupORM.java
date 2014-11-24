@@ -54,10 +54,13 @@ public class GroupORM {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 Group group = cursorToGroup(cursor);
+
+                group.setUsers(UserORM.getUsersByGroup(context, group.getId()));
+
                 groupList.add(group);
                 cursor.moveToNext();
             }
-            Log.i("GroupORM", "Groups loaded successfully.");
+            Log.i("GroupORM", "Groups loaded "+groupList.size()+" successfully.");
         }
 
         database.close();
@@ -103,48 +106,13 @@ public class GroupORM {
         }
     }
 
-    public static void updateGroup(Context context, Group group) {
-        DB databaseHelper = new DB(context);
-        SQLiteDatabase database = databaseHelper.getWritableDatabase();
-        try {
-            database.update(DB.TABLE_GROUP, groupUpdateToContentValues(group), DB.COL_ID + " = ?", new String[]{String.valueOf(group.getId())});
-        }catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            database.close();
-        }
-
-    }
-
-    public static void incrementGroup(SQLiteDatabase database, int id) {
-        try {
-            ContentValues values = new ContentValues();
-            values.put(DB.COL_ID, id+1);
-
-            database.update(DB.TABLE_GROUP, values, DB.COL_ID + " = ?", new String[]{String.valueOf(id)});
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void incrementSort(SQLiteDatabase database, int id) {
-        try {
-            ContentValues values = new ContentValues();
-            values.put(DB.COL_SORT, id+1);
-
-            database.update(DB.TABLE_GROUP, values, DB.COL_SORT + " = ?", new String[]{String.valueOf(id)});
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void updateGroups(Context context, List<Group> groups) {
+    public static void saveGroups(Context context, List<Group> groups) {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
         try {
             database.beginTransaction();
             for(Group group : groups) {
-                database.update(DB.TABLE_GROUP, groupUpdateToContentValues(group), DB.COL_ID + " = ?", new String[]{String.valueOf(group.getId())});
+                database.update(DB.TABLE_GROUP, groupToContentValues(group, false), DB.COL_ID + " = ?", new String[]{String.valueOf(group.getId())});
             }
             database.setTransactionSuccessful();
         }catch (Exception e) {
@@ -155,14 +123,30 @@ public class GroupORM {
         }
     }
 
+    public static void saveGroups(SQLiteDatabase database, List<Group> groups) {
 
-    private static ContentValues groupUpdateToContentValues(Group group) {
-        return groupToContentValues(group, false);
+        try {
+            for(Group group: groups) {
+
+                if (DB.isValid(group.getId())) {
+                    database.update(DB.TABLE_GROUP, groupToContentValues(group, false), DB.COL_ID + " = " + group.getId(), null);
+                } else {
+                    group.setId((int) database.insert(DB.TABLE_GROUP, null, groupToContentValues(group, false)));
+                }
+
+
+                UserORM.saveUsers(database, group.getUsers());
+
+                //AlarmORM.saveAlarms(database, group.getAlarms(), group.getId());
+
+                Log.d(TAG, "Notification saved with id:" + group.getId());
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public static ContentValues groupInsertToContentValues(Group group) {
-        return groupToContentValues(group, true);
-    }
 
     private static ContentValues groupToContentValues(Group group, boolean includeId) {
         ContentValues values = new ContentValues();
