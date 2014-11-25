@@ -29,4 +29,5 @@ dependencies {
     compile files('libs/signpost-commonshttp4-1.2.1.1.jar')
     compile files('libs/signpost-jetty6-1.2.1.1.jar')
     compile files('libs/YouTubeAndroidPlayerApi.jar')
+    compile project(':drag-sort-listview')
 }
