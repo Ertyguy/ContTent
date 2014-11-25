@@ -74,13 +74,12 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
     /**
      * Users of this fragment must call this method to set up the navigation drawer interactions.
-     * @param fragmentId  The android:id of this fragment in its activity's layout.
-     * @param drawerLayout  The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(ContentActivity act, int fragmentId, DrawerLayout drawerLayout) {
-        mFragmentContainerView = getActivity().findViewById(fragmentId);
-        mDrawerLayout = drawerLayout;
-        this.act = act;
+    public void setUp() {
+        act = (ContentActivity) getActivity();
+        mFragmentContainerView = act.findViewById(R.id.navigation_drawer);
+        mDrawerLayout = (DrawerLayout) act.findViewById(R.id.drawer_layout);
+
 
         adapter = new ListAdapter(act);
         mDrawerListView.setAdapter(adapter);
@@ -186,8 +185,10 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
             startActivity(i);
         }
         if(groups_v == v) {
-            act.setState(Var.LIST_USERS);
+            mDrawerLayout.closeDrawer(mFragmentContainerView);
+            act.setState(Var.LIST_GROUPS);
         }
+
     }
 
     public class ListAdapter extends BaseAdapter {
@@ -231,10 +232,11 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 	        holder.name_tv.setText(user.getName());
             act.imageLoader.DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
 
-            holder.edit_iv.setVisibility(act.getUser().equals(user)? View.VISIBLE: View.GONE);
+            holder.edit_iv.setVisibility(user.equals(act.getUser())? View.VISIBLE: View.GONE);
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mDrawerLayout.closeDrawer(mFragmentContainerView);
                     Intent i = new Intent(act, AddActivity.class);
                     i.putExtra(Var.INTENT_USER_ID, user.getId());
                     startActivity(i);

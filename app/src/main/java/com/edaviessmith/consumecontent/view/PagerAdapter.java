@@ -25,7 +25,6 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     // Returns total number of pages
     @Override
     public int getCount() {
-
         if(user == null || user.getMediaFeed() == null) return 0;
         return user.getMediaFeed().size();
     }
@@ -35,7 +34,7 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     public Fragment getItem(int position) {
         int type = ((MediaFeed) act.getUser().getMediaFeed().get(position)).getType();
         if(Var.isTypeYoutube(type)) {
-            return YoutubeFragment.newInstance(position, act.selectedUser);
+            return YoutubeFragment.newInstance(act.selectedUser, position);
         } else if(type == Var.TYPE_TWITTER) {
             return TwitterFragment.newInstance(act, position);
         }

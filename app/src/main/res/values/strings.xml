@@ -46,5 +46,11 @@
     <string name="schedule_time_example">The schedule time is used to limit when the app will trigger hourly notifications. (Every x hours)\n\nFor example if you set a new time from 8:00am to 9:30pm, you will start receiving notifications after 8 in the morning until 9:30 that night.\n(This won\'t stop alarms set to a specific time)</string>
     <string name="edit">Edit</string>
     <string name="groups">Groups</string>
+    <string name="user_thumbnail">User Thumbnail</string>
+    <string name="set_groups">Set Groups</string>
+    <string name="set_groups_for_user">Set groups for user</string>
+    <string name="group_name">Group Name</string>
+    <string name="visible">Visible</string>
+    <string name="users">Users</string>
 
 </resources>

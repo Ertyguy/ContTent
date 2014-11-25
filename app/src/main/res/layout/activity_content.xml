@@ -15,50 +15,55 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/toolbar_v"
+                android:background="@color/primary"
+                android:minHeight="@dimen/abc_action_bar_default_height_material">
+
             <android.support.v7.widget.Toolbar
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:id="@+id/toolbar"
-                android:background="@color/primary"
-                android:minHeight="@dimen/abc_action_bar_default_height_material"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                <ImageView
+              <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toLeftOf="@+id/action_edit"
                     android:id="@+id/action_settings"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/action_edit"
                     android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
 
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"
                     android:paddingRight="@dimen/toolbar_item_padding"
                     android:paddingEnd="@dimen/toolbar_item_padding"
                     android:paddingLeft="@dimen/toolbar_item_padding"
                     android:paddingStart="@dimen/toolbar_item_padding"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
                     android:contentDescription="@string/edit"
                     android:id="@+id/action_edit"
                     android:src="@drawable/ic_create_white_24dp"/>
 
-                </RelativeLayout>
+            </RelativeLayout>
 
-
-            </android.support.v7.widget.Toolbar>
 
             <FrameLayout
                 android:id="@+id/container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/toolbar"/>
+                android:layout_below="@+id/toolbar_v"/>
 
 
         </RelativeLayout>
@@ -71,8 +76,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             tools:layout="@layout/fragment_nav_drawer" />
-
-
 
 
     </android.support.v4.widget.DrawerLayout>

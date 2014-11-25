@@ -3,14 +3,14 @@ package com.edaviessmith.consumecontent;
 import android.app.Dialog;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.SwitchCompat;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.edaviessmith.consumecontent.NotificationsActivity;
-import com.edaviessmith.consumecontent.R;
 import com.edaviessmith.consumecontent.data.Alarm;
 import com.edaviessmith.consumecontent.util.Var;
 
@@ -55,6 +55,14 @@ public class AlarmDialog  extends Dialog implements View.OnClickListener{
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setBackgroundDrawable(new ColorDrawable(0));
         setContentView(R.layout.dialog_alarm);
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        act.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int width = (int) (displaymetrics.widthPixels * (Var.isDeviceLandscape(act) ? 0.65 : 0.95));
+
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.width = width;
+        getWindow().setAttributes(params);
 
         title_tv = (TextView) findViewById(R.id.title_tv);
         every_tv = (TextView) findViewById(R.id.every_tv);

@@ -138,10 +138,10 @@ public class MediaFeedORM {
         if(DB.isValid(mediaFeed.getId())) {
             database.update(DB.TABLE_MEDIA_FEED, mediaFeedToContentValues(mediaFeed, userId, false), DB.COL_ID + " = " + mediaFeed.getId(), null);
         } else {
-            database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false));
+            mediaFeed.setId((int) database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false)));
         }
 
-        Log.d(TAG, "saveMediaFeed "+mediaFeed.getSort());
+        Log.d(TAG, "saveMediaFeed "+mediaFeed.getId());
     }
 
     private static ContentValues mediaFeedToContentValues(MediaFeed mediaFeed, int userId, boolean includeId) {
@@ -154,7 +154,7 @@ public class MediaFeedORM {
         values.put(DB.COL_THUMBNAIL, mediaFeed.getThumbnail());
         values.put(DB.COL_FEED_ID, mediaFeed.getFeedId());
         values.put(DB.COL_TYPE, mediaFeed.getType());
-        values.put(DB.COL_NOTIFICATION, mediaFeed.getNotificationId());
+        values.put(DB.COL_NOTIFICATION, DB.setForeignKey(mediaFeed.getNotificationId()));
         values.put(DB.COL_LAST_UPDATE, mediaFeed.getLastUpdate());
         return values;
     }
@@ -168,7 +168,7 @@ public class MediaFeedORM {
                     cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
                     cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
-                    cursor.getInt(cursor.getColumnIndex(DB.COL_NOTIFICATION)),
+                    DB.getForeignKey(cursor, DB.COL_NOTIFICATION),
                     cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
         }
 
@@ -177,12 +177,11 @@ public class MediaFeedORM {
         return new MediaFeed(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
                                  cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
                                  cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
-
                                  cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
                                  cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
                                  cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
                                  cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
-                                 cursor.getInt(cursor.getColumnIndex(DB.COL_NOTIFICATION)),
+                                 DB.getForeignKey(cursor, DB.COL_NOTIFICATION),
                                  cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
     }
 

@@ -32,6 +32,7 @@ public class YoutubeFragment extends Fragment{
     private static String TAG = "YoutubeFragment";
     private ContentActivity act;
     private int pos, tab;
+    private Handler handler;
 
     //private boolean isSearchBusy; //Only make a single request to API
     private int feedState = Var.FEED_WAITING;
@@ -63,6 +64,31 @@ public class YoutubeFragment extends Fragment{
 
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
         view.setId(pos);
+
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == 0) {
+                    setFeedState(Var.FEED_WAITING);
+                    //itemAdapter.notifyDataSetChanged();
+                    if (swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
+
+                    if (getFeed() != null && msg.arg1 == 1 && getFeed().getId() == msg.arg2) {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                Log.d(TAG, "check" + (getFeed().getItems() != null));
+                                if (getFeed().getItems() != null && getFeed().getItems().size() > 0) {
+                                    MediaFeedORM.saveMediaItems(act, getFeed());
+                                }
+                            }
+                        }.start();
+                    }
+                } else {
+                    if (getFeed().getId() == msg.arg2) setFeedState(msg.arg1);
+                }
+            }
+        };
 
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
         linearLayoutManager = new LinearLayoutManager(act);
@@ -148,15 +174,16 @@ public class YoutubeFragment extends Fragment{
 
 
     private YoutubeFeed getFeed() {
-        return (YoutubeFeed) act.getUser(tab).getMediaFeed().get(pos);
+        //Log.d(TAG, "feed: "+ (act.getUser(pos) != null));
+        return (YoutubeFeed) act.getUser(pos).getCastMediaFeed().get(tab);
     }
 
 
     public void setFeedState(int feedState) {
         boolean change = (this.feedState != feedState);
         this.feedState = feedState;
-        if(change) //itemAdapter.notifyDataSetChanged();
-        itemAdapter.notifyItemChanged(itemAdapter.getItemCount() - 1);
+        if(change) itemAdapter.notifyDataSetChanged();
+        //itemAdapter.notifyItemChanged(itemAdapter.getItemCount() - 1);
     }
 
     public class YoutubeItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
@@ -317,7 +344,7 @@ public class YoutubeFragment extends Fragment{
 
 
 
-
+/*
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -332,7 +359,7 @@ public class YoutubeFragment extends Fragment{
                         @Override
                         public void run() {
                             Log.d(TAG, "check" + (getFeed().getItems() != null));
-                            if (getFeed().getItems().size() > 0) {
+                            if (getFeed().getItems() != null && getFeed().getItems().size() > 0) {
                                 MediaFeedORM.saveMediaItems(act, getFeed());
                             }
                         }
@@ -342,7 +369,7 @@ public class YoutubeFragment extends Fragment{
                 if(getFeed().getId() == msg.arg2) setFeedState(msg.arg1);
             }
 
-            /*if (msg.what == 1) {
+            *//*if (msg.what == 1) {
                 //if (msg.arg1 == 1) listener.onError("Error getting request token");
                // else listener.onError("Error getting access token");
             } else {
@@ -351,8 +378,8 @@ public class YoutubeFragment extends Fragment{
                 itemAdapter.notifyDataSetChanged();
                 if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
 
-            }*/
+            }*//*
         }
-    };
+    };*/
 
 }

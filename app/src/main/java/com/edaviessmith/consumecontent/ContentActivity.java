@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,8 +34,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     private static String TAG = "ContentActivity";
 
-    private static final String TAG_MEDIA_FEED_FRAGMENT = "media_fragment";
-    private static final String TAG_GROUP_FRAGMENT = "group_fragment";
+    private static final String TAG_TASK_FRAGMENT = "task_fragment";
 
 
     private NavigationDrawerFragment navigationDrawerFragment;
@@ -66,6 +65,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         videoTitle_tv = (TextView) findViewById(R.id.video_title_tv);
         videoViews_tv = (TextView) findViewById(R.id.video_views_tv);
@@ -90,17 +90,18 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         actionEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                groupFragment.setState(GroupFragment.GROUPS_ALL);
+                groupFragment.setState(groupFragment.groupState == GroupFragment.GROUPS_LIST? GroupFragment.GROUPS_ALL: GroupFragment.GROUPS_LIST);
             }
         });
 
         actionSettings = (ImageView) findViewById(R.id.action_settings);
-        actionSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
-            }
-        });
+        if(actionSettings != null)
+            actionSettings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
+                }
+            });
 
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
@@ -116,13 +117,13 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
                         //Log.d(TAG, "system ui listener resize view here");
             }});
 
-        setState(contentState);
-
 
         //Init Navigation Drawer
         navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        navigationDrawerFragment.setUp(this, R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+        navigationDrawerFragment.setUp();
 
+
+        setState(contentState);
     }
 
     @Override
@@ -144,7 +145,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
         if(contentState != Var.LIST_USERS || selectedUser != position) {
             selectedUser = position;
-            setState(Var.LIST_USERS);    //TODO need to change state
+            setState(Var.LIST_USERS);
 		}
 
 	}
@@ -174,7 +175,6 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     public boolean isVideoPlaying() {
         return videoPlayerFragment != null && videoPlayerFragment.activePlayer != null && videoPlayerFragment.activePlayer.isPlaying();
-        //return videoPlayerFragment == null || videoPlayerFragment.activePlayer == null || videoPlayerFragment.activePlayer.isPlaying();
     }
 
     public void setVideoPlaying(boolean isVideoPlaying) {
@@ -266,25 +266,34 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     public void setState(int state) {
         this.contentState = state;
 
+        if(!DB.isValid(selectedGroup)) contentState = Var.LIST_GROUPS;
+        Log.d(TAG, "setState "+contentState);
 
-        if(DB.isValid(selectedGroup) && contentState == Var.LIST_USERS) {
+        actionEdit.setVisibility(contentState == Var.LIST_GROUPS ? View.VISIBLE: View.GONE);
+
+        if(contentState == Var.LIST_USERS) {
             users = UserORM.getUsersByGroup(this, selectedGroup);
 
 
             //Init MediaFeed
             mediaFeedFragment = MediaFeedFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
+
+            getSupportActionBar().setTitle(getUser().getName());
         }
 
-        if(!DB.isValid(selectedGroup) || contentState == Var.LIST_GROUPS) {
-            users = UserORM.getUsers(this); //Debug//
-
-            contentState = Var.LIST_GROUPS;
+        if(contentState == Var.LIST_GROUPS) {
+            //users = UserORM.getUsers(this); //Debug//
+            //if(users != null) users.clear();
             groups = GroupORM.getGroups(this);
+
             //Init Groups
             groupFragment = GroupFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
         }
+
+        navigationDrawerFragment.setUp();
+
 
 
     }
@@ -293,6 +302,8 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
         Var.setIntPreference(this, Var.PREF_SELECTED_GROUP, group.getId());
         selectedGroup = group.getId();
+        selectedUser = 0;
+
         setState(Var.LIST_USERS);
 
 

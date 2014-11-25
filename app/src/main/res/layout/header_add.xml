@@ -5,30 +5,46 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout
+
+    <RelativeLayout
         android:id="@+id/profile_info"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_marginTop="5dp"
+        android:paddingBottom="15dp"
         android:background="@android:color/white"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin" >
-
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp">
+        android:paddingTop="@dimen/activity_vertical_margin">
 
 
-        <Spinner
-            android:id="@+id/user_picture_sp"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+        <RelativeLayout
+            android:id="@+id/user_thumbnail_v"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:scaleType="fitCenter" />
+            android:background="@drawable/selector_accent"
+            android:padding="5dp">
+
+            <ImageView
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:id="@+id/user_thumbnail_iv"
+                android:contentDescription="@string/user_thumbnail"
+                android:src="@drawable/ic_person_grey600_36dp"
+                android:scaleType="fitCenter" />
+
+            <ProgressBar
+                style="?android:attr/android:progressBarStyle"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerInParent="true"
+                android:id="@+id/user_thumbnail_pb"
+                android:visibility="gone" />
+
+        </RelativeLayout>
 
         <EditText
             android:id="@+id/user_name_edt"
@@ -40,54 +56,46 @@
             android:layout_marginLeft="25dp"
             android:textColor="@color/dark_gray"
             android:layout_marginStart="25dp"
-            android:layout_toEndOf="@+id/user_picture_sp"
-            android:layout_toRightOf="@+id/user_picture_sp"
+            android:layout_toEndOf="@+id/user_thumbnail_v"
+            android:layout_toRightOf="@+id/user_thumbnail_v"
             android:hint="@string/user_name" />
 
-        <com.edaviessmith.consumecontent.view.SpinnerTrigger
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/group_sp"
+            android:id="@+id/groups_v"
             android:layout_alignLeft="@+id/user_name_edt"
             android:layout_alignStart="@+id/user_name_edt"
             android:layout_below="@+id/user_name_edt"
-            style="@style/Base.Widget.AppCompat.Spinner"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textColor="@color/dark_gray"
+            android:background="@drawable/selector_accent"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentRight="true">
+
+            <ImageView
+                android:id="@+id/notification_iv"
+                android:layout_width="40dp"
+                android:layout_height="25dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_group_grey600_36dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/groups_tv"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/gray_accent"
+                android:gravity="center_vertical"
+                android:text="@string/groups"/>
+
+        </LinearLayout>
 
 
     </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/notification_v"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:padding="5dp"
-        android:layout_marginTop="5dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
-            android:gravity="center_vertical"
-            android:textColor="@color/dark_gray"
-            android:text="@string/all_notifications"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <android.support.v7.widget.SwitchCompat
-            android:id="@+id/notification_sw"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    </LinearLayout>
-
-
 
     <include layout="@layout/item_list_divider"
         android:layout_width="match_parent"

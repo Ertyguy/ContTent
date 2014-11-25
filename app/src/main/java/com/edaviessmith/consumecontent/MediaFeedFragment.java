@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import com.edaviessmith.consumecontent.view.SlidingTabLayout;
 
 public class MediaFeedFragment extends Fragment {
 
+    private static final String TAG = "MediaFeedFragment";
+
     public FragmentStateCachePagerAdapter adapterViewPager;
     public SlidingTabLayout slidingTabLayout;
     private ContentActivity act;
@@ -29,6 +32,8 @@ public class MediaFeedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_media_feed, container, false);
         act = (ContentActivity) getActivity();
+
+        Log.d(TAG, act.getUser().getName());
 
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
         adapterViewPager = new PagerAdapter(act, act.getUser());

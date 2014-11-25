@@ -344,4 +344,12 @@ public class DB extends SQLiteOpenHelper {
 
     }
 
+    public static String setForeignKey(int foreignKeyId) {
+        return DB.isValid(foreignKeyId) ? String.valueOf(foreignKeyId): null;
+    }
+
+    public static int getForeignKey(Cursor c, String columnName) {
+        if(c.isNull(c.getColumnIndex(columnName))) return -1;
+        return c.getInt(c.getColumnIndex(columnName));
+    }
 }

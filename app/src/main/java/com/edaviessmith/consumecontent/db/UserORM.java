@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.User;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class UserORM {
         return users;
     }
 
-    public static User getUser(Context context, int userId) {
+    public static User getUser(Context context, int userId, List<Group> groups) {
         DB databaseHelper = new DB(context);
         User user = null;
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
@@ -72,7 +73,7 @@ public class UserORM {
                 if (!cursor.isAfterLast()) {
                     user = cursorToUser(cursor);
 
-                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+                    user.setGroups(GroupORM.getUserGroups(database, user.getId(), groups));
                     user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
                 }
 
@@ -97,10 +98,6 @@ public class UserORM {
 
             Cursor cursor = database.rawQuery("SELECT U.* FROM "+DB.TABLE_USER+" U INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
                     "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId, null);
-                    //"WHERE GU."+DB.COL_GROUP+" = "+groupId, null) ;
-
-            Log.i(TAG, "query: "+ "SELECT U.* FROM "+DB.TABLE_USER+" U INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
-                    "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId);
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
@@ -211,7 +208,7 @@ public class UserORM {
         }
 
 
-        MediaFeedORM.saveMediaFeeds(database, user.getMediaFeed(), user.getId());
+        MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getId());
         GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
 
 

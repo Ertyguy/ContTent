@@ -7,12 +7,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.SwitchCompat;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -43,12 +44,16 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
     private GroupAdapter groupAdapter;
     private EditGroupAdapter editGroupAdapter;
     private ListView group_lv;
-    private View group_v, footer;
+    private View group_v, groupThumbnail_v, visible_v, footer;
     private Fab save_fab;
+    private SwitchCompat visible_sw;
+    private ImageView groupThumbnail_iv;
+    private EditText groupName_edt;
+    private ProgressBar groupThumbnail_pb;
 
     private List<Group> groupList;
     private Group editGroup;
-    private int groupState = -1;
+    public int groupState = -1;
 
 
     public static GroupFragment newInstance() {
@@ -59,28 +64,45 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_group, container, false);
         act = (ContentActivity) getActivity();
-        setState(GROUPS_LIST);
+
+        editGroup = new Group();
+
+        View header = inflater.inflate(R.layout.header_group_edit, null, false);
+        footer = inflater.inflate(R.layout.item_list_divider, null, false);
+        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
 
         groups_rv = (RecyclerView) view.findViewById(R.id.groups_rv);
         linearLayoutManager = new LinearLayoutManager(act);
         groups_rv.setLayoutManager(linearLayoutManager);
         groups_rv.setItemAnimator(new DefaultItemAnimator());
-        groupAdapter = new GroupAdapter(act);
-        groups_rv.setAdapter(groupAdapter);
 
-        editGroup = new Group();
-
-        footer = inflater.inflate(R.layout.item_list_divider, null, false);
-        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
 
         group_v = view.findViewById(R.id.group_v);
         group_lv = (ListView) view.findViewById(R.id.group_lv);
+        group_lv.addHeaderView(header, null, false);
         group_lv.addFooterView(footer, null, false);
-        editGroupAdapter = new EditGroupAdapter(act);
-        group_lv.setAdapter(editGroupAdapter);
+
+        groupThumbnail_v = header.findViewById(R.id.group_thumbnail_v);
+        groupThumbnail_v.setOnClickListener(this);
+        groupThumbnail_iv = (ImageView) header.findViewById(R.id.group_thumbnail_iv);
+        groupThumbnail_pb = (ProgressBar) header.findViewById(R.id.group_thumbnail_pb);
+        groupName_edt = (EditText) header.findViewById(R.id.group_name_edt);
+
+        visible_v = header.findViewById(R.id.visible_v);
+        visible_v.setOnClickListener(this);
+        visible_sw = (SwitchCompat) header.findViewById(R.id.visible_sw);
+
 
         save_fab = (Fab) view.findViewById(R.id.save_fab);
         save_fab.setOnClickListener(this);
+
+        setState(GROUPS_LIST);
+
+        editGroupAdapter = new EditGroupAdapter(act);
+        group_lv.setAdapter(editGroupAdapter);
+
+        groupAdapter = new GroupAdapter(act);
+        groups_rv.setAdapter(groupAdapter);
 
         return view;
     }
@@ -99,7 +121,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
             return vis;
         }
 
-        if(groupState == GROUPS_ALL) return act.getGroups();
+        if(groupState == GROUPS_ALL || groupState == GROUP_EDIT) return act.getGroups();
 
         return null;
     }
@@ -111,19 +133,41 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
         if(changed) {
             groupList = getGroups();
-            Log.d(TAG, "changed getting groups " + groupList.size());
         }
 
-        act.actionEdit.setVisibility(groupState == GROUPS_LIST ? View.VISIBLE: View.GONE);
+        act.actionEdit.setVisibility((groupState == GROUPS_LIST || groupState == GROUPS_ALL) ? View.VISIBLE: View.GONE);
+
+        group_v.setVisibility(groupState == GROUP_EDIT? View.VISIBLE: View.GONE);
+
 
         if(groupState == GROUPS_LIST){
+            act.getSupportActionBar().setTitle("Groups");
+            act.actionEdit.setImageResource(R.drawable.ic_create_white_24dp);
+        }
+        if(groupState == GROUPS_ALL) {
+            act.getSupportActionBar().setTitle("Edit Groups");
+            act.actionEdit.setImageResource(R.drawable.ic_check_white_24dp);
+        }
+        if(groupState == GROUP_EDIT){
+            act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
 
+            visible_sw.setChecked(editGroup.isVisible());
+            act.imageLoader.DisplayImage(editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb, false);
+
+            groupName_edt.setText(editGroup.getName());
+
+            editGroupAdapter.notifyDataSetChanged();
         }
 
     }
 
     @Override
     public void onClick(View v) {
+
+        if(visible_v == v) {
+            editGroup.setVisible(!editGroup.isVisible());
+            visible_sw.setChecked(editGroup.isVisible());
+        }
 
     }
 
@@ -164,6 +208,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
             if(groupState == GROUPS_ALL) {
                 editGroup = new Group(groupList.get(itemPosition));
                 setState(GROUP_EDIT);
+
             }
             //TODO onclick
 

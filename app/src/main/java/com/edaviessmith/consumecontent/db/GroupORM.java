@@ -27,7 +27,9 @@ public class GroupORM {
 
     public static List<Group> getUserGroups(SQLiteDatabase database, int userId) {
 
-        Cursor cursor = database.rawQuery("SELECT G.* FROM "+DB.TABLE_GROUP+" AS G INNER JOIN "+DB.TABLE_GROUP_USER+" GU on (G."+DB.COL_ID+" = GU."+DB.COL_GROUP+")", null) ;
+        Cursor cursor = database.rawQuery("SELECT G.* FROM "+DB.TABLE_GROUP+" AS G INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
+                "on (G."+DB.COL_ID+" = GU."+DB.COL_GROUP+") " +
+                "WHERE GU."+DB.COL_USER+" = "+userId, null) ;
         List<Group> groups = new ArrayList<Group>();
 
         if(cursor.getCount() > 0) {
@@ -40,6 +42,36 @@ public class GroupORM {
         }
 
         return groups;
+    }
+
+
+    //Add user groups (using all groups as reference for comparison purposes
+
+    public static List<Group> getUserGroups(SQLiteDatabase database, int userId, List<Group> groups) {
+
+        Cursor cursor = database.query(false, DB.TABLE_GROUP_USER, new String[]{DB.COL_GROUP}, DB.COL_USER + " == "+userId, null, null, null, null, null);
+
+        List<Group> userGroups = new ArrayList<Group>();
+
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                int id = cursor.getInt(cursor.getColumnIndex(DB.COL_GROUP));
+
+                for(Group group: groups){
+                    if(id == group.getId()){
+                        userGroups.add(group);
+                        break;
+                    }
+                }
+
+                cursor.moveToNext();
+            }
+            Log.i("UserORM", "Groups loaded successfully for user "+userId);
+        }
+
+        return userGroups;
+
     }
 
 
@@ -74,7 +106,7 @@ public class GroupORM {
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
 
-        Cursor cursor = database.query(false, DB.TABLE_GROUP, null, DB.COL_VISIBILITY + " == ?", new String[]{String.valueOf(1)}, null, null, DB.ORDER_BY_SORT, null);
+        Cursor cursor = database.query(false, DB.TABLE_GROUP, null, DB.COL_VISIBILITY + " == 1", null, null, null, DB.ORDER_BY_SORT, null);
 
         Log.i("GroupORM", "Loaded " + cursor.getCount() + " Groups...");
         List<Group> groupList = new ArrayList<Group>();

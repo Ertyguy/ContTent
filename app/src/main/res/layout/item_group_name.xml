@@ -47,66 +47,14 @@
             android:text="Group Name"
             android:id="@+id/name_tv"
             android:layout_centerVertical="true"
-            android:layout_alignTop="@+id/icon_v"
             android:layout_toRightOf="@+id/icon_v"
             android:layout_toEndOf="@+id/icon_v"
-            android:textColor="@color/gray_accent"
+            android:textColor="@drawable/selector_accent_text"
             android:minLines="1"
             android:maxLines="1"
             android:ellipsize="end"
             android:textSize="22sp"
             android:gravity="center_vertical" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="X users"
-            android:id="@+id/user_count_tv"
-            android:layout_below="@+id/name_tv"
-            android:layout_toRightOf="@+id/icon_v"
-            android:layout_toEndOf="@+id/icon_v"
-            android:textColor="@color/gray_accent"
-            android:minLines="1"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textSize="14sp"
-            android:gravity="center_vertical" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/notification_v"
-            android:layout_toEndOf="@+id/icon_v"
-            android:background="@drawable/selector_accent"
-            android:layout_below="@+id/icon_v"
-            android:visibility="gone"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
-
-            <ImageView
-                android:id="@+id/notification_iv"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:scaleType="fitCenter"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_alarm_grey600_36dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginEnd="10dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Watching X users"
-                android:id="@+id/watching_count_tv"
-                android:textColor="@color/gray_accent"
-                android:minLines="1"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textSize="14sp"
-                android:gravity="center_vertical" />
-
-        </LinearLayout>
 
     </RelativeLayout>
 
