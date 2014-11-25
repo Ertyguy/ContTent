@@ -12,7 +12,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -26,6 +26,8 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
+import com.mobeta.android.dslv.DragSortController;
+import com.mobeta.android.dslv.DragSortListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +45,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
     private LinearLayoutManager linearLayoutManager;
     private GroupAdapter groupAdapter;
     private EditGroupAdapter editGroupAdapter;
-    private ListView group_lv;
+    private DragSortListView group_lv;
+    private DragSortController dragSortController;
     private View group_v, groupThumbnail_v, visible_v, footer;
     private Fab save_fab;
     private SwitchCompat visible_sw;
@@ -54,6 +57,12 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
     private List<Group> groupList;
     private Group editGroup;
     public int groupState = -1;
+
+    public int dragStartMode = DragSortController.ON_DOWN;
+    public boolean removeEnabled = false;
+    public int removeMode = DragSortController.FLING_REMOVE;
+    public boolean sortEnabled = true;
+    public boolean dragEnabled = true;
 
 
     public static GroupFragment newInstance() {
@@ -78,7 +87,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
 
         group_v = view.findViewById(R.id.group_v);
-        group_lv = (ListView) view.findViewById(R.id.group_lv);
+        group_lv = (DragSortListView) view.findViewById(R.id.group_lv);
         group_lv.addHeaderView(header, null, false);
         group_lv.addFooterView(footer, null, false);
 
@@ -98,13 +107,54 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
         setState(GROUPS_LIST);
 
-        editGroupAdapter = new EditGroupAdapter(act);
+        editGroupAdapter = new EditGroupAdapter(act, R.layout.item_group_user, editGroup.getUsers());
         group_lv.setAdapter(editGroupAdapter);
 
         groupAdapter = new GroupAdapter(act);
         groups_rv.setAdapter(groupAdapter);
 
+
+        dragSortController = buildController(group_lv);
+
+        group_lv.setDropListener(onDrop);
+        //mDslv.setRemoveListener(onRemove);
+        group_lv.setFloatViewManager(dragSortController);
+        group_lv.setOnTouchListener(dragSortController);
+        group_lv.setDragEnabled(dragEnabled);
+
+
         return view;
+    }
+
+
+    private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
+        @Override
+        public void drop(int from, int to) {
+            if (from != to) {
+                //DragSortListView list = (DragSortListView)getListView();
+                User item = editGroupAdapter.getItem(from);
+                editGroupAdapter.remove(item);
+                editGroupAdapter.insert(item, to);
+                group_lv.moveCheckState(from, to);
+            }
+        }
+    };
+
+
+
+
+    public DragSortController buildController(DragSortListView dslv) {
+        // defaults are
+        //   dragStartMode = onDown
+        //   removeMode = flingRight
+        DragSortController controller = new DragSortController(dslv);
+        controller.setDragHandleId(R.id.drag_handle);
+        controller.setClickRemoveId(R.id.click_remove);
+        controller.setRemoveEnabled(removeEnabled);
+        controller.setSortEnabled(sortEnabled);
+        controller.setDragInitMode(dragStartMode);
+        controller.setRemoveMode(removeMode);
+        return controller;
     }
 
 
@@ -261,13 +311,13 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    public class EditGroupAdapter extends BaseAdapter {
+    public class EditGroupAdapter extends ArrayAdapter<User> {
 
         private LayoutInflater inflater;
         Context context;
 
-        public EditGroupAdapter(Context context) {
-            this.context = context;
+        public EditGroupAdapter(Context context, int resource, List<User> objects) {
+            super(context, resource, objects);
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
