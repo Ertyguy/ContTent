@@ -8,8 +8,10 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -56,6 +58,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
     private List<Group> groupList;
     private Group editGroup;
+    private List<User> users;
     public int groupState = -1;
 
     public int dragStartMode = DragSortController.ON_DOWN;
@@ -74,7 +77,11 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         View view = inflater.inflate(R.layout.fragment_group, container, false);
         act = (ContentActivity) getActivity();
 
+        act.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
         editGroup = new Group();
+        users = new ArrayList<User>();
 
         View header = inflater.inflate(R.layout.header_group_edit, null, false);
         footer = inflater.inflate(R.layout.item_list_divider, null, false);
@@ -107,7 +114,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
         setState(GROUPS_LIST);
 
-        editGroupAdapter = new EditGroupAdapter(act, R.layout.item_group_user, editGroup.getUsers());
+
+        editGroupAdapter = new EditGroupAdapter(act, R.layout.item_group_user, users);
         group_lv.setAdapter(editGroupAdapter);
 
         groupAdapter = new GroupAdapter(act);
@@ -117,7 +125,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         dragSortController = buildController(group_lv);
 
         group_lv.setDropListener(onDrop);
-        //mDslv.setRemoveListener(onRemove);
+        //group_lv.setRemoveListener(onRemove);
         group_lv.setFloatViewManager(dragSortController);
         group_lv.setOnTouchListener(dragSortController);
         group_lv.setDragEnabled(dragEnabled);
@@ -126,12 +134,16 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         return view;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
         @Override
         public void drop(int from, int to) {
             if (from != to) {
-                //DragSortListView list = (DragSortListView)getListView();
                 User item = editGroupAdapter.getItem(from);
                 editGroupAdapter.remove(item);
                 editGroupAdapter.insert(item, to);
@@ -206,6 +218,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
             groupName_edt.setText(editGroup.getName());
 
+            users.clear();
+            users.addAll(editGroup.getUsers());
             editGroupAdapter.notifyDataSetChanged();
         }
 
@@ -219,6 +233,22 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
             visible_sw.setChecked(editGroup.isVisible());
         }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        Log.e(TAG, "onoptionsItemSelected "+id +" = "+android.R.id.home);
+        if(id == android.R.id.home) {
+            if(groupState != GROUPS_LIST) {
+                setState(GROUPS_LIST);
+                return true;
+            } else {
+                act.setState(Var.LIST_USERS);
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -315,20 +345,22 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
         private LayoutInflater inflater;
         Context context;
+        List<User> users;
 
-        public EditGroupAdapter(Context context, int resource, List<User> objects) {
-            super(context, resource, objects);
+        public EditGroupAdapter(Context context, int resource, List<User> users) {
+            super(context, resource, users);
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.users = users;
         }
 
         @Override
         public int getCount() {
-            return editGroup.getUsers() == null? 0: editGroup.getUsers().size();
+            return users == null? 0: users.size();
         }
 
         @Override
         public User getItem(int position) {
-            return editGroup.getUsers().get(position);
+            return users.get(position);
         }
 
         @Override
@@ -382,6 +414,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         }
 
     }
+
 
 }
 

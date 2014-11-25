@@ -37,7 +37,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 	/**  A pointer to the current callbacks instance (the Activity). */
 	private NavigationDrawerCallbacks mCallbacks;
 	/** Helper component that ties the action bar to the navigation drawer. */
-	private ActionBarDrawerToggle mDrawerToggle;
+	public ActionBarDrawerToggle actionBarDrawerToggle;
 
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerListView;
@@ -86,7 +86,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
 
-        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, act.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close ) {
+        actionBarDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, act.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close ) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -120,6 +120,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
             }
         };
 
+
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer, per the navigation drawer design guidelines.
         if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
             mDrawerLayout.openDrawer(mFragmentContainerView);
@@ -129,11 +130,11 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
         mDrawerLayout.post(new Runnable() {
             @Override
             public void run() {
-                mDrawerToggle.syncState();
+                actionBarDrawerToggle.syncState();
             }
         });
 
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.setDrawerListener(actionBarDrawerToggle);
     }
 
 
@@ -300,7 +301,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		// Forward the new configuration the drawer toggle component.
-		mDrawerToggle.onConfigurationChanged(newConfig);
+		actionBarDrawerToggle.onConfigurationChanged(newConfig);
 	}
 
 	@Override

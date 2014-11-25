@@ -98,9 +98,10 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_warning_amber_36dp" />
+            android:src="@drawable/ic_unfold_more_grey600_36dp" />
 
     </RelativeLayout>
 
+    <View style="@style/divider"/>
 
 </LinearLayout>

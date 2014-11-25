@@ -67,6 +67,14 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "toolbar click");
+            }
+        });
+
+
         videoTitle_tv = (TextView) findViewById(R.id.video_title_tv);
         videoViews_tv = (TextView) findViewById(R.id.video_views_tv);
         videoDescription_tv = (TextView) findViewById(R.id.video_description_tv);
@@ -254,9 +262,18 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     public void onBackPressed() {
         if(videoPlayerLayout != null && !videoPlayerLayout.isDismiss && !videoPlayerLayout.isMinimized) {
             videoPlayerLayout.minimize();
-        } else {
-            super.onBackPressed();
+            return;
         }
+        if(contentState != Var.LIST_USERS) {
+            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
+                groupFragment.setState(GroupFragment.GROUPS_LIST);
+            } else {
+                setState(Var.LIST_USERS);
+            }
+            return;
+        }
+        super.onBackPressed();
+
     }
 
     public List<Group> getGroups() {
@@ -280,6 +297,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
             getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
 
             getSupportActionBar().setTitle(getUser().getName());
+            navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
         }
 
         if(contentState == Var.LIST_GROUPS) {
@@ -290,9 +308,12 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
             //Init Groups
             groupFragment = GroupFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
+
+            navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
         }
 
-        navigationDrawerFragment.setUp();
+        //TODO nav drawer should have an update call (only when users has changed)
+        //navigationDrawerFragment.setUp();
 
 
 
@@ -308,4 +329,6 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
 
     }
+
+
 }
