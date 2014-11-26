@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -119,11 +120,11 @@ public class NotificationDialog extends Dialog implements View.OnClickListener, 
         if(dialogType == DIALOG_SELECTED_USERS) {
             int notificationId = position > 0? notificationAdapter.getItem(position - 1).getId(): -1;
             for(User user: selectedUsers) {
-                List<MediaFeed> mediaFeeds = user.getCastMediaFeed();
-                if(mediaFeeds.size() > 0) mediaFeeds.get(0).setNotificationId(notificationId);
+                SparseArray<MediaFeed> mediaFeeds = user.getCastMediaFeed();
+                if(mediaFeeds.size() > 0) mediaFeeds.valueAt(0).setNotificationId(notificationId);
                 if(!DB.isValid(notificationId)) {       //Disable all alarms
-                    for(MediaFeed mediaFeed: mediaFeeds) {
-                        mediaFeed.setNotificationId(notificationId);
+                    for(int i=0; i< mediaFeeds.size(); i++) {
+                        mediaFeeds.valueAt(i).setNotificationId(notificationId);
                     }
                 }
             }

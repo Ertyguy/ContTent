@@ -8,6 +8,9 @@ import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 abstract public class ActionActivity extends ActionBarActivity {
     public final String TAG = ((Object) this).getClass().getSimpleName();
@@ -22,6 +25,7 @@ abstract public class ActionActivity extends ActionBarActivity {
             if (bindState == 1) {
                 binder = (DataService.ServiceBinder)service;
                 binder.addListener(actionDispatch);
+                for(ActionDispatch fragActionDispatch: fragActionDispatches) binder.addListener(fragActionDispatch);
                 onBind();
                 bindState = 2;
             } else {
@@ -31,7 +35,7 @@ abstract public class ActionActivity extends ActionBarActivity {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName arg0) {
+        public void onServiceDisconnected(ComponentName className) {
             bindState = 0;
         }
     };
@@ -60,12 +64,24 @@ abstract public class ActionActivity extends ActionBarActivity {
 
         if (bindState == 2) {
             binder.removeListener(actionDispatch);
+            for(ActionDispatch fragActionDispatch: fragActionDispatches) binder.removeListener(fragActionDispatch);
             unbindService(serviceConnection);
         }
         bindState = 0;
     }
 
-    protected void onBind() {}
+    protected void onBind() {
+        binder.fetchBinder();
 
+    }
+
+    List<ActionDispatch> fragActionDispatches = new ArrayList<ActionDispatch>();
+
+    public void addActionFragment(ActionDispatch fragActionDispatch) {
+        fragActionDispatches.add(fragActionDispatch);
+        if(bindState == 2) {
+            binder.addListener(fragActionDispatch);
+        }
+    }
 }
 

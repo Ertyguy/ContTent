@@ -2,30 +2,42 @@ package com.edaviessmith.consumecontent;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
+import com.edaviessmith.consumecontent.util.ActionDispatch;
+import com.edaviessmith.consumecontent.util.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.FragmentStateCachePagerAdapter;
 import com.edaviessmith.consumecontent.view.PagerAdapter;
 import com.edaviessmith.consumecontent.view.SlidingTabLayout;
 
 
-public class MediaFeedFragment extends Fragment {
-
-    private static final String TAG = "MediaFeedFragment";
+public class MediaFeedFragment extends ActionFragment {
 
     public FragmentStateCachePagerAdapter adapterViewPager;
     public SlidingTabLayout slidingTabLayout;
     private ContentActivity act;
+    ViewPager viewPager;
+
 
     public static MediaFeedFragment newInstance() {
         return new MediaFeedFragment();
+    }
+
+    public MediaFeedFragment() {
+        actionDispatch = new ActionDispatch() {
+
+            @Override
+            public void binderReady() {
+                super.binderReady();
+
+
+            }
+        };
     }
 
     @Override
@@ -33,18 +45,18 @@ public class MediaFeedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_media_feed, container, false);
         act = (ContentActivity) getActivity();
 
-        Log.d(TAG, act.getUser().getName());
 
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
-        adapterViewPager = new PagerAdapter(act, act.getUser());
+        viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
+        slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
+
+        adapterViewPager = new PagerAdapter(act, getBinder().getUser());
         viewPager.setAdapter(adapterViewPager);
 
-        slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
         slidingTabLayout.setViewPager(viewPager);
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                int type = ((MediaFeed) act.getUser().getMediaFeed().get(position)).getType();
+                int type = ((MediaFeed) getBinder().getUser().getMediaFeed().valueAt(position)).getType();
                 if(Var.isTypeYoutube(type)) {
                     return act.getResources().getColor(R.color.red_youtube);
                 }else if(type == Var.TYPE_TWITTER) {
@@ -63,6 +75,7 @@ public class MediaFeedFragment extends Fragment {
 
         return view;
     }
+
 
     @Override
     public void onAttach(Activity activity) {

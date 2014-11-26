@@ -1,19 +1,21 @@
 package com.edaviessmith.consumecontent.data;
 
+import android.util.SparseArray;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class User extends Content{
 
 
-	public List mediaFeed;
+	public SparseArray mediaFeed;
     private List<Group> groups;
 
-    private List <MediaFeed> removed;
+    private SparseArray<MediaFeed> removed;
 
 
     public User () {
-        mediaFeed = new ArrayList();
+        mediaFeed = new SparseArray();
         groups = new ArrayList<Group>();
 
     }
@@ -22,12 +24,12 @@ public class User extends Content{
         super(id, sort, name, thumbnail);
     }
 
-    public User(int id, int sort, String name, String thumbnail, List mediaFeed) {
+    public User(int id, int sort, String name, String thumbnail, SparseArray mediaFeed) {
         super(id, sort, name, thumbnail);
         this.mediaFeed = mediaFeed;
     }
 
-    public User(int sort, String name, String thumbnail, List mediaFeed, List<Group> groups) {
+    public User(int sort, String name, String thumbnail, SparseArray mediaFeed, List<Group> groups) {
         super(sort, name, thumbnail);
         this.mediaFeed = mediaFeed;
         this.groups = groups;
@@ -41,29 +43,32 @@ public class User extends Content{
         this.groups = groups;
     }
 
-    public List getMediaFeed() {
+    public SparseArray getMediaFeed() {
         return mediaFeed;
     }
 
-    public void setMediaFeed(List mediaFeed) {
+    public void setMediaFeed(SparseArray mediaFeed) {
         this.mediaFeed = mediaFeed;
     }
 
-    public List<MediaFeed> getCastMediaFeed() {
+    public SparseArray<MediaFeed> getCastMediaFeed() {
         return mediaFeed;
     }
 
-    public List<MediaFeed> getRemoved() {
+    public SparseArray<MediaFeed> getRemoved() {
         return removed;
     }
 
     //Utility method to update mediaFeeds and set removed feeds
     public void addMediaFeed(List<MediaFeed> mediaFeeds) {
-        removed = new ArrayList<MediaFeed>();
-        removed.addAll(getCastMediaFeed());
-        removed.removeAll(mediaFeeds);
+        removed = getCastMediaFeed().clone();
+        SparseArray<MediaFeed> feeds = new SparseArray<MediaFeed>();
+        for(int i=0; i< mediaFeeds.size(); i++) {
+            removed.remove(mediaFeeds.get(i).getId());
+            feeds.put(mediaFeeds.get(i).getId(), mediaFeeds.get(i));
+        }
 
-        setMediaFeed(mediaFeeds);
+        setMediaFeed(feeds);
     }
 
     @Override

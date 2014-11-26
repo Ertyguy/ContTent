@@ -57,6 +57,26 @@ public class YoutubeFragment extends ActionFragment {
     public YoutubeFragment() {
         actionDispatch = new ActionDispatch() {
 
+            @Override
+            public void binderReady() {
+                super.binderReady();
+
+                Log.d(TAG, "binderReady");
+            }
+
+            @Override
+            public void updatedUserMediaFeed(int userId, int mediaFeedId) {
+                super.updatedUserMediaFeed(userId, mediaFeedId);
+
+                Log.d(TAG, "updatedUserMediaFeed "+userId + mediaFeedId);
+
+                if(pos == userId && tab == mediaFeedId) {
+                    itemAdapter.notifyDataSetChanged();
+
+                    setFeedState(Var.FEED_LOADING);
+                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                }
+            }
         };
     }
 
@@ -113,6 +133,7 @@ public class YoutubeFragment extends ActionFragment {
         });
 
 
+
         itemAdapter = new YoutubeItemAdapter(act);
         feed_rv.setAdapter(itemAdapter);
         feed_rv.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -144,6 +165,9 @@ public class YoutubeFragment extends ActionFragment {
             }
         });
 
+        if(getBinder() != null) {
+            getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+        }
 
         return view;
     }
@@ -151,11 +175,15 @@ public class YoutubeFragment extends ActionFragment {
     @Override
     public void onStart() {
         super.onStart();
-        getLocalItems();
+
+        Log.d(TAG, "onStart "+(getBinder() != null));
+        if(getBinder() != null) getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+        //getLocalItems();
     }
 
     public void getLocalItems() {
         if(getFeed().getItems() == null || getFeed().getItems().size() == 0) {
+
             new Thread() {
                 @Override
                 public void run() {
@@ -180,7 +208,7 @@ public class YoutubeFragment extends ActionFragment {
 
     private YoutubeFeed getFeed() {
         //Log.d(TAG, "feed: "+ (act.getUser(pos) != null));
-        return (YoutubeFeed) act.getUser(pos).getCastMediaFeed().get(tab);
+        return (YoutubeFeed) getBinder().getUser(pos).getCastMediaFeed().get(tab);
     }
 
 
@@ -307,7 +335,7 @@ public class YoutubeFragment extends ActionFragment {
 
         @Override
         public int getItemCount() {
-            return getFeed().getItems() == null ? 1 : getFeed().getItems().size() + 1;
+            return (getBinder() == null || getFeed().getItems() == null) ? 1 : getFeed().getItems().size() + 1;
         }
 
 

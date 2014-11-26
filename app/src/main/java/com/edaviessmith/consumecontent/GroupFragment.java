@@ -23,7 +23,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.Group;
-import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.DB;
@@ -177,15 +176,17 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     }
 
     private List<Group> getGroups() {
-        if(groupState == GROUPS_LIST) {
-            List<Group> vis = new ArrayList<Group>();
-            for(Group group: binder.getGroups())
-                if(group.isVisible()) vis.add(group);
-            return vis;
+        if(getBinder() != null) {
+            if (groupState == GROUPS_LIST) {
+                List<Group> vis = new ArrayList<Group>();
+                for (Group group : getBinder().getGroups())
+                    if (group.isVisible()) vis.add(group);
+                return vis;
+            }
+
+            if (groupState == GROUPS_ALL || groupState == GROUP_EDIT)
+                return getBinder().getGroups();
         }
-
-        if(groupState == GROUPS_ALL || groupState == GROUP_EDIT) return binder.getGroups();
-
         return null;
     }
 
@@ -221,7 +222,10 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             groupName_edt.setText(editGroup.getName());
 
             users.clear();
-            users.addAll(editGroup.getUsers());
+            for(int i=0; i< editGroup.getUsers().size(); i++) {
+                users.add( editGroup.getUsers().valueAt(i));
+            }
+
             editGroupAdapter.notifyDataSetChanged();
         }
 
@@ -254,7 +258,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     }
 
     public void setNotifications() {
-        new NotificationDialog(this, binder.getNotificationList(), selectedUsers);
+        new NotificationDialog(this, getBinder().getNotificationList(), selectedUsers);
     }
 
     public void deleteConfirmation() {
@@ -336,14 +340,15 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 holder.userCount_tv.setText(item.getUsers().size() + " users");
 
                 int watchingCount = 0;
-                for(User user: item.getUsers()) {
-                    for(Object mediaFeed: user.getMediaFeed()) {
-                        if(DB.isValid(((MediaFeed) mediaFeed).getNotificationId())) {
-                            watchingCount ++;
+                for (int u = 0; u < item.getUsers().size(); u++) {
+                    for (int m = 0; m < item.getUsers().valueAt(m).getCastMediaFeed().size(); m++) {
+                        if (DB.isValid(item.getUsers().valueAt(m).getCastMediaFeed().valueAt(m).getNotificationId())) {
+                            watchingCount++;
                             break;
                         }
                     }
                 }
+
 
                 holder.watchingCount_tv.setText(watchingCount > 0? ("Watching " + watchingCount + " users") : "Not watching");
 
@@ -418,10 +423,10 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             holder.name_tv.setText(user.getName());
 
             List<Notification> userNotifications = new ArrayList<Notification>();
-            for(MediaFeed mediaFeed: user.getCastMediaFeed()) {
-                if(DB.isValid(mediaFeed.getNotificationId())) userNotifications.add(binder.getNotificationList().getNotification(mediaFeed.getNotificationId()));
+            for(int i=0;i<user.getCastMediaFeed().size(); i++) {
+                if(DB.isValid(user.getCastMediaFeed().valueAt(i).getNotificationId())) userNotifications.add(getBinder().getNotificationList().getNotification(user.getCastMediaFeed().valueAt(i).getNotificationId()));
             }
-            if(userNotifications.size() > 0) holder.nextAlarm_tv.setText(Var.getNextNotificationTime(userNotifications, binder.getNotificationList().getScheduleNotification()));
+            if(userNotifications.size() > 0) holder.nextAlarm_tv.setText(Var.getNextNotificationTime(userNotifications, getBinder().getNotificationList().getScheduleNotification()));
             else holder.nextAlarm_tv.setText("Not watching");
 
 

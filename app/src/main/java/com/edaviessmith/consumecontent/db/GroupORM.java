@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.edaviessmith.consumecontent.data.Group;
 
@@ -75,21 +76,21 @@ public class GroupORM {
     }
 
 
-    public static List<Group> getGroups(Context context) {
+    public static SparseArray<Group> getGroups(Context context) {
 
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
         Cursor cursor = database.query(false, DB.TABLE_GROUP, null, null, null, null, null, DB.ORDER_BY_SORT, null);
-        List<Group> groupList = new ArrayList<Group>();
+        SparseArray<Group> groupList = new SparseArray<Group>();
 
         if(cursor.getCount() > 0) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 Group group = cursorToGroup(cursor);
 
-                group.setUsers(UserORM.getUsersByGroup(context, group.getId()));
+                group.setUsers(UserORM.getUsersByGroupId(context, group.getId()));
 
-                groupList.add(group);
+                groupList.put(group.getId(), group);
                 cursor.moveToNext();
             }
             Log.i("GroupORM", "Groups loaded "+groupList.size()+" successfully.");

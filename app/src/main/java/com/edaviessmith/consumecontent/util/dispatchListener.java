@@ -7,9 +7,12 @@ import com.edaviessmith.consumecontent.data.User;
 
 public interface DispatchListener {
 
+    void binderReady();
 
     void updatedUsers();
     void updatedGroups();
+
+    void updatedUserMediaFeed(int userId, int mediaFeedId);
 
     void updateGroup(Group group);
     void updateUser(User user);

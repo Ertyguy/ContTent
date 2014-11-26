@@ -7,9 +7,9 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,11 +23,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.util.ActionDispatch;
+import com.edaviessmith.consumecontent.util.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 
 
-public class NavigationDrawerFragment extends Fragment implements View.OnClickListener{
+public class NavigationDrawerFragment extends ActionFragment implements View.OnClickListener{
 
     static final String TAG = "NavigationDrawerFragment";
 	/** Remember the position of the selected item. */
@@ -53,7 +55,19 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
 	ContentActivity act;
 	
-	public NavigationDrawerFragment() { }
+	public NavigationDrawerFragment() {
+        actionDispatch = new ActionDispatch() {
+
+            @Override
+            public void updatedUsers() {
+                super.updatedUsers();
+
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "binder is null: "+(getBinder() == null));
+
+            }
+        };
+    }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -204,12 +218,12 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 
         @Override
         public int getCount() {
-            return act.getUsers() == null? 0: act.getUsers().size();
+            return getBinder().getUsers() == null? 0: getBinder().getUsers().size();
         }
 
         @Override
         public User getItem(int position) {
-            return act.getUsers().get(position);
+            return getBinder().getUsers().get(position);
         }
 
         @Override
@@ -233,7 +247,7 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 	        holder.name_tv.setText(user.getName());
             act.imageLoader.DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
 
-            holder.edit_iv.setVisibility(user.equals(act.getUser())? View.VISIBLE: View.GONE);
+            holder.edit_iv.setVisibility(user.equals(act.binder.getUser())? View.VISIBLE: View.GONE);
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -261,8 +275,13 @@ public class NavigationDrawerFragment extends Fragment implements View.OnClickLi
 		
 	}
 
+    @Override
+    protected void onBind() {
+        super.onBind();
 
-	private void selectItem(int position) {
+    }
+
+    private void selectItem(int position) {
 		mCurrentSelectedPosition = position;
 		if (mDrawerListView != null) {
 			mDrawerListView.setItemChecked(position, true);

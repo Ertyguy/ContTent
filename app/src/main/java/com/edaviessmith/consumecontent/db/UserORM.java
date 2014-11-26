@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.User;
@@ -88,6 +89,8 @@ public class UserORM {
         return user;
     }
 
+    //Moving main structures to map for faster access
+    @Deprecated
     public static List<User> getUsersByGroup(Context context, int groupId) {
         DB databaseHelper = new DB(context);
         List<User> users = new ArrayList<User>();
@@ -108,6 +111,42 @@ public class UserORM {
                     user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
 
                     users.add(user);
+                    cursor.moveToNext();
+                }
+
+            }
+            Log.i("UserORM", "Users loaded successfully :"+users.size());
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return users;
+    }
+
+
+    public static SparseArray<User> getUsersByGroupId(Context context, int groupId) {
+        DB databaseHelper = new DB(context);
+        SparseArray<User> users = new SparseArray<User>();
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+
+            Cursor cursor = database.rawQuery("SELECT U.* FROM "+DB.TABLE_USER+" U INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
+                    "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId, null);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    User user = cursorToUser(cursor);
+
+                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+                    user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
+
+                    users.put(user.getId(), user);
                     cursor.moveToNext();
                 }
 
@@ -190,9 +229,9 @@ public class UserORM {
 
 
 
-    public static void saveUsers(SQLiteDatabase database, List<User> users) {
+    public static void saveUsers(SQLiteDatabase database, SparseArray<User> users) {
         for(int i=0; i< users.size(); i++) {
-            saveUser(database, users.get(i), i);
+            saveUser(database, users.valueAt(i), i);
         }
     }
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
@@ -35,18 +36,19 @@ public class MediaFeedORM {
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_MEDIA_FEED;
 
 
-    public static List getMediaFeeds(SQLiteDatabase database, int userId) {
-        List mediaFeeds = new ArrayList();
+    public static SparseArray getMediaFeeds(SQLiteDatabase database, int userId) {
+        SparseArray mediaFeeds = new SparseArray();
 
         Cursor cursor = database.query(false, DB.TABLE_MEDIA_FEED, null, DB.COL_USER + " = " + userId, null, null, null, DB.ORDER_BY_SORT, null);
 
         if(cursor.getCount() > 0) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
+                int id = cursor.getInt(cursor.getColumnIndex(DB.COL_ID));
                 int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
 
-                if(Var.isTypeYoutube(type)) mediaFeeds.add((YoutubeFeed) cursorToMediaFeed(cursor, type));
-                else mediaFeeds.add((MediaFeed) cursorToMediaFeed(cursor, type));
+                if(Var.isTypeYoutube(type)) mediaFeeds.put(id, (YoutubeFeed) cursorToMediaFeed(cursor, type));
+                else mediaFeeds.put(id, (MediaFeed) cursorToMediaFeed(cursor, type));
                 Log.e(TAG, cursorToMediaFeed(cursor, type).toString());
                 cursor.moveToNext();
             }
@@ -126,15 +128,16 @@ public class MediaFeedORM {
         }
     }
 
-    public static void saveMediaFeeds(SQLiteDatabase database, List<MediaFeed> mediaFeeds, List<MediaFeed> removedMediaFeeds, int userId) {
+    public static void saveMediaFeeds(SQLiteDatabase database, SparseArray<MediaFeed> mediaFeeds, SparseArray<MediaFeed> removedMediaFeeds, int userId) {
         if(removedMediaFeeds != null) {
-            for (MediaFeed removedMediaFeed : removedMediaFeeds) {
-                removeMediaFeed(database, removedMediaFeed);
+            //for (MediaFeed removedMediaFeed : removedMediaFeeds) {
+            for(int i=0; i< removedMediaFeeds.size(); i++) {
+                removeMediaFeed(database, removedMediaFeeds.valueAt(i));
             }
         }
 
         for(int i=0; i< mediaFeeds.size(); i++) {
-            saveMediaFeed(database, mediaFeeds.get(i), userId, i);
+            saveMediaFeed(database, mediaFeeds.valueAt(i), userId, i);
         }
     }
 

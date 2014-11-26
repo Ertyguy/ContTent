@@ -1,21 +1,20 @@
 package com.edaviessmith.consumecontent.data;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import android.util.SparseArray;
 
 public class Group extends Content {
 
     private boolean isVisible;
 
-    private List<User> users;
+    private SparseArray<User> users;
 
     public Group () { }
 
     public Group (String name, boolean isVisible) {
         setName(name);
         setVisible(isVisible);
-        users = new ArrayList<User>();
+        users = new SparseArray<User>();
     }
 
     public Group(int sort, String name, String thumbnail, boolean isVisible) {
@@ -42,11 +41,11 @@ public class Group extends Content {
         this.isVisible = isVisible;
     }
 
-    public List<User> getUsers() {
+    public SparseArray<User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(SparseArray<User> users) {
         this.users = users;
     }
 

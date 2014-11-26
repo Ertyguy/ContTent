@@ -137,7 +137,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         selectedFeeds = new ArrayList<MediaFeed>();
         mediaFeeds = new ArrayList<MediaFeed>();
-        mediaFeeds.addAll(editUser.getCastMediaFeed());
+
+        for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
+            mediaFeeds.add( editUser.getCastMediaFeed().valueAt(i));
+        }
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -262,7 +265,8 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
             imageLoader.DisplayImage(editUser.getThumbnail(), userThumbnail_iv, userThumbnail_pb, false);
             addThumbnail(editUser.getThumbnail());
-            for(Object mediaFeed: editUser.getMediaFeed()) addThumbnail(((MediaFeed) mediaFeed).getThumbnail());
+            for(int i=0; i<editUser.getMediaFeed().size(); i++)
+                addThumbnail(((MediaFeed) editUser.getMediaFeed().valueAt(i)).getThumbnail());
 
             toggleSearch(SEARCH_NONE);
         } else {
@@ -544,8 +548,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 editUser.setName(userName_edt.getText().toString().trim());
 
 
-                Log.d(TAG, "adding "+mediaFeeds.size());
-                Log.d(TAG, "saving "+editUser.getCastMediaFeed().size());
 
                 editUser.addMediaFeed(mediaFeeds);
 
