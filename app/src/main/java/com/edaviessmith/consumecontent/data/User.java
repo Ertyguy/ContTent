@@ -7,8 +7,10 @@ public class User extends Content{
 
 
 	public List mediaFeed;
+    private List<Group> groups;
 
-    private List<Group> groups; //TODO need to thoroughly hash out this relationship
+    private List <MediaFeed> removed;
+
 
     public User () {
         mediaFeed = new ArrayList();
@@ -51,6 +53,19 @@ public class User extends Content{
         return mediaFeed;
     }
 
+    public List<MediaFeed> getRemoved() {
+        return removed;
+    }
+
+    //Utility method to update mediaFeeds and set removed feeds
+    public void addMediaFeed(List<MediaFeed> mediaFeeds) {
+        removed = new ArrayList<MediaFeed>();
+        removed.addAll(getCastMediaFeed());
+        removed.removeAll(mediaFeeds);
+
+        setMediaFeed(mediaFeeds);
+    }
+
     @Override
     public String toString() {
         return "}}); \n\nnew User(" + getId() +
@@ -59,4 +74,6 @@ public class User extends Content{
                 ", \"" + getThumbnail() + '\"' +
                 ", new ArrayList<YoutubeFeed>(){{";
     }
+
+
 }

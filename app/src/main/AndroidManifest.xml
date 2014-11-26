@@ -72,6 +72,11 @@
             android:label="Notification Listener"
             android:exported="false" />
 
+        <service
+            android:name="com.edaviessmith.consumecontent.util.DataService"
+            android:exported="false" >
+        </service>
+
 
         <activity android:name="com.edaviessmith.consumecontent.db.AndroidDatabaseManager"  />
     </application>

@@ -15,20 +15,19 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/group_v"
+        android:id="@+id/user_group_v"
         android:background="@color/gray"
         android:orientation="vertical"
         android:visibility="gone">
 
         <com.mobeta.android.dslv.DragSortListView
-            android:id="@+id/group_lv"
+            android:id="@+id/user_group_lv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:choiceMode="multipleChoice"
-            android:dividerHeight="0dp"
-            android:divider="@android:color/transparent"
+            android:divider="@null"
             app:click_remove_id="@+id/click_remove"
-            app:collapsed_height="10dp"
+            app:collapsed_height="0dp"
             app:drag_enabled="true"
             app:drag_handle_id="@+id/drag_handle"
             app:drag_scroll_start="0.33"

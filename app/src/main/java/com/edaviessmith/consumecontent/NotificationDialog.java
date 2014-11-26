@@ -1,5 +1,6 @@
 package com.edaviessmith.consumecontent;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -18,33 +19,55 @@ import android.widget.TextView;
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.NotificationList;
+import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.util.Var;
+
+import java.util.List;
 
 
 public class NotificationDialog extends Dialog implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     private final static String TAG = "NotificationDialog";
 
-    AddActivity act;
+    AddActivity addActivity;
+    GroupFragment groupFragment;
     NotificationList notificationList;
-    MediaFeed mediaFeed;
+    List<MediaFeed> mediaFeeds;
+    List<User> selectedUsers;
 
     ListView notification_lv;
     NotificationAdapter notificationAdapter;
     View cancel_tv;
 
+    int dialogType;
 
+    private final static int DIALOG_MEDIA_FEED = 0;
+    private final static int DIALOG_SELECTED_USERS = 1;
+    private final static int DIALOG_SELECTED_FEEDS = 1;
 
-    public NotificationDialog(AddActivity activity, NotificationList notificationList, MediaFeed mediaFeed) {
+    public NotificationDialog(AddActivity activity, NotificationList notificationList, List<MediaFeed> mediaFeeds) {
         super(activity);
-        this.act = activity;
+        dialogType = DIALOG_MEDIA_FEED;
+        this.addActivity = activity;
         this.notificationList = notificationList;
-        this.mediaFeed = mediaFeed;
+        this.mediaFeeds = mediaFeeds;
+        init();
+    }
 
+
+    public NotificationDialog(GroupFragment fragment, NotificationList notificationList, List<User> selectedUsers) {
+        super(fragment.act);
+        dialogType = DIALOG_SELECTED_USERS;
+        this.groupFragment = fragment;
+        this.notificationList = notificationList;
+        this.selectedUsers = selectedUsers;
         init();
     }
 
     private void init() {
+
+        Activity act = dialogType == DIALOG_MEDIA_FEED? addActivity: groupFragment.act;
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setBackgroundDrawable(new ColorDrawable(0));
@@ -58,7 +81,14 @@ public class NotificationDialog extends Dialog implements View.OnClickListener, 
         params.width = width;
         getWindow().setAttributes(params);
 
+
+        View disableNotification = act.getLayoutInflater().inflate(R.layout.item_notification, null, false);
+        ((ImageView) disableNotification.findViewById(R.id.icon_iv)).setImageResource(R.drawable.ic_alarm_off_grey600_36dp);
+        ((TextView) disableNotification.findViewById(R.id.name_tv)).setText("No Notifications");
+
         notification_lv = (ListView) findViewById(R.id.notification_lv);
+        notification_lv.addHeaderView(disableNotification, new Notification(-1, "No Notifications", Var.NOTIFICATION_DISABLE), true);
+
         notification_lv.setOnItemClickListener(this);
         notificationAdapter = new NotificationAdapter(act);
         notification_lv.setAdapter(notificationAdapter);
@@ -81,8 +111,26 @@ public class NotificationDialog extends Dialog implements View.OnClickListener, 
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mediaFeed.setNotificationId(notificationAdapter.getItem(position).getId());
-        act.feedAdapter.notifyDataSetChanged();
+        if(dialogType == DIALOG_MEDIA_FEED) {
+            for(MediaFeed mediaFeed: mediaFeeds)
+            mediaFeed.setNotificationId(notificationAdapter.getItem(position - 1).getId());
+            addActivity.feedAdapter.notifyDataSetChanged();
+        }
+        if(dialogType == DIALOG_SELECTED_USERS) {
+            int notificationId = position > 0? notificationAdapter.getItem(position - 1).getId(): -1;
+            for(User user: selectedUsers) {
+                List<MediaFeed> mediaFeeds = user.getCastMediaFeed();
+                if(mediaFeeds.size() > 0) mediaFeeds.get(0).setNotificationId(notificationId);
+                if(!DB.isValid(notificationId)) {       //Disable all alarms
+                    for(MediaFeed mediaFeed: mediaFeeds) {
+                        mediaFeed.setNotificationId(notificationId);
+                    }
+                }
+            }
+            groupFragment.editGroupAdapter.notifyDataSetChanged();
+            groupFragment.clearSelection(-1);
+
+        }
         dismiss();
     }
 

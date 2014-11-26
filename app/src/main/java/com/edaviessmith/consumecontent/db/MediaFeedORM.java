@@ -126,7 +126,13 @@ public class MediaFeedORM {
         }
     }
 
-    public static void saveMediaFeeds(SQLiteDatabase database, List<MediaFeed> mediaFeeds, int userId) {
+    public static void saveMediaFeeds(SQLiteDatabase database, List<MediaFeed> mediaFeeds, List<MediaFeed> removedMediaFeeds, int userId) {
+        if(removedMediaFeeds != null) {
+            for (MediaFeed removedMediaFeed : removedMediaFeeds) {
+                removeMediaFeed(database, removedMediaFeed);
+            }
+        }
+
         for(int i=0; i< mediaFeeds.size(); i++) {
             saveMediaFeed(database, mediaFeeds.get(i), userId, i);
         }
@@ -142,6 +148,17 @@ public class MediaFeedORM {
         }
 
         Log.d(TAG, "saveMediaFeed "+mediaFeed.getId());
+    }
+
+    public static void removeMediaFeed(SQLiteDatabase database, MediaFeed mediaFeed) {
+
+        if(DB.isValid(mediaFeed.getId())) {
+            YoutubeItemORM.removeYoutubeItems(database, mediaFeed.getId());
+
+            database.delete(DB.TABLE_MEDIA_FEED, DB.COL_ID + " = " + mediaFeed.getId(), null);
+        }
+
+        Log.d(TAG, "deleteMediaFeed "+mediaFeed.getId());
     }
 
     private static ContentValues mediaFeedToContentValues(MediaFeed mediaFeed, int userId, boolean includeId) {

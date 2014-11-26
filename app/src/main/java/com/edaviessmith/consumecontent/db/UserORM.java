@@ -174,7 +174,7 @@ public class UserORM {
                 user.setId((int) database.insert(DB.TABLE_USER, null, userToContentValues(user, false)));
             }
 
-            MediaFeedORM.saveMediaFeeds(database, user.getMediaFeed(), user.getId());
+            MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId());
             GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
 
             database.setTransactionSuccessful();
@@ -208,7 +208,7 @@ public class UserORM {
         }
 
 
-        MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getId());
+        MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId());
         GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
 
 

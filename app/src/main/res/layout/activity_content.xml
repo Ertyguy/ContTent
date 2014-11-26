@@ -29,33 +29,56 @@
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-              <ImageView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@+id/action_edit"
-                    android:id="@+id/action_settings"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@+id/action_edit"
-                    android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
+                    android:layout_centerVertical="true">
 
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="@dimen/toolbar_item_padding"
-                    android:paddingEnd="@dimen/toolbar_item_padding"
-                    android:paddingLeft="@dimen/toolbar_item_padding"
-                    android:paddingStart="@dimen/toolbar_item_padding"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/edit"
-                    android:id="@+id/action_edit"
-                    android:src="@drawable/ic_create_white_24dp"/>
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="@dimen/toolbar_item_padding"
+                        android:paddingEnd="@dimen/toolbar_item_padding"
+                        android:paddingLeft="@dimen/toolbar_item_padding"
+                        android:paddingStart="@dimen/toolbar_item_padding"
+                        android:contentDescription="Set Notifications"
+                        android:visibility="gone"
+                        android:id="@+id/action_notification"
+                        android:src="@drawable/ic_alarm_white_24dp"/>
 
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="@dimen/toolbar_item_padding"
+                        android:paddingEnd="@dimen/toolbar_item_padding"
+                        android:paddingLeft="@dimen/toolbar_item_padding"
+                        android:paddingStart="@dimen/toolbar_item_padding"
+                        android:contentDescription="Delete"
+                        android:visibility="gone"
+                        android:id="@+id/action_delete"
+                        android:src="@drawable/ic_delete_white_24dp"/>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="@dimen/toolbar_item_padding"
+                        android:paddingEnd="@dimen/toolbar_item_padding"
+                        android:paddingLeft="@dimen/toolbar_item_padding"
+                        android:paddingStart="@dimen/toolbar_item_padding"
+                        android:contentDescription="@string/edit"
+                        android:id="@+id/action_edit"
+                        android:src="@drawable/ic_create_white_24dp"/>
+
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/action_settings"
+                        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"/>
+                </LinearLayout>
             </RelativeLayout>
 
 

@@ -3,17 +3,18 @@ package com.edaviessmith.consumecontent;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,6 +27,7 @@ import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.DB;
+import com.edaviessmith.consumecontent.util.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
@@ -35,21 +37,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class GroupFragment extends Fragment implements View.OnClickListener{
-    private static final String TAG = "GroupFragment";
+public class GroupFragment extends ActionFragment implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     public static final int GROUPS_LIST = 0;
     public static final int GROUPS_ALL  = 1;
     public static final int GROUP_EDIT  = 2;
 
-    private ContentActivity act;
+    public ContentActivity act;
     private RecyclerView groups_rv;
     private LinearLayoutManager linearLayoutManager;
     private GroupAdapter groupAdapter;
-    private EditGroupAdapter editGroupAdapter;
+    public EditGroupAdapter editGroupAdapter;
     private DragSortListView group_lv;
     private DragSortController dragSortController;
-    private View group_v, groupThumbnail_v, visible_v, footer;
+    private View userGroup_v, groupThumbnail_v, visible_v, footer;
     private Fab save_fab;
     private SwitchCompat visible_sw;
     private ImageView groupThumbnail_iv;
@@ -58,7 +59,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
     private List<Group> groupList;
     private Group editGroup;
-    private List<User> users;
+    private List<User> users, selectedUsers;
+
     public int groupState = -1;
 
     public int dragStartMode = DragSortController.ON_DOWN;
@@ -82,6 +84,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
         editGroup = new Group();
         users = new ArrayList<User>();
+        selectedUsers = new ArrayList<User>();
 
         View header = inflater.inflate(R.layout.header_group_edit, null, false);
         footer = inflater.inflate(R.layout.item_list_divider, null, false);
@@ -93,8 +96,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         groups_rv.setItemAnimator(new DefaultItemAnimator());
 
 
-        group_v = view.findViewById(R.id.group_v);
-        group_lv = (DragSortListView) view.findViewById(R.id.group_lv);
+        userGroup_v = view.findViewById(R.id.user_group_v);
+        group_lv = (DragSortListView) view.findViewById(R.id.user_group_lv);
         group_lv.addHeaderView(header, null, false);
         group_lv.addFooterView(footer, null, false);
 
@@ -112,10 +115,10 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         save_fab = (Fab) view.findViewById(R.id.save_fab);
         save_fab.setOnClickListener(this);
 
-        setState(GROUPS_LIST);
+        toggleState(GROUPS_LIST);
 
 
-        editGroupAdapter = new EditGroupAdapter(act, R.layout.item_group_user, users);
+        editGroupAdapter = new EditGroupAdapter(act, users);
         group_lv.setAdapter(editGroupAdapter);
 
         groupAdapter = new GroupAdapter(act);
@@ -129,6 +132,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         group_lv.setFloatViewManager(dragSortController);
         group_lv.setOnTouchListener(dragSortController);
         group_lv.setDragEnabled(dragEnabled);
+        group_lv.setOnItemClickListener(this);
 
 
         return view;
@@ -151,9 +155,6 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
             }
         }
     };
-
-
-
 
     public DragSortController buildController(DragSortListView dslv) {
         // defaults are
@@ -178,18 +179,18 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
     private List<Group> getGroups() {
         if(groupState == GROUPS_LIST) {
             List<Group> vis = new ArrayList<Group>();
-            for(Group group: act.getGroups())
+            for(Group group: binder.getGroups())
                 if(group.isVisible()) vis.add(group);
             return vis;
         }
 
-        if(groupState == GROUPS_ALL || groupState == GROUP_EDIT) return act.getGroups();
+        if(groupState == GROUPS_ALL || groupState == GROUP_EDIT) return binder.getGroups();
 
         return null;
     }
 
 
-    public void setState(int groupState) {
+    public void toggleState(int groupState) {
         boolean changed = (this.groupState != groupState);
         this.groupState = groupState;
 
@@ -198,13 +199,14 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         }
 
         act.actionEdit.setVisibility((groupState == GROUPS_LIST || groupState == GROUPS_ALL) ? View.VISIBLE: View.GONE);
+        act.toggleEditActions(false);
 
-        group_v.setVisibility(groupState == GROUP_EDIT? View.VISIBLE: View.GONE);
-
+        userGroup_v.setVisibility(groupState == GROUP_EDIT? View.VISIBLE: View.GONE);
 
         if(groupState == GROUPS_LIST){
             act.getSupportActionBar().setTitle("Groups");
             act.actionEdit.setImageResource(R.drawable.ic_create_white_24dp);
+
         }
         if(groupState == GROUPS_ALL) {
             act.getSupportActionBar().setTitle("Edit Groups");
@@ -241,7 +243,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         Log.e(TAG, "onoptionsItemSelected "+id +" = "+android.R.id.home);
         if(id == android.R.id.home) {
             if(groupState != GROUPS_LIST) {
-                setState(GROUPS_LIST);
+                toggleState(GROUPS_LIST);
                 return true;
             } else {
                 act.setState(Var.LIST_USERS);
@@ -249,6 +251,33 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void setNotifications() {
+        new NotificationDialog(this, binder.getNotificationList(), selectedUsers);
+    }
+
+    public void deleteConfirmation() {
+
+    }
+
+    public void clearSelection(int selected) {
+        for (int i = 0; i < group_lv.getCount(); i++) group_lv.setItemChecked(i, (i == selected)); //Unselect all options
+        if(selected < 0) act.toggleEditActions(false);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        selectedUsers.clear();
+        SparseBooleanArray checked = group_lv.getCheckedItemPositions();
+        for (int i = 0; i < checked.size(); i++) {
+            if(checked.valueAt(i)) {
+                selectedUsers.add((User) group_lv.getItemAtPosition(checked.keyAt(i)));
+            }
+        }
+
+        act.toggleEditActions(selectedUsers.size() > 0);
     }
 
 
@@ -287,7 +316,7 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
             if(groupState == GROUPS_ALL) {
                 editGroup = new Group(groupList.get(itemPosition));
-                setState(GROUP_EDIT);
+                toggleState(GROUP_EDIT);
 
             }
             //TODO onclick
@@ -347,8 +376,8 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
         Context context;
         List<User> users;
 
-        public EditGroupAdapter(Context context, int resource, List<User> users) {
-            super(context, resource, users);
+        public EditGroupAdapter(Context context,List<User> users) {
+            super(context, R.layout.item_group_user, users);
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.users = users;
         }
@@ -390,9 +419,9 @@ public class GroupFragment extends Fragment implements View.OnClickListener{
 
             List<Notification> userNotifications = new ArrayList<Notification>();
             for(MediaFeed mediaFeed: user.getCastMediaFeed()) {
-                if(DB.isValid(mediaFeed.getNotificationId())) userNotifications.add(act.notificationList.getNotification(mediaFeed.getNotificationId()));
+                if(DB.isValid(mediaFeed.getNotificationId())) userNotifications.add(binder.getNotificationList().getNotification(mediaFeed.getNotificationId()));
             }
-            if(userNotifications.size() > 0) holder.nextAlarm_tv.setText(Var.getNextNotificationTime(userNotifications, act.notificationList.getScheduleNotification()));
+            if(userNotifications.size() > 0) holder.nextAlarm_tv.setText(Var.getNextNotificationTime(userNotifications, binder.getNotificationList().getScheduleNotification()));
             else holder.nextAlarm_tv.setText("Not watching");
 
 

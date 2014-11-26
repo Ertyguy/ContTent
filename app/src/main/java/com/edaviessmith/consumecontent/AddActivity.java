@@ -14,11 +14,13 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -43,6 +45,8 @@ import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
+import com.mobeta.android.dslv.DragSortController;
+import com.mobeta.android.dslv.DragSortListView;
 
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
@@ -78,18 +82,22 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
     SearchAdapter searchAdapter;
     FeedAdapter feedAdapter;
+    private DragSortController dragSortController;
     //GroupAdapter groupAdapter;
     List<YoutubeChannel> youtubeChannelSearch;
     List<TwitterFeed> twitterFeedSearch;
     List<Group> groups;
+    List<MediaFeed> mediaFeeds;
+    List<MediaFeed> selectedFeeds;
     NotificationList notificationList;
     User editUser;
-
+    YoutubeChannel searchChannel;
     List<String> userPictureThumbnails;
 
 
-    ListView search_lv, feed_lv;
-    View search_v, searchTwitter_v, searchDiv_v, channel_v, footer, search_rl, youtube_ll, twitter_ll, groups_v, userThumbnail_v;
+    ListView search_lv;
+    DragSortListView feed_lv;
+    View search_v, searchTwitter_v, searchDiv_v, channel_v, footer, search_rl, youtube_ll, twitter_ll, groups_v, userThumbnail_v,  actionNotification, actionDelete;
     TextView searchMessage_tv, name_tv, searchTwitterLogin_tv;
     ImageView channelThumbnail_iv, clearSearch_iv, userThumbnail_iv;
     EditText userName_edt, search_edt;
@@ -101,6 +109,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     String search, pageToken;
     boolean searchBusy;
 
+
+    public int dragStartMode = DragSortController.ON_DOWN;
+    public boolean removeEnabled = false;
+    public int removeMode = DragSortController.FLING_REMOVE;
+    public boolean sortEnabled = true;
+    public boolean dragEnabled = true;
 
 
     @Override
@@ -121,13 +135,19 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         if(DB.isValid(userId)) editUser = UserORM.getUser(this, userId, groups);
         else editUser = new User();
 
-
+        selectedFeeds = new ArrayList<MediaFeed>();
+        mediaFeeds = new ArrayList<MediaFeed>();
+        mediaFeeds.addAll(editUser.getCastMediaFeed());
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+        actionDelete = findViewById(R.id.action_delete);
+        actionDelete.setOnClickListener(this);
+        actionNotification = findViewById(R.id.action_notification);
+        actionNotification.setOnClickListener(this);
 
         View header = getLayoutInflater().inflate(R.layout.header_add, null, false);
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
@@ -135,11 +155,22 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
         footer.setVisibility(View.GONE);
 
-        feedAdapter = new FeedAdapter(this);
-        feed_lv = (ListView) findViewById(R.id.feed_lv);
+        feedAdapter = new FeedAdapter(this, mediaFeeds);
+        feed_lv = (DragSortListView) findViewById(R.id.feed_lv);
         feed_lv.addHeaderView(header, null, false);
         feed_lv.addFooterView(footer, null, false);
         feed_lv.setAdapter(feedAdapter);
+
+        dragSortController = buildController(feed_lv);
+
+        feed_lv.setDropListener(onDrop);
+        //group_lv.setRemoveListener(onRemove);
+        feed_lv.setFloatViewManager(dragSortController);
+        feed_lv.setOnTouchListener(dragSortController);
+        feed_lv.setDragEnabled(dragEnabled);
+        feed_lv.setOnItemClickListener(this);
+
+
 
         //Header
         userThumbnail_v = header.findViewById(R.id.user_thumbnail_v);
@@ -197,10 +228,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         search_lv.setOnScrollListener(this);
         search_lv.setOnItemClickListener(this);
 
-        //iconAdapter = new IconAdapter(this, userPictureThumbnails, imageLoader);
-        //userPicture_sp.setAdapter(iconAdapter);
-        //userPicture_sp.setOnItemSelectedListener(this);
-
         action_fab = (Fab) findViewById(R.id.action_fab);
 
         userThumbnail_v.setOnClickListener(this);
@@ -226,7 +253,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         });
 
 
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         userName_edt.setText(editUser.getName());
         getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? editUser.getName(): "Add User"));
@@ -245,6 +271,33 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
 
     }
+
+    private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
+        @Override
+        public void drop(int from, int to) {
+            if (from != to) {
+                MediaFeed item = feedAdapter.getItem(from);
+                feedAdapter.remove(item);
+                feedAdapter.insert(item, to);
+                feed_lv.moveCheckState(from, to);
+            }
+        }
+    };
+
+    public DragSortController buildController(DragSortListView dslv) {
+        // defaults are
+        //   dragStartMode = onDown
+        //   removeMode = flingRight
+        DragSortController controller = new DragSortController(dslv);
+        controller.setDragHandleId(R.id.drag_handle);
+        controller.setClickRemoveId(R.id.click_remove);
+        controller.setRemoveEnabled(removeEnabled);
+        controller.setSortEnabled(sortEnabled);
+        controller.setDragInitMode(dragStartMode);
+        controller.setRemoveMode(removeMode);
+        return controller;
+    }
+
 
 
     private void toggleSearch(int searchMode) {
@@ -359,33 +412,59 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
 
 
-    YoutubeChannel searchChannel;
+    private void toggleEditActions(boolean show) {
+        actionNotification.setVisibility(show ? View.VISIBLE: View.GONE);
+        actionDelete.setVisibility(show ? View.VISIBLE: View.GONE);
+    }
+
+
+    public void clearFeedSelection(int selected) {
+        for (int i = 0; i < feed_lv.getCount(); i++) feed_lv.setItemChecked(i, (i == selected)); //Unselect all options
+        if(selected < 0) toggleEditActions(false);
+    }
+
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        if(searchMode == SEARCH_YOUTUBE) {
-            searchChannel = youtubeChannelSearch.get(position - 1);
-            Log.d(TAG, searchChannel.toString());
+        Log.d(TAG, "onItemClick "+parent +" = "+feed_lv);
 
-            addThumbnail(searchChannel.getThumbnail());
-            if(Var.isEmpty(userName_edt.getText().toString())) userName_edt.setText(searchChannel.getName());
-            name_tv.setText(searchChannel.getName());
-            imageLoader.DisplayImage(searchChannel.getThumbnail(), channelThumbnail_iv);
+        if(search_lv == parent) {
+            if (searchMode == SEARCH_YOUTUBE) {
+                searchChannel = youtubeChannelSearch.get(position - 1);
+                Log.d(TAG, searchChannel.toString());
 
-            toggleSearch(SEARCH_YT_CHANNEL);
-            searchChannel();
+                addThumbnail(searchChannel.getThumbnail());
+                if (Var.isEmpty(userName_edt.getText().toString()))
+                    userName_edt.setText(searchChannel.getName());
+                name_tv.setText(searchChannel.getName());
+                imageLoader.DisplayImage(searchChannel.getThumbnail(), channelThumbnail_iv);
+
+                toggleSearch(SEARCH_YT_CHANNEL);
+                searchChannel();
+            }
+
+            if (searchMode == SEARCH_TWITTER) {
+                mediaFeeds.add(twitterFeedSearch.get(position - 1));
+                addThumbnail(twitterFeedSearch.get(position - 1).getThumbnail());
+
+                if (Var.isEmpty(userName_edt.getText().toString()))
+                    userName_edt.setText(twitterFeedSearch.get(position - 1).getDisplayName());
+
+                toggleSearch(SEARCH_NONE);
+            }
         }
+        if(feed_lv == parent) {
+            selectedFeeds.clear();
+            SparseBooleanArray checked = feed_lv.getCheckedItemPositions();
+            for (int i = 0; i < checked.size(); i++) {
+                if(checked.valueAt(i)) {
+                    selectedFeeds.add((MediaFeed) feed_lv.getItemAtPosition(checked.keyAt(i)));
+                }
+            }
 
-        if(searchMode == SEARCH_TWITTER) {
-            editUser.getCastMediaFeed().add( twitterFeedSearch.get(position - 1));
-            addThumbnail(twitterFeedSearch.get(position - 1).getThumbnail());
-
-            if(Var.isEmpty(userName_edt.getText().toString())) userName_edt.setText(twitterFeedSearch.get(position - 1).getDisplayName());
-
-            toggleSearch(SEARCH_NONE);
+            toggleEditActions(selectedFeeds.size() > 0);
         }
-
     }
 
     private void addThumbnail(String thumbnail) {
@@ -416,6 +495,20 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     @Override
     public void onClick(View v) {
 
+        if(actionNotification == v) {
+            new NotificationDialog(this, notificationList, selectedFeeds);
+        }
+
+        if(actionDelete == v) {
+
+            for(MediaFeed mediaFeed: selectedFeeds) {
+                mediaFeeds.remove(mediaFeed);
+            }
+
+            clearFeedSelection(-1);
+
+        }
+
         if(groups_v == v) {
             new GroupDialog(this, groups, editUser.getGroups());
         }
@@ -436,7 +529,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                         YoutubeFeed youtubeFeed = (YoutubeFeed) search_lv.getItemAtPosition(checked.keyAt(i));
                         youtubeFeed.setChannelHandle(searchChannel.getFeedId());
                         addThumbnail(youtubeFeed.getThumbnail());
-                        editUser.getCastMediaFeed().add(youtubeFeed);
+                        mediaFeeds.add(youtubeFeed);
                     }
                 }
 
@@ -449,6 +542,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
                 //TODO make sure save is working
                 editUser.setName(userName_edt.getText().toString().trim());
+
+
+                Log.d(TAG, "adding "+mediaFeeds.size());
+                Log.d(TAG, "saving "+editUser.getCastMediaFeed().size());
+
+                editUser.addMediaFeed(mediaFeeds);
 
 
                 //editUser.setThumbnail((String) userPicture_sp.getSelectedItem());//TODO set thumbnail
@@ -644,6 +743,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 JSONObject play = new JSONObject(playlist);
                 if (Var.isJsonArray(play, "items")) {
                     JSONArray items = play.getJSONArray("items");
+
+                    YoutubeFeed activityFeed = new YoutubeFeed();
+                    activityFeed.setChannelHandle(searchChannel.getFeedId());
+
                     for (int i = 0; i < items.length(); i++) {
                         JSONObject item = items.getJSONObject(i);
 
@@ -656,7 +759,10 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                             if (Var.isJsonObject(item, "snippet")) {                        //Feed Name
                                 JSONObject snippet = item.getJSONObject("snippet");
                                 if (Var.isJsonString(snippet, "title")) {
-                                    if(snippet.getString("title").startsWith("Upload")) feed.setName("Uploads");
+                                    if(snippet.getString("title").startsWith("Upload")) {
+                                        feed.setName("Uploads");
+
+                                    }
                                     else feed.setName(snippet.getString("title"));
                                 }
 
@@ -666,6 +772,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                                         JSONObject def = thumbnails.getJSONObject("default");
                                         if (Var.isJsonString(def, "url")) {
                                             feed.setThumbnail(def.getString("url"));
+                                            if(feed.getName().contentEquals("Uploads")) activityFeed.setThumbnail(def.getString("url"));
                                         }
                                     }
                                 }
@@ -677,8 +784,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                         }
                     }
 
-                    YoutubeFeed activityFeed = new YoutubeFeed();
-                    activityFeed.setChannelHandle(searchChannel.getFeedId());
+
                     searchChannel.getYoutubeFeeds().add(activityFeed); //Activity
                 }
 
@@ -695,25 +801,27 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     }
 
 
-    public class FeedAdapter extends BaseAdapter {
+    public class FeedAdapter extends ArrayAdapter<MediaFeed> {
 
         private LayoutInflater inflater;
         Context context;
+        List<MediaFeed> mediaFeeds;
 
-        public FeedAdapter(Context context) {
-            this.context = context;
+        public FeedAdapter(Context context, List<MediaFeed> mediaFeeds) {
+            super(context, R.layout.item_group_user, mediaFeeds);
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.mediaFeeds = mediaFeeds;
         }
 
 
         @Override
         public int getCount() {
-            return editUser.getMediaFeed().size();
+            return mediaFeeds.size();
         }
 
         @Override
         public MediaFeed getItem(int position) {
-            return (MediaFeed) editUser.getMediaFeed().get(position);
+            return mediaFeeds.get(position);
         }
 
         @Override
@@ -724,6 +832,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         @Override
         public void notifyDataSetChanged() {
             super.notifyDataSetChanged();
+            clearFeedSelection(-1);
             footer.setVisibility(getCount() == 0? View.GONE: View.VISIBLE);
         }
 
@@ -744,19 +853,12 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
             holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
             if(feed.getThumbnail() != null) imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
-            holder.name_tv.setText(feed.getName());
-
-            holder.delete_iv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editUser.getMediaFeed().remove(feed);
-                }
-            });
+            holder.name_edt.setText(feed.getName());
 
             holder.notification_v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new NotificationDialog(AddActivity.this, notificationList, feed);
+                    new NotificationDialog(AddActivity.this, notificationList, new ArrayList<MediaFeed>() {{ add(feed); }});
                 }
             });
 
@@ -768,19 +870,36 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
         }
 
-        class ViewHolder {
+        class ViewHolder implements View.OnTouchListener {
+            View row;
             ImageView image_iv;
-            TextView name_tv;
-            ImageView delete_iv;
+            EditText name_edt;
             View notification_v;
             TextView notification_tv;
 
             public ViewHolder(View view) {
+                row = view;
+                row.setOnTouchListener(this);
                 image_iv = (ImageView) view.findViewById(R.id.thumbnail_iv);
-                name_tv = (TextView) view.findViewById(R.id.name_tv);
-                delete_iv = (ImageView) view.findViewById(R.id.delete_iv);
+                name_edt = (EditText) view.findViewById(R.id.name_edt);
+                name_edt.setOnTouchListener(this);
                 notification_v = view.findViewById(R.id.notification_v);
                 notification_tv = (TextView) view.findViewById(R.id.notification_tv);
+            }
+
+            //Allow focusable view and onItemClick
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                if (view instanceof EditText) {
+                    EditText editText = (EditText) view;
+                    editText.setFocusable(true);
+                    editText.setFocusableInTouchMode(true);
+                } else {
+                    FeedAdapter.ViewHolder holder = (FeedAdapter.ViewHolder) view.getTag();
+                    holder.name_edt.setFocusable(false);
+                    holder.name_edt.setFocusableInTouchMode(false);
+                }
+                return false;
             }
         }
     }
@@ -876,63 +995,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             TextView screenName_tv;
         }
     }
-
-
-
-
-    /*@Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG,"item selected "+spinnerSelect+", "+spinnerInit + "pos: "+position);
-        if(spinnerSelect < spinnerInit) spinnerSelect ++; else { //if(position < social_icons.length - 1){
-
-
-            if(position < groups.size()) {
-                groupAdapter.selected = position;
-                if(spinnerSelect == 1 && position == 0) {
-                    Log.d(TAG, "trying to refresh");
-                    groupAdapter.notifyDataSetChanged();
-                }
-
-            } else {    //Do nothing because an option outside the list was selected
-                spinnerSelect --;
-
-
-                final EditText input = new EditText(this);
-                new AlertDialog.Builder(this)
-                        .setTitle("Update Status")
-                        .setMessage("Create a new Group")
-                        .setView(input)
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //TODO most of this is hardcoded ugliness
-                                Group group = new Group(input.getText().toString(), true);
-                                GroupORM.insertGroup(AddActivity.this, group);
-
-                                groups.clear();
-                                groups.addAll(GroupORM.getVisibleGroups(AddActivity.this));
-                                groupAdapter.notifyDataSetChanged();
-                                group_sp.setSelection(groups.size() - 1);
-
-
-                                editUser.getGroups().clear();
-                                editUser.getGroups().add(group);
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        group_sp.setSelection(groupAdapter.selected);
-                    }
-                }).show();
-            }
-
-            //icon_sp.setSelection(social_icons.length - 1);
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-    }
-
-*/
 
 
     protected class SearchTwitterTask extends AsyncTask<Void, Void, Integer> {

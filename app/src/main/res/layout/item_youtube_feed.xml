@@ -2,14 +2,16 @@
 <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/white" >
+    android:id="@+id/row"
+    android:orientation="vertical" >
+
 
     <View style="@style/divider"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/selector_accent"
         android:padding="10dp">
 
     <ImageView
@@ -27,25 +29,13 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Display Name"
-        android:id="@+id/name_tv"
+        android:id="@+id/name_edt"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv"
-        android:textColor="@color/dark_gray"
-        android:layout_toLeftOf="@+id/delete_iv"
-        android:layout_toStartOf="@+id/delete_iv" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/delete_iv"
-            android:src="@drawable/ic_delete_grey600_24dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignBottom="@+id/name_tv"
-            android:layout_alignTop="@+id/name_tv"
-            android:scaleType="fitEnd"
-            android:background="@drawable/selector_accent"/>
+        android:textColor="@drawable/selector_accent_text"
+        android:layout_toLeftOf="@+id/drag_handle"
+        android:layout_toStartOf="@+id/drag_handle" />
 
 
         <LinearLayout
@@ -54,7 +44,9 @@
             android:id="@+id/notification_v"
             android:layout_toRightOf="@+id/thumbnail_iv"
             android:layout_toEndOf="@+id/thumbnail_iv"
-            android:layout_below="@+id/name_tv"
+            android:layout_below="@+id/name_edt"
+            android:layout_toLeftOf="@+id/drag_handle"
+            android:layout_toStartOf="@+id/drag_handle"
             android:background="@drawable/selector_accent">
 
             <ImageView
@@ -68,15 +60,28 @@
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:gravity="center_vertical"
+                android:paddingTop="3dp"
                 android:text="No notification set"
                 android:id="@+id/notification_tv"
-                android:textColor="@color/dark_gray" />
+                android:textColor="@drawable/selector_accent_text"/>
 
         </LinearLayout>
 
+        <ImageView
+            android:id="@id/drag_handle"
+            android:layout_width="50dp"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_unfold_more_grey600_36dp" />
+
     </RelativeLayout>
+
+    <View style="@style/divider"/>
 
 </LinearLayout>

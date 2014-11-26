@@ -95,6 +95,10 @@ public class YoutubeItemORM {
         if(updated == 0) database.insert(DB.TABLE_YOUTUBE_ITEM, null, youtubeItemToContentValues(youtubeItem, youtubeFeedId, sort));
     }
 
+    public static void removeYoutubeItems(SQLiteDatabase database, int youtubeFeedId) {
+        database.delete(DB.TABLE_YOUTUBE_ITEM, DB.COL_MEDIA_FEED + " = " + youtubeFeedId, null);
+    }
+
     private static ContentValues youtubeItemToContentValues(YoutubeItem youtubeItem, int userId, int sort) {
         ContentValues values = new ContentValues();
         values.put(DB.COL_MEDIA_FEED, userId);

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -15,13 +14,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.Group;
-import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
 import com.edaviessmith.consumecontent.db.DB;
-import com.edaviessmith.consumecontent.db.GroupORM;
-import com.edaviessmith.consumecontent.db.UserORM;
+import com.edaviessmith.consumecontent.util.ActionActivity;
+import com.edaviessmith.consumecontent.util.ActionDispatch;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.VideoPlayerFragment;
@@ -30,7 +28,7 @@ import com.edaviessmith.consumecontent.view.VideoPlayerLayout;
 import java.util.Date;
 import java.util.List;
 
-public class ContentActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+public class ContentActivity extends ActionActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, View.OnClickListener {
 
     private static String TAG = "ContentActivity";
 
@@ -45,18 +43,50 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
     private List<Group> groups;
     private List<User> users;
-    public NotificationList notificationList;
+    //public NotificationList notificationList;
 
     Toolbar toolbar;
     private CharSequence actionBarTitle;
     public ImageLoader imageLoader;
     ImageView actionSettings, actionEdit;
+    View actionDelete, actionNotification;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
     public int selectedUser, selectedGroup, contentState = Var.LIST_USERS;
 
-    public ContentActivity() { }
+    public ContentActivity() {
 
+        actionDispatch = new ActionDispatch() {
+
+            @Override
+            public void updatedUsers() {
+                super.updatedUsers();
+                users = binder.getUsers();
+
+                navigationDrawerFragment.adapter.notifyDataSetChanged();
+
+                //Init MediaFeed
+                mediaFeedFragment = MediaFeedFragment.newInstance();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
+
+                getSupportActionBar().setTitle(getUser().getName());
+                navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
+
+            @Override
+            public void updatedGroups() {
+                super.updatedGroups();
+                groups = binder.getGroups();
+
+                //Init Groups
+                groupFragment = GroupFragment.newInstance();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
+
+                navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+            }
+        };
+
+    }
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,14 +96,6 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "toolbar click");
-            }
-        });
-
 
         videoTitle_tv = (TextView) findViewById(R.id.video_title_tv);
         videoViews_tv = (TextView) findViewById(R.id.video_views_tv);
@@ -89,27 +111,17 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
 
         selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
 
-        notificationList = new NotificationList(this);
 
-
-		//users = UserORM.getUsers(this);
+        actionDelete = findViewById(R.id.action_delete);
+        actionDelete.setOnClickListener(this);
+        actionNotification = findViewById(R.id.action_notification);
+        actionNotification.setOnClickListener(this);
 
         actionEdit = (ImageView) findViewById(R.id.action_edit);
-        actionEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                groupFragment.setState(groupFragment.groupState == GroupFragment.GROUPS_LIST? GroupFragment.GROUPS_ALL: GroupFragment.GROUPS_LIST);
-            }
-        });
+        actionEdit.setOnClickListener(this);
 
         actionSettings = (ImageView) findViewById(R.id.action_settings);
-        if(actionSettings != null)
-            actionSettings.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
-                }
-            });
+        if(actionSettings != null) actionSettings.setOnClickListener(this);
 
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener (new View.OnSystemUiVisibilityChangeListener() {
@@ -130,8 +142,6 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp();
 
-
-        setState(contentState);
     }
 
     @Override
@@ -142,6 +152,12 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         //users = UserORM.getUsers(this);
         //navigationDrawerFragment.adapter.notifyDataSetChanged();
     }
+
+    @Override
+    protected void onBind() {
+        setState(contentState);
+    }
+
 
     public List<User> getUsers() {
         return users;
@@ -266,7 +282,7 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         }
         if(contentState != Var.LIST_USERS) {
             if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
-                groupFragment.setState(GroupFragment.GROUPS_LIST);
+                groupFragment.toggleState(GroupFragment.GROUPS_LIST);
             } else {
                 setState(Var.LIST_USERS);
             }
@@ -284,32 +300,18 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
         this.contentState = state;
 
         if(!DB.isValid(selectedGroup)) contentState = Var.LIST_GROUPS;
-        Log.d(TAG, "setState "+contentState);
+        Log.d(TAG, "toggleState "+contentState);
 
         actionEdit.setVisibility(contentState == Var.LIST_GROUPS ? View.VISIBLE: View.GONE);
 
+        toggleEditActions(false);
+
         if(contentState == Var.LIST_USERS) {
-            users = UserORM.getUsersByGroup(this, selectedGroup);
-
-
-            //Init MediaFeed
-            mediaFeedFragment = MediaFeedFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
-
-            getSupportActionBar().setTitle(getUser().getName());
-            navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            if(binder != null) binder.fetchUsersByGroup(selectedGroup);
         }
 
         if(contentState == Var.LIST_GROUPS) {
-            //users = UserORM.getUsers(this); //Debug//
-            //if(users != null) users.clear();
-            groups = GroupORM.getGroups(this);
-
-            //Init Groups
-            groupFragment = GroupFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
-
-            navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+            if(binder != null) binder.fetchGroups();
         }
 
         //TODO nav drawer should have an update call (only when users has changed)
@@ -331,4 +333,29 @@ public class ContentActivity extends ActionBarActivity implements NavigationDraw
     }
 
 
+    @Override
+    public void onClick(View v) {
+
+        if(actionNotification == v) {
+            groupFragment.setNotifications();
+        }
+
+        if(actionDelete == v) {
+            groupFragment.deleteConfirmation();
+        }
+
+        if(actionEdit == v) {
+            groupFragment.toggleState(groupFragment.groupState == GroupFragment.GROUPS_LIST ? GroupFragment.GROUPS_ALL : GroupFragment.GROUPS_LIST);
+        }
+
+        if(actionSettings == v) {
+            startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
+        }
+
+    }
+
+    public void toggleEditActions(boolean show) {
+        actionNotification.setVisibility(show ? View.VISIBLE: View.GONE);
+        actionDelete.setVisibility(show ? View.VISIBLE: View.GONE);
+    }
 }

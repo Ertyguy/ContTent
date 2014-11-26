@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,13 +20,15 @@ import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
+import com.edaviessmith.consumecontent.util.ActionDispatch;
+import com.edaviessmith.consumecontent.util.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
 import java.util.List;
 
 
-public class YoutubeFragment extends Fragment{
+public class YoutubeFragment extends ActionFragment {
 
     private static String TAG = "YoutubeFragment";
     private ContentActivity act;
@@ -53,7 +54,11 @@ public class YoutubeFragment extends Fragment{
         return youtubeFragment;
     }
 
-    public YoutubeFragment() { }
+    public YoutubeFragment() {
+        actionDispatch = new ActionDispatch() {
+
+        };
+    }
 
 
     @Override
