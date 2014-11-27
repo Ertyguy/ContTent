@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.edaviessmith.consumecontent.data.Group;
+import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.GroupORM;
@@ -49,8 +50,8 @@ public class DataService extends Service {
         selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
         selectedUser = Var.getIntPreference(this, Var.PREF_SELECTED_USER);
 
-        selectedGroup = 1;
-        selectedUser = 1;
+        selectedGroup = -1;
+        selectedUser = -1;
 
         groupList = new ArrayList<Group>();
         userList = new ArrayList<User>();
@@ -78,6 +79,8 @@ public class DataService extends Service {
 
 
     public class ServiceBinder extends Binder {
+
+        private int selectedGroup;
 
         public ServiceBinder() {
             Log.d(TAG, "serviceBinder started");
@@ -109,8 +112,8 @@ public class DataService extends Service {
             return users.get(selectedUser);
         }
 
-        public User getUser(int pos) {
-            return users.get(pos);
+        public User getUser(int userId) {
+            return users.get(userId);
         }
 
         public void fetchBinder() {
@@ -134,6 +137,8 @@ public class DataService extends Service {
                     for(int i=0; i< users.size(); i++) {
                         userList.add(users.valueAt(i));
                     }
+
+                    selectedUser = userList.get(0).getId(); //TODO hardconding change (should come from pref
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -178,15 +183,22 @@ public class DataService extends Service {
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d(TAG, "fetchYoutubeItemsByMediaFeedId "+userId+ ", "+mediaFeedId);
+                    try {
+                        MediaFeed mediaFeed = getUser(userId).getCastMediaFeed().get(mediaFeedId);
+                        Log.d(TAG, "fetchYoutubeItemsfinish "+mediaFeed.toString());
+                        mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
+                    } catch (Exception e) {e.printStackTrace(); }
 
-                    getUsers().get(userId).getCastMediaFeed().get(mediaFeedId).setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
+                    //TODO someting here
 
-                    Log.d(TAG, "fetchYoutubeItemsByMediaFeedId");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            for (DispatchListener ad : actionDispatches) {
+                            Log.d(TAG, "DispatchListener updatedUserMediaFeed");
+                            for (ActionDispatch ad : actionDispatches) {
                                 ad.updatedUserMediaFeed(userId, mediaFeedId);
+
                             }
                         }
                     });
@@ -201,9 +213,34 @@ public class DataService extends Service {
             return selectedUser;
         }
 
-        public void setSelectedUser(int id) {
-            selectedUser = users.valueAt(id).getId();
+
+        public void setSelectedUser(int index) {
+            selectedUser = users.valueAt(index).getId();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (ActionDispatch ad : actionDispatches) {
+                        ad.updateUserChanged();
+
+                    }
+                }
+            });
         }
+
+        public int getSelectedGroup() {
+            return selectedGroup;
+        }
+
+
+        public void setSelectedGroup(int id) {
+            selectedGroup = id;
+
+            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_GROUP, id);
+
+            fetchUsersByGroup(selectedGroup);
+        }
+
+
     }
 
 

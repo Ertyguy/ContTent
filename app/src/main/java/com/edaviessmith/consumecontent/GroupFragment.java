@@ -250,7 +250,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 toggleState(GROUPS_LIST);
                 return true;
             } else {
-                act.setState(Var.LIST_USERS);
+                act.toggleState(Var.LIST_USERS);
             }
         }
 

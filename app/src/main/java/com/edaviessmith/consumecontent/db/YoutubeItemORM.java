@@ -52,9 +52,8 @@ public class YoutubeItemORM {
                     youtubeItems.add(cursorToYoutubeItem(cursor));
                     cursor.moveToNext();
                 }
-                Log.i(TAG, "YoutubeItems loaded successfully.");
             }
-
+            Log.i(TAG, "YoutubeItems loaded successfully " +youtubeItems.size());
             database.setTransactionSuccessful();
 
         }catch (Exception e) {

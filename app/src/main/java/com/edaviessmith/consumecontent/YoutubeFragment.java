@@ -73,8 +73,10 @@ public class YoutubeFragment extends ActionFragment {
                 if(pos == userId && tab == mediaFeedId) {
                     itemAdapter.notifyDataSetChanged();
 
-                    setFeedState(Var.FEED_LOADING);
-                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                    if(Var.isEmpty(getFeed().getNextPageToken())) {//getFeed().getItems().size() == 0) {  //No local items so
+                        setFeedState(Var.FEED_LOADING);
+                        new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                    }
                 }
             }
         };

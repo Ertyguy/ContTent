@@ -28,6 +28,11 @@ public class ActionDispatch implements DispatchListener {
     }
 
     @Override
+    public void updateUserChanged() {
+
+    }
+
+    @Override
     public void updateGroup(Group group) {}
 
     @Override

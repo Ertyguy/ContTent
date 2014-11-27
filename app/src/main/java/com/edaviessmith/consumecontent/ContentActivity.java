@@ -48,7 +48,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     View actionDelete, actionNotification;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
-    public int selectedUser, selectedGroup, contentState = -1;
+    //public int selectedUser, selectedGroup,
+            public int contentState = -1;
 
     public ContentActivity() {
 
@@ -57,29 +58,23 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             @Override
             public void updatedUsers() {
                 super.updatedUsers();
-                //users = binder.getUsers();
 
-                navigationDrawerFragment.adapter.notifyDataSetChanged();
 
-                //Init MediaFeed
-                mediaFeedFragment = MediaFeedFragment.newInstance();
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
-
-                if(binder.getUser() != null)
-                getSupportActionBar().setTitle(binder.getUser().getName());
-                navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+                openUsers();
             }
 
             @Override
             public void updatedGroups() {
                 super.updatedGroups();
-                //groups = binder.getGroups();
 
-                //Init Groups
-                groupFragment = GroupFragment.newInstance();
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
+                openGroups();
+            }
 
-                navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+            @Override
+            public void updateUserChanged() {
+                super.updateUserChanged();
+
+                openUsers();
             }
         };
 
@@ -106,7 +101,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 		actionBarTitle = getTitle();
         imageLoader = new ImageLoader(this);
 
-        selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
+        //selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
 
 
         actionDelete = findViewById(R.id.action_delete);
@@ -143,10 +138,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     @Override
     protected void onResume() {
         super.onResume();
-
-        //TODO update users
-        //users = UserORM.getUsers(this);
-        //navigationDrawerFragment.adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -154,37 +145,10 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         super.onBind();
         navigationDrawerFragment.setUp();
 
-        setState(Var.LIST_USERS);
+        toggleState(Var.LIST_USERS);
+        updateData();
     }
 
-
-
-
-    @Override
-	public void onNavigationDrawerItemSelected(int position) {
-		// update the main content by replacing fragments
-
-        if(binder != null && (contentState != Var.LIST_USERS || selectedUser != position)) {
-            binder.setSelectedUser(position);
-            setState(Var.LIST_USERS);
-		}
-
-	}
-
-
-    /*
-    public List<User> getUsers() {
-        return users;
-    }
-
-    public User getUser() {
-        return (selectedUser < users.size() ? users.get(selectedUser): null);
-    }
-
-    public User getUser(int pos) {
-        return (pos < users.size() ? users.get(pos): null);
-    }
-    */
 
 
     public void startVideo(YoutubeItem youtubeItem) {
@@ -288,7 +252,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
                 groupFragment.toggleState(GroupFragment.GROUPS_LIST);
             } else {
-                setState(Var.LIST_USERS);
+                toggleState(Var.LIST_USERS);
             }
             return;
         }
@@ -300,41 +264,54 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     //    return groups;
     //}
 
-    public void setState(int state) {
-        boolean changed = contentState != state;
+    public void toggleState(int state) {
         this.contentState = state;
 
-        if(!DB.isValid(selectedGroup)) contentState = Var.LIST_GROUPS;
+        if(!DB.isValid(binder.getSelectedUser())) contentState = Var.LIST_GROUPS;
         Log.d(TAG, "toggleState "+contentState);
 
         actionEdit.setVisibility(contentState == Var.LIST_GROUPS ? View.VISIBLE: View.GONE);
 
         toggleEditActions(false);
 
-        if(binder != null && changed) {
-            if (contentState == Var.LIST_USERS) {
-               binder.fetchUsersByGroup(selectedGroup);
-            }
-            if (contentState == Var.LIST_GROUPS) {
-                binder.fetchGroups();
-            }
-        }
-
         //TODO nav drawer should have an update call (only when users has changed)
-        //navigationDrawerFragment.setUp();
+    }
 
+    public void updateData() {
+        if (contentState == Var.LIST_USERS) {
+            binder.fetchUsersByGroup(binder.getSelectedUser());
+        }
+        if (contentState == Var.LIST_GROUPS) {
+            binder.fetchGroups();
+        }
+    }
+
+
+    public void setGroup(Group group) {
+
+        //toggleState(Var.LIST_USERS);
+
+        //if(group.getId() == binder.getSelectedGroup()) {
+            //binder.setSelectedUser(0);
+            //toggleState(Var.LIST_USERS);
+            //openUsers();
+        //}
+        binder.setSelectedGroup(group.getId());
+
+
+        /*binder.setSelectedUser(0); */
 
 
     }
 
-    public void setGroup(Group group) {
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+        // update the main content by replacing fragments
 
-        Var.setIntPreference(this, Var.PREF_SELECTED_GROUP, group.getId());
-        selectedGroup = group.getId();
-        selectedUser = 0;
-
-        setState(Var.LIST_USERS);
-
+        if(binder != null && (contentState != Var.LIST_USERS ||  binder.getUser() == null || binder.getUser().getSort() != position)) {
+            binder.setSelectedUser(position);
+            toggleState(Var.LIST_USERS);
+        }
 
     }
 
@@ -363,5 +340,27 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     public void toggleEditActions(boolean show) {
         actionNotification.setVisibility(show ? View.VISIBLE: View.GONE);
         actionDelete.setVisibility(show ? View.VISIBLE: View.GONE);
+    }
+
+    public void openGroups() {
+        //Init Groups
+        groupFragment = GroupFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
+
+        navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+    }
+
+    public void openUsers() {
+        toggleState(Var.LIST_USERS);
+        navigationDrawerFragment.adapter.notifyDataSetChanged();
+
+        //Init MediaFeed
+        mediaFeedFragment = MediaFeedFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, mediaFeedFragment).commit();
+
+        if(binder.getUser() != null)
+            getSupportActionBar().setTitle(binder.getUser().getName());
+
+        navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
     }
 }

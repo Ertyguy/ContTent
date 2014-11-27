@@ -25,14 +25,12 @@ public class YoutubeFeed extends MediaFeed {
         super(id, sort, name, thumbnail, channelHandle, feedId, type, notificationId, lastUpdate);
     }
 
-    public YoutubeFeed(int sort, String name, String thumbnail, String channelHandle, String feedId, int type, int notificationId){
-        setSort(sort);
+    public YoutubeFeed(String name, String thumbnail, String channelHandle, String feedId, int type){
         setName(name);
         setThumbnail(thumbnail);
         setChannelHandle(channelHandle);
         setFeedId(feedId);
         setType(type);
-        setNotificationId(notificationId);
     }
 
     public List<YoutubeItem> getItems() {

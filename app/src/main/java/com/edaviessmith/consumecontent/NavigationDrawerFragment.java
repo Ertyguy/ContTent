@@ -201,7 +201,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
         }
         if(groups_v == v) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
-            act.setState(Var.LIST_GROUPS);
+            act.openGroups();
         }
 
     }

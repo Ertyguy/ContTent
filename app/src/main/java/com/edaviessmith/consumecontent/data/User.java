@@ -29,8 +29,8 @@ public class User extends Content{
         this.mediaFeed = mediaFeed;
     }
 
-    public User(int sort, String name, String thumbnail, SparseArray mediaFeed, List<Group> groups) {
-        super(sort, name, thumbnail);
+    public User(String name, String thumbnail, SparseArray mediaFeed, List<Group> groups) {
+        super(name, thumbnail);
         this.mediaFeed = mediaFeed;
         this.groups = groups;
     }
