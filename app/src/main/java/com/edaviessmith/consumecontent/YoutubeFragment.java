@@ -19,18 +19,14 @@ import android.widget.TextView;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
-import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 import com.edaviessmith.consumecontent.util.ActionDispatch;
 import com.edaviessmith.consumecontent.util.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
-import java.util.List;
-
 
 public class YoutubeFragment extends ActionFragment {
 
-    private static String TAG = "YoutubeFragment";
     private ContentActivity act;
     private int pos, tab;
     private Handler handler;
@@ -178,38 +174,12 @@ public class YoutubeFragment extends ActionFragment {
     public void onStart() {
         super.onStart();
 
-        Log.d(TAG, "onStart "+(getBinder() != null));
-        if(getBinder() != null) getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
-        //getLocalItems();
+        getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
     }
 
-    public void getLocalItems() {
-        if(getFeed().getItems() == null || getFeed().getItems().size() == 0) {
-
-            new Thread() {
-                @Override
-                public void run() {
-
-                    final List<YoutubeItem> localItems = YoutubeItemORM.getYoutubeItems(act, getFeed().getId());
-
-                    act.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG,"adding local items "+localItems.size());
-                            getFeed().setItems(localItems);
-                            itemAdapter.notifyDataSetChanged();
-                            setFeedState(Var.FEED_LOADING);
-                            new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
-                        }
-                    });
-                }
-            }.start();
-        }
-    }
 
 
     private YoutubeFeed getFeed() {
-        //Log.d(TAG, "feed: "+ (act.getUser(pos) != null));
         return (YoutubeFeed) getBinder().getUser(pos).getCastMediaFeed().get(tab);
     }
 
@@ -279,7 +249,7 @@ public class YoutubeFragment extends ActionFragment {
                 ViewHolderItem holder = (ViewHolderItem) viewHolder;
                 YoutubeItem item = getFeed().getItems().get(i);
 
-                act.imageLoader.DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
+                getBinder().getImageLoader().DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
                 holder.title_tv.setText(item.getTitle());
                 holder.length_tv.setText(item.getDuration());
 
@@ -377,44 +347,5 @@ public class YoutubeFragment extends ActionFragment {
         }
     }
 
-
-
-/*
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-
-            if(msg.what == 0) {
-                setFeedState(Var.FEED_WAITING);
-                //itemAdapter.notifyDataSetChanged();
-                if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
-
-                if(msg.arg1 == 1 && getFeed().getId() == msg.arg2) {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "check" + (getFeed().getItems() != null));
-                            if (getFeed().getItems() != null && getFeed().getItems().size() > 0) {
-                                MediaFeedORM.saveMediaItems(act, getFeed());
-                            }
-                        }
-                    }.start();
-                }
-            } else {
-                if(getFeed().getId() == msg.arg2) setFeedState(msg.arg1);
-            }
-
-            *//*if (msg.what == 1) {
-                //if (msg.arg1 == 1) listener.onError("Error getting request token");
-               // else listener.onError("Error getting access token");
-            } else {
-                //if (msg.arg1 == 1) ;//showLoginDialog((String) msg.obj);
-                //else listener.onComplete("");
-                itemAdapter.notifyDataSetChanged();
-                if(swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
-
-            }*//*
-        }
-    };*/
 
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,16 +30,13 @@ import android.widget.Toast;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
-import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
-import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.UserORM;
-import com.edaviessmith.consumecontent.util.App;
-import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.util.ActionActivity;
 import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
@@ -60,8 +56,7 @@ import java.util.List;
 import twitter4j.ResponseList;
 
 
-public class AddActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, View.OnClickListener, AbsListView.OnScrollListener {
-    String TAG = "AddActivity";
+public class AddActivity extends ActionActivity implements AdapterView.OnItemClickListener, View.OnClickListener, AbsListView.OnScrollListener {
 
     //Searching users
     public static final int SEARCH_NONE = 0;
@@ -71,8 +66,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     public static final int SEARCH_TWITTER = 4;
     private static int maxResults = 10;
 
-    private App app;
-    public  ImageLoader imageLoader;
+
     private SearchYoutubeTask searchTask;
     private SearchTwitterTask searchTwitterTask;
     private GetFeedAsyncTask feedTask;
@@ -83,13 +77,13 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     SearchAdapter searchAdapter;
     FeedAdapter feedAdapter;
     private DragSortController dragSortController;
-    //GroupAdapter groupAdapter;
+
     List<YoutubeChannel> youtubeChannelSearch;
     List<TwitterFeed> twitterFeedSearch;
     List<Group> groups;
     List<MediaFeed> mediaFeeds;
     List<MediaFeed> selectedFeeds;
-    NotificationList notificationList;
+
     User editUser;
     YoutubeChannel searchChannel;
     List<String> userPictureThumbnails;
@@ -118,29 +112,51 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add);
+    protected void onBind() {
+        super.onBind();
 
-        app = (App) getApplication();
-        imageLoader = new ImageLoader(this);
-        youtubeChannelSearch = new ArrayList<YoutubeChannel>();
-        twitterFeedSearch = new ArrayList<TwitterFeed>();
-        userPictureThumbnails = new ArrayList<String>();
-
-        groups = GroupORM.getVisibleGroups(this);
-        notificationList = new NotificationList(this);
+        for (Group group : binder.getGroups())
+            if (group.isVisible()) groups.add(group);
 
         int userId = getIntent().getIntExtra(Var.INTENT_USER_ID, -1);
-        if(DB.isValid(userId)) editUser = UserORM.getUser(this, userId, groups);
+        if(DB.isValid(userId)) editUser = binder.getUser(userId); //UserORM.getUser(this, userId, groups);
         else editUser = new User();
-
-        selectedFeeds = new ArrayList<MediaFeed>();
-        mediaFeeds = new ArrayList<MediaFeed>();
 
         for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
             mediaFeeds.add( editUser.getCastMediaFeed().valueAt(i));
         }
+
+
+        userName_edt.setText(editUser.getName());
+        getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? editUser.getName(): "Add User"));
+
+        if(DB.isValid(editUser.getId())) {
+            action_fab.setDrawable(getResources().getDrawable(R.drawable.ic_action_accept));
+
+            binder.getImageLoader().DisplayImage(editUser.getThumbnail(), userThumbnail_iv, userThumbnail_pb, false);
+            addThumbnail(editUser.getThumbnail());
+            for(int i=0; i<editUser.getMediaFeed().size(); i++)
+                addThumbnail(((MediaFeed) editUser.getMediaFeed().valueAt(i)).getThumbnail());
+
+            toggleSearch(SEARCH_NONE);
+        } else {
+            toggleSearch(SEARCH_OPTIONS);
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add);
+
+        youtubeChannelSearch = new ArrayList<YoutubeChannel>();
+        twitterFeedSearch = new ArrayList<TwitterFeed>();
+        userPictureThumbnails = new ArrayList<String>();
+
+        groups = new ArrayList<Group>();
+        selectedFeeds = new ArrayList<MediaFeed>();
+        mediaFeeds = new ArrayList<MediaFeed>();
+
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -189,9 +205,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
         youtube_ll = header.findViewById(R.id.youtube_ll);
         twitter_ll = header.findViewById(R.id.twitter_ll);
 
-        //groupAdapter = new GroupAdapter(this, groups);
-        //group_sp.setAdapter(groupAdapter);
-        //group_sp.setOnItemSelectedListener(this);
 
         //Search
         search_rl = findViewById(R.id.search_rl);
@@ -254,24 +267,6 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 Log.d(TAG, "twitter listener authorized " + twitter.getUsername());
             }
         });
-
-
-
-        userName_edt.setText(editUser.getName());
-        getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? editUser.getName(): "Add User"));
-
-        if(DB.isValid(editUser.getId())) {
-            action_fab.setDrawable(getResources().getDrawable(R.drawable.ic_action_accept));
-
-            imageLoader.DisplayImage(editUser.getThumbnail(), userThumbnail_iv, userThumbnail_pb, false);
-            addThumbnail(editUser.getThumbnail());
-            for(int i=0; i<editUser.getMediaFeed().size(); i++)
-                addThumbnail(((MediaFeed) editUser.getMediaFeed().valueAt(i)).getThumbnail());
-
-            toggleSearch(SEARCH_NONE);
-        } else {
-            toggleSearch(SEARCH_OPTIONS);
-        }
 
 
     }
@@ -339,7 +334,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             clearSearchOptions(1);
         } else if(searchMode == SEARCH_YOUTUBE || searchMode == SEARCH_TWITTER) {
             search_edt.setHint((searchMode == SEARCH_YOUTUBE) ? R.string.search_youtube : R.string.search_twitter);
-            app.postFocusText(search_edt);
+            binder.getApp().postFocusText(search_edt);
             search_rl.setVisibility(View.VISIBLE);
             search_rl.requestFocus();
         }
@@ -442,7 +437,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
                 if (Var.isEmpty(userName_edt.getText().toString()))
                     userName_edt.setText(searchChannel.getName());
                 name_tv.setText(searchChannel.getName());
-                imageLoader.DisplayImage(searchChannel.getThumbnail(), channelThumbnail_iv);
+                binder.getImageLoader().DisplayImage(searchChannel.getThumbnail(), channelThumbnail_iv);
 
                 toggleSearch(SEARCH_YT_CHANNEL);
                 searchChannel();
@@ -477,7 +472,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
 
             if (Var.isEmpty(editUser.getThumbnail())) {
                 editUser.setThumbnail(userPictureThumbnails.get(0));
-                imageLoader.DisplayImage(userPictureThumbnails.get(0), userThumbnail_iv);
+                binder.getImageLoader().DisplayImage(userPictureThumbnails.get(0), userThumbnail_iv);
 
             }
 
@@ -500,7 +495,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
     public void onClick(View v) {
 
         if(actionNotification == v) {
-            new NotificationDialog(this, notificationList, selectedFeeds);
+            new NotificationDialog(this, binder.getNotificationList(), selectedFeeds);
         }
 
         if(actionDelete == v) {
@@ -854,18 +849,18 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             final MediaFeed feed = getItem(position);
 
             holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
-            if(feed.getThumbnail() != null) imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
+            if(feed.getThumbnail() != null) binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
             holder.name_edt.setText(feed.getName());
 
             holder.notification_v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new NotificationDialog(AddActivity.this, notificationList, new ArrayList<MediaFeed>() {{ add(feed); }});
+                    new NotificationDialog(AddActivity.this, binder.getNotificationList(), new ArrayList<MediaFeed>() {{ add(feed); }});
                 }
             });
 
             if(DB.isValid(feed.getNotificationId())) {
-                holder.notification_tv.setText(Var.getNextNotificationAlarm(notificationList.getNotification(feed.getNotificationId()), notificationList.getScheduleNotification()));
+                holder.notification_tv.setText(Var.getNextNotificationAlarm(binder.getNotificationList().getNotification(feed.getNotificationId()), binder.getNotificationList().getScheduleNotification()));
             }
 
             return convertView;
@@ -966,7 +961,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if(searchMode == SEARCH_YOUTUBE) {
                 YoutubeChannel feed = (YoutubeChannel) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
-                if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
+                if (feed.getThumbnail() != null)  binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
 
                 holder.name_tv.setText(feed.getName());
             }
@@ -974,7 +969,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if(searchMode == SEARCH_TWITTER) {
                 TwitterFeed feed = (TwitterFeed) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_twitter_icon);
-                if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
+                if (feed.getThumbnail() != null)  binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
 
                 holder.name_tv.setText(feed.getDisplayName());
                 holder.screenName_tv.setText(feed.getName());
@@ -983,7 +978,7 @@ public class AddActivity extends ActionBarActivity implements AdapterView.OnItem
             if(searchMode == SEARCH_YT_CHANNEL) {
                 YoutubeFeed feed = (YoutubeFeed) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
-                if (feed.getThumbnail() != null)  imageLoader.DisplayImage(feed.getThumbnail(), holder.image_iv);
+                if (feed.getThumbnail() != null)  binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
 
                 holder.name_tv.setText(feed.getName());
             }

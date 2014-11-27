@@ -13,13 +13,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.db.AndroidDatabaseManager;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.util.ActionActivity;
 import com.edaviessmith.consumecontent.util.ActionDispatch;
-import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.VideoPlayerFragment;
 import com.edaviessmith.consumecontent.view.VideoPlayerLayout;
@@ -37,13 +35,9 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     private VideoPlayerLayout videoPlayerLayout;
     private VideoPlayerFragment videoPlayerFragment;
 
-    //private List<Group> groups;
-    //private List<User> users;
-    //public NotificationList notificationList;
 
     Toolbar toolbar;
     private CharSequence actionBarTitle;
-    public ImageLoader imageLoader;
     ImageView actionSettings, actionEdit;
     View actionDelete, actionNotification;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
@@ -58,7 +52,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             @Override
             public void updatedUsers() {
                 super.updatedUsers();
-
 
                 openUsers();
             }
@@ -94,14 +87,10 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         videoDescription_tv = (TextView) findViewById(R.id.video_description_tv);
         videoDate_tv = (TextView) findViewById(R.id.video_date_tv);
 
-
         videoPlayerLayout = (VideoPlayerLayout) findViewById(R.id.video_player_v);
         videoPlayerLayout.init(this);
 
 		actionBarTitle = getTitle();
-        imageLoader = new ImageLoader(this);
-
-        //selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
 
 
         actionDelete = findViewById(R.id.action_delete);
@@ -110,7 +99,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         actionNotification.setOnClickListener(this);
 
         actionEdit = (ImageView) findViewById(R.id.action_edit);
-        actionEdit.setOnClickListener(this);
+        //actionEdit.setOnClickListener(this);
 
         actionSettings = (ImageView) findViewById(R.id.action_settings);
         if(actionSettings != null) actionSettings.setOnClickListener(this);
@@ -260,9 +249,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
     }
 
-    //public List<Group> getGroups() {
-    //    return groups;
-    //}
 
     public void toggleState(int state) {
         this.contentState = state;
@@ -287,23 +273,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     }
 
 
-    public void setGroup(Group group) {
-
-        //toggleState(Var.LIST_USERS);
-
-        //if(group.getId() == binder.getSelectedGroup()) {
-            //binder.setSelectedUser(0);
-            //toggleState(Var.LIST_USERS);
-            //openUsers();
-        //}
-        binder.setSelectedGroup(group.getId());
-
-
-        /*binder.setSelectedUser(0); */
-
-
-    }
-
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
@@ -327,9 +296,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             groupFragment.deleteConfirmation();
         }
 
-        if(actionEdit == v) {
-            groupFragment.toggleState(groupFragment.groupState == GroupFragment.GROUPS_LIST ? GroupFragment.GROUPS_ALL : GroupFragment.GROUPS_LIST);
-        }
 
         if(actionSettings == v) {
             startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));

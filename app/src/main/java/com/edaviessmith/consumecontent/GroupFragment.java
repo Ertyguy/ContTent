@@ -11,6 +11,8 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,6 +118,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
         toggleState(GROUPS_LIST);
 
+        act.actionEdit.setOnClickListener(this);
 
         editGroupAdapter = new EditGroupAdapter(act, users);
         group_lv.setAdapter(editGroupAdapter);
@@ -207,7 +210,6 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         if(groupState == GROUPS_LIST){
             act.getSupportActionBar().setTitle("Groups");
             act.actionEdit.setImageResource(R.drawable.ic_create_white_24dp);
-
         }
         if(groupState == GROUPS_ALL) {
             act.getSupportActionBar().setTitle("Edit Groups");
@@ -217,7 +219,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
 
             visible_sw.setChecked(editGroup.isVisible());
-            act.imageLoader.DisplayImage(editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb, false);
+            getBinder().getImageLoader().DisplayImage(editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb, false);
 
             groupName_edt.setText(editGroup.getName());
 
@@ -234,6 +236,11 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
 
+        if(act.actionEdit == v) {
+            toggleState(groupState == GroupFragment.GROUPS_LIST ? GroupFragment.GROUPS_ALL : GroupFragment.GROUPS_LIST);
+            groupAdapter.notifyDataSetChanged();
+        }
+
         if(visible_v == v) {
             editGroup.setVisible(!editGroup.isVisible());
             visible_sw.setChecked(editGroup.isVisible());
@@ -241,6 +248,13 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
     }
 
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    //TODO back button not working here
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -248,13 +262,13 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         if(id == android.R.id.home) {
             if(groupState != GROUPS_LIST) {
                 toggleState(GROUPS_LIST);
-                return true;
+                return false;
             } else {
                 act.toggleState(Var.LIST_USERS);
             }
         }
 
-        return super.onOptionsItemSelected(item);
+        return false; //super.onOptionsItemSelected(item);
     }
 
     public void setNotifications() {
@@ -315,7 +329,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         public void onClick(final View view) {
             int itemPosition = groups_rv.getChildPosition(view);
             if(groupState == GROUPS_LIST) {
-                act.setGroup(groupList.get(itemPosition));
+                getBinder().setSelectedGroup(groupList.get(itemPosition).getId());
             }
 
             if(groupState == GROUPS_ALL) {
@@ -335,7 +349,8 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
                 Group item = groupList.get(i);
 
-                act.imageLoader.DisplayImage(item.getThumbnail(), holder.icon_iv, holder.icon_pb, false);
+
+                getBinder().getImageLoader().DisplayImage(item.getThumbnail(), holder.icon_iv, holder.icon_pb, false);
                 holder.name_tv.setText(item.getName());
                 holder.userCount_tv.setText(item.getUsers().size() + " users");
 
@@ -350,7 +365,12 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 }
 
 
-                holder.watchingCount_tv.setText(watchingCount > 0? ("Watching " + watchingCount + " users") : "Not watching");
+                holder.editIcon_iv.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
+                holder.watchingCount_v.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
+                if(groupState == GROUPS_ALL) {
+                    holder.watchingCount_tv.setText(watchingCount > 0? ("Watching " + watchingCount + " users") : "Not watching");
+                }
+
 
             }
         }
@@ -361,7 +381,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             public ProgressBar icon_pb;
             public TextView name_tv;
             public TextView userCount_tv;
+            public View watchingCount_v;
             public TextView watchingCount_tv;
+            public ImageView editIcon_iv;
 
             public ViewHolderItem(View itemView) {
                 super(itemView);
@@ -370,7 +392,10 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 name_tv = (TextView) itemView.findViewById(R.id.name_tv);
 
                 userCount_tv = (TextView) itemView.findViewById(R.id.user_count_tv);
+                watchingCount_v = itemView.findViewById(R.id.watching_count_v);
                 watchingCount_tv = (TextView) itemView.findViewById(R.id.watching_count_tv);
+                editIcon_iv = (ImageView) itemView.findViewById(R.id.edit_icon_iv);
+
             }
         }
     }
@@ -419,7 +444,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             final ViewHolder holder = (ViewHolder) convertView.getTag();
             final User user = getItem(position);
 
-            act.imageLoader.DisplayImage(user.getThumbnail(), holder.thumbnail_iv, holder.thumbnail_pb);
+            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv, holder.thumbnail_pb);
             holder.name_tv.setText(user.getName());
 
             List<Notification> userNotifications = new ArrayList<Notification>();

@@ -138,7 +138,7 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
 
             Group group = getItem(position);
             holder.name_tv.setText(group.getName());
-            act.imageLoader.DisplayImage(group.getThumbnail(), holder.icon_iv, holder.icon_pb, false);
+            act.binder.getImageLoader().DisplayImage(group.getThumbnail(), holder.icon_iv, holder.icon_pb, false);
 
             return convertView;
 

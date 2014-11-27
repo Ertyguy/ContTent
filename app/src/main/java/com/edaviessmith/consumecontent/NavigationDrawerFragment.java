@@ -83,6 +83,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 		}
 
 		// Select either the default item (0) or the last selected item.
+        //TODO update selected when changing groups
 		selectItem(mCurrentSelectedPosition);
 	}
 
@@ -245,7 +246,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 	        
 	        final User user = getItem(position);
 	        holder.name_tv.setText(user.getName());
-            act.imageLoader.DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
+            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
 
             holder.edit_iv.setVisibility(user.equals(act.binder.getUser())? View.VISIBLE: View.GONE);
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {

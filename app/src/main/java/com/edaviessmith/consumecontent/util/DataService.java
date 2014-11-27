@@ -30,6 +30,8 @@ public class DataService extends Service {
     public List<ActionDispatch> actionDispatches = new ArrayList<ActionDispatch>();
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
+    App app;
+    ImageLoader imageLoader;
 
     public SparseArray<Group> groups;
     public SparseArray<User> users; //todo possible just use current group
@@ -63,6 +65,9 @@ public class DataService extends Service {
             }
         });
 
+        app = (App) getApplication();
+        imageLoader = new ImageLoader(this);
+
         super.onCreate();
     }
 
@@ -79,8 +84,6 @@ public class DataService extends Service {
 
 
     public class ServiceBinder extends Binder {
-
-        private int selectedGroup;
 
         public ServiceBinder() {
             Log.d(TAG, "serviceBinder started");
@@ -138,7 +141,7 @@ public class DataService extends Service {
                         userList.add(users.valueAt(i));
                     }
 
-                    selectedUser = userList.get(0).getId(); //TODO hardconding change (should come from pref
+                    selectedUser = userList.get(0).getId(); //TODO hardconding change (should come from pref)
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -241,6 +244,13 @@ public class DataService extends Service {
         }
 
 
+        public ImageLoader getImageLoader() {
+            return imageLoader;
+        }
+
+        public App getApp() {
+            return app;
+        }
     }
 
 
