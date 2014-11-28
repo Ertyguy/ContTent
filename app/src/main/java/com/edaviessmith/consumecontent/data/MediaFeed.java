@@ -18,7 +18,7 @@ public class MediaFeed {
 
     private List items;
 
-    private String nextPageToken; //Not db related
+    private String nextPageToken = null; //Not db related
 
     public MediaFeed() { }
 

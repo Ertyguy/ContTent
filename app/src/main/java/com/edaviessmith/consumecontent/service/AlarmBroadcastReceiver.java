@@ -1,9 +1,11 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import com.edaviessmith.consumecontent.util.Var;
 
 public class AlarmBroadcastReceiver extends BroadcastReceiver {
     @Override

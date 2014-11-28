@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 import android.content.ComponentName;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 import android.app.Service;
 import android.content.Intent;
@@ -12,10 +12,14 @@ import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
+import com.edaviessmith.consumecontent.util.App;
+import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +129,10 @@ public class DataService extends Service {
             return users.get(userId);
         }
 
+        public boolean containsUser(int userId) {
+            return users.get(userId) != null;
+        }
+
         public void fetchBinder() {
             runOnUiThread(new Runnable() {
                 @Override
@@ -137,6 +145,8 @@ public class DataService extends Service {
         }
 
         public void fetchUsers() {
+
+            Log.d(TAG, "fetchUsers "+selectedGroup);
 
             tpe.submit(new Runnable() {
                 @Override
@@ -264,7 +274,7 @@ public class DataService extends Service {
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
-                    MediaFeedORM.saveMediaItems(DataService.this, getUser(userId).getCastMediaFeed().get(mediaFeedId));
+                    MediaFeedORM.saveYoutubeFeedItems(DataService.this, (YoutubeFeed) getUser(userId).getMediaFeed().get(mediaFeedId));
                 }
             });
 

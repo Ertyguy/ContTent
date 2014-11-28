@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
+import com.edaviessmith.consumecontent.service.ActionDispatch;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,11 +57,11 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
             String url = null;
 
             if (youtubeFeed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
-                String fields = "";//"&fields=items%2Fsnippet%2CnextPageToken";
+                String fields = "&fields=items%2Fsnippet%2CnextPageToken";
                 url = "https://www.googleapis.com/youtube/v3/playlistItems?part=snippet" + fields + "&maxResults=20&playlistId=" + URLEncoder.encode(youtubeFeed.getFeedId(), "UTF-8") + "&key=" + Var.DEVELOPER_KEY;
             }
             if (youtubeFeed.getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
-                String fields = "";//"&fields=items(contentDetails%2Csnippet)%2CnextPageToken";
+                String fields = "&fields=items(contentDetails%2Csnippet)%2CnextPageToken";
                 url = "https://www.googleapis.com/youtube/v3/activities?part=snippet%2C+contentDetails"+fields+"&channelId=" + URLEncoder.encode(youtubeFeed.getChannelHandle(), "UTF-8") + "&maxResults=20&key=" + Var.DEVELOPER_KEY;
             }
             if(!Var.isEmpty(params[0])) url+= "&pageToken="+ youtubeFeed.getNextPageToken();
@@ -70,6 +71,8 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
             JSONObject res = new JSONObject(playlistItems);
             if (Var.isJsonString(res, "nextPageToken")) {
                 youtubeFeed.setNextPageToken(res.getString("nextPageToken"));
+            } else {
+                youtubeFeed.setNextPageToken("");
             }
 
             if (Var.isJsonArray(res, "items")) {
@@ -246,7 +249,9 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
                 actionDispatch.updateMediaFeedDatabase(userId, youtubeFeed.getId());
             }
 
-            actionDispatch.updatedMediaFeed(youtubeFeed.getId(), Var.FEED_WAITING);
+            int feed = Var.isEmpty(youtubeFeed.getNextPageToken()) ? Var.FEED_END: Var.FEED_WAITING;
+
+            actionDispatch.updatedMediaFeed(youtubeFeed.getId(), feed);
         }
     }
 

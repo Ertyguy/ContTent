@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 
 import com.edaviessmith.consumecontent.data.Group;

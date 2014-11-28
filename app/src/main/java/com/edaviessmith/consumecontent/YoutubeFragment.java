@@ -16,8 +16,8 @@ import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
-import com.edaviessmith.consumecontent.util.ActionDispatch;
-import com.edaviessmith.consumecontent.util.ActionFragment;
+import com.edaviessmith.consumecontent.service.ActionDispatch;
+import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
@@ -54,7 +54,9 @@ public class YoutubeFragment extends ActionFragment {
             public void binderReady() {
                 super.binderReady();
 
-                getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+                if (isFragmentOpen(userId, mediaFeedId)) {
+                    getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+                }
                 Log.d(TAG, "binderReady");
             }
 
@@ -62,21 +64,29 @@ public class YoutubeFragment extends ActionFragment {
             public void updatedMediaFeed(int mediaFeedId, int feedState) {
                 super.updatedMediaFeed(mediaFeedId, feedState);
 
-                Log.d(TAG, "updatedUserMediaFeed "+ mediaFeedId);
-                if (isFragment(mediaFeedId)) {
+                Log.d(TAG, "updatedUserMediaFeed "+ mediaFeedId + "-"+feedState);
+                if (isFragmentOpen(userId, mediaFeedId)) {
 
-
-                    if(feedState == Var.FEED_WAITING) {
-                        itemAdapter.notifyDataSetChanged();
+                    if(feedState == Var.FEED_WAITING || feedState == Var.FEED_END) {
                         if (swipeRefreshLayout.isRefreshing())
                             swipeRefreshLayout.setRefreshing(false);
 
-                        if (getBinder() != null && Var.isEmpty(getFeed().getNextPageToken())) {//getFeed().getItems().size() == 0) {  //No local items so
-                            setFeedState(Var.FEED_LOADING);
+                        if (!Var.isRecent(getFeed().getLastUpdate()) && feedState != Var.FEED_END && getFeed().getNextPageToken() == null) {//getFeed().getItems().size() == 0) {  //No local items so
+                            Log.d(TAG, "getNextPage AsyncTask "+ getFeed().getNextPageToken());
+                            feedState = Var.FEED_LOADING;
                             new YoutubeFeedAsyncTask(act, getFeed(), userId, actionDispatch).execute(getFeed().getNextPageToken());
                         }
                     }
+
                     setFeedState(feedState);
+
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            itemAdapter.notifyDataSetChanged();
+                        }
+                    });
+
 
                 }
             }
@@ -85,14 +95,17 @@ public class YoutubeFragment extends ActionFragment {
             public void updateMediaFeedDatabase(int userId, int mediaFeedId) {
                 super.updateMediaFeedDatabase(userId, mediaFeedId);
 
+                if(getBinder() != null) getBinder().saveMediaFeedItems(userId, mediaFeedId);
+
             }
 
 
         };
     }
 
-    private boolean isFragment(int mediaFeedId) {
-        return this.mediaFeedId == mediaFeedId;
+    private boolean isFragmentOpen(int userId, int mediaFeedId) {
+
+        return (getBinder() != null && getBinder().containsUser(userId) && this.mediaFeedId == mediaFeedId);
     }
 
     @Override
@@ -160,7 +173,7 @@ public class YoutubeFragment extends ActionFragment {
                     Log.d(TAG,"onScrolled getFeed called");
                 }
 
-                Log.d(TAG, "onScrolled " + dy + " : " + act.getSupportActionBar().isShowing());
+                Log.d(TAG, "onScrolled " + feedState);
                 //TODO much thinking needed to hide toolbar on scroll
                 //if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
                 //if (android.os.Build.VERSION.SDK_INT >= 12) ;
@@ -185,13 +198,13 @@ public class YoutubeFragment extends ActionFragment {
 
 
     private YoutubeFeed getFeed() {
-        Log.d(TAG, "youtubeFragment getFeed: "+(getBinder().getUsers().size()));
+        //Log.d(TAG, "youtubeFragment getFeed: "+(getBinder().getUsers().size()));
         return (YoutubeFeed) getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId);
     }
 
 
     public void setFeedState(int feedState) {
-        boolean change = (this.feedState != feedState);
+        //boolean change = (this.feedState != feedState);
         this.feedState = feedState;
         //if(change) itemAdapter.notifyDataSetChanged();
         //itemAdapter.notifyItemChanged(itemAdapter.getItemCount() - 1);
@@ -240,7 +253,7 @@ public class YoutubeFragment extends ActionFragment {
         public void onClick(final View view) {
             int itemPosition = feed_rv.getChildPosition(view);
             if(itemPosition < getItemCount() - 1)  act.startVideo(getFeed().getItems().get(itemPosition));
-            else if(feedState == Var.FEED_WARNING || feedState == Var.FEED_OFFLINE) {
+            else if(feedState == Var.FEED_WARNING || feedState == Var.FEED_OFFLINE || feedState == Var.FEED_END) {
                 setFeedState(Var.FEED_LOADING);
                 new YoutubeFeedAsyncTask(act, getFeed(),userId, actionDispatch).execute(getFeed().getNextPageToken());
 
@@ -300,10 +313,11 @@ public class YoutubeFragment extends ActionFragment {
                 footer.warning_tv.setVisibility(loading? View.INVISIBLE: View.VISIBLE);
 
                 if(feedState != Var.FEED_LOADING) {
-                    footer.warning_iv.setImageResource(feedState == Var.FEED_WARNING ?
-                                                        R.drawable.ic_warning_amber_36dp :
-                                                        R.drawable.ic_error_red_36dp);
+                    footer.warning_iv.setImageResource(feedState == Var.FEED_OFFLINE ?
+                                                    R.drawable.ic_error_red_36dp:
+                                                    R.drawable.ic_warning_amber_36dp);
 
+                    if(feedState == Var.FEED_END)   footer.warning_tv.setText("No more videos found");
                     if(feedState == Var.FEED_WARNING) footer.warning_tv.setText("Could not connect to Youtube");
                     if(feedState == Var.FEED_OFFLINE) footer.warning_tv.setText("No Internet connection");
                 }

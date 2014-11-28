@@ -13,7 +13,9 @@ import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MediaFeedORM {
     static final String TAG = "MediaFeedORM";
@@ -105,21 +107,21 @@ public class MediaFeedORM {
         return null;
     }
 
-    public static void saveMediaItems(Context context, MediaFeed mediaFeed) {
+    public static void saveYoutubeFeedItems(Context context, YoutubeFeed mediaFeed) {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         database.beginTransaction();
         try {
 
-            //TODO update last_updated field (to prevent overtaxing requests)
+            database.update(DB.TABLE_MEDIA_FEED,lastUpdateToContentValues(Calendar.getInstance(Locale.getDefault()).getTimeInMillis()), DB.COL_ID + " = " + mediaFeed.getId(), null);
 
             if(mediaFeed.getType() == Var.TYPE_YOUTUBE_ACTIVTY || mediaFeed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
                 YoutubeItemORM.saveYoutubeItems(database, mediaFeed.getItems(), mediaFeed.getId());
             }
 
             database.setTransactionSuccessful();
-            Log.e(TAG, "saveMediaItems");
+            Log.e(TAG, "saveYoutubeFeedItems");
         }catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -162,6 +164,14 @@ public class MediaFeedORM {
         }
 
         Log.d(TAG, "deleteMediaFeed "+mediaFeed.getId());
+    }
+
+
+
+    private static ContentValues lastUpdateToContentValues(long lastUpdate) {
+        ContentValues values = new ContentValues();
+        values.put(DB.COL_LAST_UPDATE, lastUpdate);
+        return values;
     }
 
     private static ContentValues mediaFeedToContentValues(MediaFeed mediaFeed, int userId, boolean includeId) {

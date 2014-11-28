@@ -23,8 +23,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.User;
-import com.edaviessmith.consumecontent.util.ActionDispatch;
-import com.edaviessmith.consumecontent.util.ActionFragment;
+import com.edaviessmith.consumecontent.service.ActionDispatch;
+import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 

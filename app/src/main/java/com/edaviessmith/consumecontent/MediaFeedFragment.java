@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
-import com.edaviessmith.consumecontent.util.ActionDispatch;
-import com.edaviessmith.consumecontent.util.ActionFragment;
+import com.edaviessmith.consumecontent.service.ActionDispatch;
+import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.FragmentStateCachePagerAdapter;
 import com.edaviessmith.consumecontent.view.PagerAdapter;

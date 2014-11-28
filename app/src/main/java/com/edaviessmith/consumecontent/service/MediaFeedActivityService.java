@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 
 import android.app.IntentService;
@@ -15,6 +15,8 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.UserORM;
+import com.edaviessmith.consumecontent.util.Var;
+import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +54,7 @@ public class MediaFeedActivityService extends IntentService {
                         tpe.submit(new Runnable() {
                             @Override
                             public void run() {
-                                MediaFeedORM.saveMediaItems(MediaFeedActivityService.this, youtubeFeed);
+                                MediaFeedORM.saveYoutubeFeedItems(MediaFeedActivityService.this, youtubeFeed);
                                 threadCounter--;
                                 checkMediaFeedUpdated();
                             }

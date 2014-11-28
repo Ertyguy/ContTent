@@ -12,13 +12,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.TypedValue;
 
 import com.edaviessmith.consumecontent.data.Alarm;
-import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.NotificationList;
+import com.edaviessmith.consumecontent.service.AlarmBroadcastReceiver;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -37,9 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -79,6 +76,7 @@ public class Var {
     public static final int FEED_LOADING = 1;
     public static final int FEED_WARNING = 2;
     public static final int FEED_OFFLINE = 3;
+    public static final int FEED_END = 4;
 
     public static final int LIST_USERS  = 0;
     public static final int LIST_GROUPS = 1;
@@ -653,6 +651,13 @@ public class Var {
         nextAlarm.setTimeInMillis(when.getTimeInMillis() - now.getTimeInMillis());
 
         return nextAlarm;
+    }
+
+    //The last 20 minutes
+    public static boolean isRecent(long lastUpdate) {
+        Calendar now = Calendar.getInstance(Locale.getDefault());
+
+        return (now.getTimeInMillis() - (Var.MINUTE_MILLI * 20) < lastUpdate);
     }
 
 }

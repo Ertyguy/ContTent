@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

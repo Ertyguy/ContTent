@@ -36,7 +36,7 @@ import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.db.UserORM;
-import com.edaviessmith.consumecontent.util.ActionActivity;
+import com.edaviessmith.consumecontent.service.ActionActivity;
 import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;

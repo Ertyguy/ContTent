@@ -28,7 +28,7 @@ import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.DB;
-import com.edaviessmith.consumecontent.util.ActionFragment;
+import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
