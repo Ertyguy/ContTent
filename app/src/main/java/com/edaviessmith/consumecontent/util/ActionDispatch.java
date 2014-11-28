@@ -23,7 +23,12 @@ public class ActionDispatch implements DispatchListener {
     }
 
     @Override
-    public void updatedUserMediaFeed(int userId, int mediaFeedId) {
+    public void updatedMediaFeed(int mediaFeedId, int feedState) {
+
+    }
+
+    @Override
+    public void updateMediaFeedDatabase(int userId, int mediaFeedId) {
 
     }
 

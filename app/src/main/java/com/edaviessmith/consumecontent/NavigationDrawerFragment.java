@@ -202,7 +202,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
         }
         if(groups_v == v) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
-            act.openGroups();
+            getBinder().fetchGroups();
         }
 
     }
@@ -219,7 +219,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 
         @Override
         public int getCount() {
-            return getBinder().getUsers() == null? 0: getBinder().getUsers().size();
+            return getBinder() == null? 0: getBinder().getUsers().size();
         }
 
         @Override

@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 
 
 abstract public class ActionFragment extends Fragment {
-    public final String TAG = ((Object) this).getClass().getName();
+    public final String TAG = ((Object) this).getClass().getSimpleName();
 
     public ActionActivity activity;
     public ActionDispatch actionDispatch;
@@ -15,22 +15,24 @@ abstract public class ActionFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         activity = (ActionActivity) getActivity();
-        activity.addActionFragment(actionDispatch);
+
     }
 
 
     public DataService.ServiceBinder getBinder() {
-        return activity.binder;
+        return activity.bindState == 2? activity.binder: null;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        activity.addActionFragment(actionDispatch);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        activity.removeActionFragment(actionDispatch);
     }
 
 

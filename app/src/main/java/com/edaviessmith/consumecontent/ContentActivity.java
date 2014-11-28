@@ -42,8 +42,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     View actionDelete, actionNotification;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
-    //public int selectedUser, selectedGroup,
-            public int contentState = -1;
+    public int contentState = -1;
 
     public ContentActivity() {
 
@@ -265,8 +264,9 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
     public void updateData() {
         if (contentState == Var.LIST_USERS) {
-            binder.fetchUsersByGroup(binder.getSelectedUser());
+            binder.fetchUsers();
         }
+
         if (contentState == Var.LIST_GROUPS) {
             binder.fetchGroups();
         }

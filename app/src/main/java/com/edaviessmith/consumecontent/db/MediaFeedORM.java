@@ -47,19 +47,19 @@ public class MediaFeedORM {
                 int id = cursor.getInt(cursor.getColumnIndex(DB.COL_ID));
                 int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
 
-                if(Var.isTypeYoutube(type)) mediaFeeds.put(id, (YoutubeFeed) cursorToMediaFeed(cursor, type));
-                else mediaFeeds.put(id, (MediaFeed) cursorToMediaFeed(cursor, type));
-                Log.e(TAG, cursorToMediaFeed(cursor, type).toString());
+                if(Var.isTypeYoutube(type)) mediaFeeds.put(id, (YoutubeFeed) cursorToMediaFeed(cursor, type, false));
+                else mediaFeeds.put(id, (MediaFeed) cursorToMediaFeed(cursor, type, false));
+                Log.e(TAG, mediaFeeds.get(id).toString());
                 cursor.moveToNext();
             }
-            Log.i(TAG, "MediaFeeds loaded successfully.");
+            Log.i(TAG, "MediaFeeds loaded successfully "+mediaFeeds.size());
         }
 
         return mediaFeeds;
 
     }
 
-    public static List<YoutubeFeed> getMediaFeedsByNotificationId(Context context, int notificationId) {
+    public static List<YoutubeFeed> getYoutubeFeedsByNotificationId(Context context, int notificationId) {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
         List<YoutubeFeed> mediaFeeds = new ArrayList<YoutubeFeed>();
@@ -72,7 +72,7 @@ public class MediaFeedORM {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
                     int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
-                    YoutubeFeed youtubeFeed = (YoutubeFeed) cursorToMediaFeed(cursor, type);
+                    YoutubeFeed youtubeFeed = (YoutubeFeed) cursorToMediaFeed(cursor, type, true);
 
                     youtubeFeed.setItems(YoutubeItemORM.getYoutubeItems(database, youtubeFeed.getId()));
 
@@ -97,7 +97,7 @@ public class MediaFeedORM {
         Cursor cursor = database.query(false, DB.TABLE_MEDIA_FEED, null,  DB.COL_ID + " = " + mediaFeedId, null, null, null, null, null);
         if(cursor != null && cursor.moveToFirst()) {
             int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
-            MediaFeed mediaFeed = (MediaFeed) cursorToMediaFeed(cursor, type);
+            MediaFeed mediaFeed = (MediaFeed) cursorToMediaFeed(cursor, type, false);
 
             return mediaFeed;
         }
@@ -179,9 +179,9 @@ public class MediaFeedORM {
         return values;
     }
 
-    private static Object cursorToMediaFeed(Cursor cursor, int type) {
+    private static Object cursorToMediaFeed(Cursor cursor, int type, boolean includeUserId) {
         if(Var.isTypeYoutube(type)) {
-            return new YoutubeFeed(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
+            YoutubeFeed youtubeFeed = new YoutubeFeed(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
                     cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
@@ -190,6 +190,9 @@ public class MediaFeedORM {
                     cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
                     DB.getForeignKey(cursor, DB.COL_NOTIFICATION),
                     cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
+            if(includeUserId) youtubeFeed.setUserId(cursor.getInt(cursor.getColumnIndex(DB.COL_USER)));
+            return youtubeFeed;
+
         }
 
         //TODO return TwitterFeed

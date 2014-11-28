@@ -12,7 +12,8 @@ public interface DispatchListener {
     void updatedUsers();
     void updatedGroups();
 
-    void updatedUserMediaFeed(int userId, int mediaFeedId);
+    void updatedMediaFeed(int mediaFeedId, int feedState);
+    void updateMediaFeedDatabase(int userId, int mediaFeedId);
 
     void updateUserChanged();
 

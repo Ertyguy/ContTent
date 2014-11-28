@@ -13,6 +13,7 @@ import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.GroupORM;
+import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 
@@ -30,14 +31,14 @@ public class DataService extends Service {
     public List<ActionDispatch> actionDispatches = new ArrayList<ActionDispatch>();
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
-    App app;
+    App app = (App) getApplication();
     ImageLoader imageLoader;
 
     public SparseArray<Group> groups;
     public SparseArray<User> users; //todo possible just use current group
 
-    private List<User> userList;
-    private List<Group> groupList;
+    private List<User> userList = new ArrayList<User>();
+    private List<Group> groupList = new ArrayList<Group>();
 
     int selectedGroup, selectedUser;
 
@@ -52,11 +53,10 @@ public class DataService extends Service {
         selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
         selectedUser = Var.getIntPreference(this, Var.PREF_SELECTED_USER);
 
-        selectedGroup = -1;
-        selectedUser = -1;
+        //selectedGroup = 1;
+        //selectedUser = 1;
 
-        groupList = new ArrayList<Group>();
-        userList = new ArrayList<User>();
+        imageLoader = new ImageLoader(this);
 
         tpe.submit(new Runnable() {
             @Override
@@ -65,10 +65,16 @@ public class DataService extends Service {
             }
         });
 
-        app = (App) getApplication();
-        imageLoader = new ImageLoader(this);
+
+
 
         super.onCreate();
+        Log.d(TAG, "onCreate");
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy");
     }
 
     @Override
@@ -130,7 +136,7 @@ public class DataService extends Service {
             });
         }
 
-        public void fetchUsersByGroup(final int selectedGroup) {
+        public void fetchUsers() {
 
             tpe.submit(new Runnable() {
                 @Override
@@ -183,6 +189,8 @@ public class DataService extends Service {
         public void fetchYoutubeItemsByMediaFeedId(final int mediaFeedId) {
 
             final int userId = selectedUser;
+            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_USER, selectedUser);
+
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -200,7 +208,7 @@ public class DataService extends Service {
                         public void run() {
                             Log.d(TAG, "DispatchListener updatedUserMediaFeed");
                             for (ActionDispatch ad : actionDispatches) {
-                                ad.updatedUserMediaFeed(userId, mediaFeedId);
+                                ad.updatedMediaFeed(mediaFeedId, Var.FEED_WAITING);
 
                             }
                         }
@@ -239,8 +247,7 @@ public class DataService extends Service {
             selectedGroup = id;
 
             Var.setIntPreference(DataService.this, Var.PREF_SELECTED_GROUP, id);
-
-            fetchUsersByGroup(selectedGroup);
+            fetchUsers();
         }
 
 
@@ -250,6 +257,19 @@ public class DataService extends Service {
 
         public App getApp() {
             return app;
+        }
+
+        public void saveMediaFeedItems(final int userId, final int mediaFeedId) {
+
+            tpe.submit(new Runnable() {
+                @Override
+                public void run() {
+                    MediaFeedORM.saveMediaItems(DataService.this, getUser(userId).getCastMediaFeed().get(mediaFeedId));
+                }
+            });
+
+
+
         }
     }
 

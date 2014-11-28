@@ -6,8 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 
 import com.edaviessmith.consumecontent.ContentActivity;
@@ -20,6 +18,8 @@ import com.edaviessmith.consumecontent.db.UserORM;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MediaFeedActivityService extends IntentService {
 
@@ -27,6 +27,9 @@ public class MediaFeedActivityService extends IntentService {
 
     private int threadCounter;
     private List<Integer> updatedMediaFeedIds;
+    private ActionDispatch actionDispatch;
+    List<YoutubeFeed> youtubeFeeds;
+    final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
 
     public MediaFeedActivityService(){
@@ -37,17 +40,48 @@ public class MediaFeedActivityService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
+        actionDispatch = new ActionDispatch() {
+            @Override
+            public void updateMediaFeedDatabase(int userId, int mediaFeedId) {
+                super.updateMediaFeedDatabase(userId, mediaFeedId);
+                updatedMediaFeedIds.add(mediaFeedId);
+
+                for(final YoutubeFeed youtubeFeed: youtubeFeeds) {
+                    if(youtubeFeed.getId() == mediaFeedId) {
+                        threadCounter ++;
+                        tpe.submit(new Runnable() {
+                            @Override
+                            public void run() {
+                                MediaFeedORM.saveMediaItems(MediaFeedActivityService.this, youtubeFeed);
+                                threadCounter--;
+                                checkMediaFeedUpdated();
+                            }
+                        });
+                    }
+                }
+
+            }
+
+            @Override
+            public void updatedMediaFeed(int mediaFeedId, int feedState) {
+                super.updatedMediaFeed(mediaFeedId, feedState);
+
+                threadCounter --;
+                checkMediaFeedUpdated();
+            }
+        };
+
         int notificationId = intent.getIntExtra(Var.NOTIFY_NOTIFICATION_ID, -1);
 
         Var.setNextAlarm(this, new NotificationList(this)); //Set next Alarm
 
-        List<YoutubeFeed> youtubeFeeds = MediaFeedORM.getMediaFeedsByNotificationId(this, notificationId);
+        youtubeFeeds = MediaFeedORM.getYoutubeFeedsByNotificationId(this, notificationId); //run in sync
         updatedMediaFeedIds = new ArrayList<Integer>();
 
         threadCounter = 0;
         for(YoutubeFeed youtubeFeed : youtubeFeeds) {
             threadCounter ++;
-            new YoutubeFeedAsyncTask(this, youtubeFeed, handler).execute("");
+            new YoutubeFeedAsyncTask(this, youtubeFeed, youtubeFeed.getUserId(), actionDispatch).execute("");
 
         }
 
@@ -102,23 +136,5 @@ public class MediaFeedActivityService extends IntentService {
         }
 
     }
-
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-
-            threadCounter --;
-
-            if(msg.what == 0) {
-                if(msg.arg1 == 1) {     //Feed has new content
-                    updatedMediaFeedIds.add(msg.arg2);
-                }
-
-                checkMediaFeedUpdated();
-            }
-
-        }
-    };
 
 }

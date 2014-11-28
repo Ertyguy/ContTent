@@ -12,6 +12,8 @@ public class YoutubeFeed extends MediaFeed {
 
     final static String TAG = "YoutubeFeed";
 
+    private int userId;
+
     public YoutubeFeed() {
         setType(Var.TYPE_YOUTUBE_ACTIVTY);
         setName("Activity");
@@ -33,6 +35,14 @@ public class YoutubeFeed extends MediaFeed {
         setType(type);
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
     public List<YoutubeItem> getItems() {
         return (List<YoutubeItem>) super.getItems();
     }
@@ -41,6 +51,7 @@ public class YoutubeFeed extends MediaFeed {
     public void setItems(List youtubeItems) {
         super.setItems((List<YoutubeItem>) youtubeItems);
     }
+
 
     /**
      * Merge new items  ordered by getDate()

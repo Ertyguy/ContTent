@@ -2,7 +2,6 @@ package com.edaviessmith.consumecontent.util;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
@@ -27,14 +26,17 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
 
     private Context context;
     private YoutubeFeed youtubeFeed;
-    private Handler handler;
+    //private Handler handler;
+    private ActionDispatch actionDispatch;
+    private int userId;
 
     private boolean cancel;
     
-    public YoutubeFeedAsyncTask(Context context, YoutubeFeed youtubeFeed, Handler handler) {
+    public YoutubeFeedAsyncTask(Context context, YoutubeFeed youtubeFeed, int userId, ActionDispatch actionDispatch) {
         this.context = context;
         this.youtubeFeed = youtubeFeed;
-        this.handler = handler;
+        this.actionDispatch = actionDispatch;
+        this.userId = userId;
     }
     
     @Override
@@ -45,7 +47,8 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
 
             //TODO make this a beautiful toast like Chrome (use Handler)
             if (!Var.isNetworkAvailable(context)) {
-                handler.sendMessage(handler.obtainMessage(1, Var.FEED_OFFLINE, youtubeFeed.getId(), null));
+                //handler.sendMessage(handler.obtainMessage(1, Var.FEED_OFFLINE, youtubeFeed.getId(), null));
+                actionDispatch.updatedMediaFeed(youtubeFeed.getId(), Var.FEED_OFFLINE);
                 cancel = true;
                 return null;
             }
@@ -221,7 +224,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
         } catch (Throwable t) {
             Log.e(TAG, "getFeed failed");
             t.printStackTrace();
-            handler.sendMessage(handler.obtainMessage(1, Var.FEED_WARNING, youtubeFeed.getId(), null));
+            actionDispatch.updatedMediaFeed(youtubeFeed.getId(), Var.FEED_WARNING);
             cancel = true;
             return null;
         }
@@ -238,9 +241,13 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         Log.d(TAG,"adding youtube items "+youtubeItems.size());
-        boolean updated = youtubeFeed.addItems(youtubeItems);
+        if(!cancel) {
+            if (youtubeFeed.addItems(youtubeItems)) {
+                actionDispatch.updateMediaFeedDatabase(userId, youtubeFeed.getId());
+            }
 
-        if(!cancel) handler.sendMessage(handler.obtainMessage(0, (updated? 1: 0), youtubeFeed.getId(), null));
+            actionDispatch.updatedMediaFeed(youtubeFeed.getId(), Var.FEED_WAITING);
+        }
     }
 
 

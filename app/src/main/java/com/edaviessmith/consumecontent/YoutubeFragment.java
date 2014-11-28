@@ -2,8 +2,6 @@ package com.edaviessmith.consumecontent;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +16,6 @@ import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
-import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.util.ActionDispatch;
 import com.edaviessmith.consumecontent.util.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
@@ -28,8 +25,8 @@ import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 public class YoutubeFragment extends ActionFragment {
 
     private ContentActivity act;
-    private int pos, tab;
-    private Handler handler;
+    private int userId, mediaFeedId;
+    //private Handler handler;
 
     //private boolean isSearchBusy; //Only make a single request to API
     private int feedState = Var.FEED_WAITING;
@@ -41,10 +38,10 @@ public class YoutubeFragment extends ActionFragment {
 
 
 
-    public static YoutubeFragment newInstance(int pos, int tab) {
+    public static YoutubeFragment newInstance(int userId, int mediaFeedId) {
         Bundle args = new Bundle();
-        args.putInt("pos", pos);
-        args.putInt("tab", tab);
+        args.putInt("userId", userId);
+        args.putInt("mediaFeedId", mediaFeedId);
         YoutubeFragment youtubeFragment = new YoutubeFragment();
         youtubeFragment.setArguments(args);
         return youtubeFragment;
@@ -57,61 +54,73 @@ public class YoutubeFragment extends ActionFragment {
             public void binderReady() {
                 super.binderReady();
 
+                getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
                 Log.d(TAG, "binderReady");
             }
 
             @Override
-            public void updatedUserMediaFeed(int userId, int mediaFeedId) {
-                super.updatedUserMediaFeed(userId, mediaFeedId);
+            public void updatedMediaFeed(int mediaFeedId, int feedState) {
+                super.updatedMediaFeed(mediaFeedId, feedState);
 
-                Log.d(TAG, "updatedUserMediaFeed "+userId + mediaFeedId);
+                Log.d(TAG, "updatedUserMediaFeed "+ mediaFeedId);
+                if (isFragment(mediaFeedId)) {
 
-                if(pos == userId && tab == mediaFeedId) {
-                    itemAdapter.notifyDataSetChanged();
 
-                    if(Var.isEmpty(getFeed().getNextPageToken())) {//getFeed().getItems().size() == 0) {  //No local items so
-                        setFeedState(Var.FEED_LOADING);
-                        new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                    if(feedState == Var.FEED_WAITING) {
+                        itemAdapter.notifyDataSetChanged();
+                        if (swipeRefreshLayout.isRefreshing())
+                            swipeRefreshLayout.setRefreshing(false);
+
+                        if (getBinder() != null && Var.isEmpty(getFeed().getNextPageToken())) {//getFeed().getItems().size() == 0) {  //No local items so
+                            setFeedState(Var.FEED_LOADING);
+                            new YoutubeFeedAsyncTask(act, getFeed(), userId, actionDispatch).execute(getFeed().getNextPageToken());
+                        }
                     }
+                    setFeedState(feedState);
+
                 }
             }
+
+            @Override
+            public void updateMediaFeedDatabase(int userId, int mediaFeedId) {
+                super.updateMediaFeedDatabase(userId, mediaFeedId);
+
+            }
+
+
         };
     }
 
+    private boolean isFragment(int mediaFeedId) {
+        return this.mediaFeedId == mediaFeedId;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         act = (ContentActivity) getActivity();
-        pos = getArguments() != null ? getArguments().getInt("pos") : -1;
-        tab = getArguments() != null ? getArguments().getInt("tab") : -1;
+        userId = getArguments() != null ? getArguments().getInt("userId") : -1;
+        mediaFeedId = getArguments() != null ? getArguments().getInt("mediaFeedId") : -1;
 
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
-        view.setId(pos);
+        view.setId(userId);
 
-        handler = new Handler() {
+      /*  new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == 0) {
                     setFeedState(Var.FEED_WAITING);
-                    //itemAdapter.notifyDataSetChanged();
                     if (swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
 
                     if (getFeed() != null && msg.arg1 == 1 && getFeed().getId() == msg.arg2) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                Log.d(TAG, "check" + (getFeed().getItems() != null));
-                                if (getFeed().getItems() != null && getFeed().getItems().size() > 0) {
-                                    MediaFeedORM.saveMediaItems(act, getFeed());
-                                }
-                            }
-                        }.start();
+                        if (getFeed().getItems() != null && getFeed().getItems().size() > 0) {
+
+                        }
                     }
                 } else {
                     if (getFeed().getId() == msg.arg2) setFeedState(msg.arg1);
                 }
             }
-        };
+        };*/
 
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
         linearLayoutManager = new LinearLayoutManager(act);
@@ -125,7 +134,7 @@ public class YoutubeFragment extends ActionFragment {
             public void onRefresh() {
                 if(feedState != Var.FEED_LOADING) {
                     setFeedState(Var.FEED_LOADING);
-                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute("");
+                    new YoutubeFeedAsyncTask(act, getFeed(),userId, actionDispatch).execute("");
                 }
             }
         });
@@ -147,7 +156,7 @@ public class YoutubeFragment extends ActionFragment {
 
                 if(feedState == Var.FEED_WAITING && linearLayoutManager.findLastVisibleItemPosition() > linearLayoutManager.getItemCount() - Var.SCROLL_OFFSET) {
                     setFeedState(Var.FEED_LOADING);
-                    new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                    new YoutubeFeedAsyncTask(act, getFeed(),userId, actionDispatch).execute(getFeed().getNextPageToken());
                     Log.d(TAG,"onScrolled getFeed called");
                 }
 
@@ -163,10 +172,6 @@ public class YoutubeFragment extends ActionFragment {
             }
         });
 
-        if(getBinder() != null) {
-            getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
-        }
-
         return view;
     }
 
@@ -174,20 +179,21 @@ public class YoutubeFragment extends ActionFragment {
     public void onStart() {
         super.onStart();
 
-        getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+        if(getBinder() != null) getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
     }
 
 
 
     private YoutubeFeed getFeed() {
-        return (YoutubeFeed) getBinder().getUser(pos).getCastMediaFeed().get(tab);
+        Log.d(TAG, "youtubeFragment getFeed: "+(getBinder().getUsers().size()));
+        return (YoutubeFeed) getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId);
     }
 
 
     public void setFeedState(int feedState) {
         boolean change = (this.feedState != feedState);
         this.feedState = feedState;
-        if(change) itemAdapter.notifyDataSetChanged();
+        //if(change) itemAdapter.notifyDataSetChanged();
         //itemAdapter.notifyItemChanged(itemAdapter.getItemCount() - 1);
     }
 
@@ -236,7 +242,7 @@ public class YoutubeFragment extends ActionFragment {
             if(itemPosition < getItemCount() - 1)  act.startVideo(getFeed().getItems().get(itemPosition));
             else if(feedState == Var.FEED_WARNING || feedState == Var.FEED_OFFLINE) {
                 setFeedState(Var.FEED_LOADING);
-                new YoutubeFeedAsyncTask(act, getFeed(), handler).execute(getFeed().getNextPageToken());
+                new YoutubeFeedAsyncTask(act, getFeed(),userId, actionDispatch).execute(getFeed().getNextPageToken());
 
             }
 

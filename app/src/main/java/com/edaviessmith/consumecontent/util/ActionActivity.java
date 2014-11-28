@@ -50,12 +50,13 @@ abstract public class ActionActivity extends ActionBarActivity {
 
     @Override
     public void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart");
         bindState = 1;
         Intent intent = new Intent(this, DataService.class);
         startService(intent);
         bindService(intent, serviceConnection, 0);
+
+        Log.d(TAG, "onStart");
+        super.onStart();
     }
 
     @Override
@@ -81,6 +82,13 @@ abstract public class ActionActivity extends ActionBarActivity {
         fragActionDispatches.add(fragActionDispatch);
         if(bindState == 2) {
             binder.addListener(fragActionDispatch);
+        }
+    }
+
+    public void removeActionFragment(ActionDispatch fragActionDispatch) {
+        fragActionDispatches.remove(fragActionDispatch);
+        if(bindState == 2) {
+            binder.removeListener(fragActionDispatch);
         }
     }
 }
