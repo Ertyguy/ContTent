@@ -52,6 +52,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
             android:layout_marginLeft="25dp"
             android:textColor="@color/dark_gray"
             android:layout_marginStart="25dp"

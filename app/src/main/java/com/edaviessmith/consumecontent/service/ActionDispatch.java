@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
-import com.edaviessmith.consumecontent.data.User;
 
 public class ActionDispatch implements DispatchListener {
 
@@ -41,7 +40,7 @@ public class ActionDispatch implements DispatchListener {
     public void updateGroup(Group group) {}
 
     @Override
-    public void updateUser(User user) {}
+    public void updatedUser(int userId) {}
 
     @Override
     public void updateMediaFeed(MediaFeed mediaFeed) {}

@@ -13,7 +13,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -35,7 +34,6 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
-import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.service.ActionActivity;
 import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
@@ -119,7 +117,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             if (group.isVisible()) groups.add(group);
 
         int userId = getIntent().getIntExtra(Var.INTENT_USER_ID, -1);
-        if(DB.isValid(userId)) editUser = binder.getUser(userId); //UserORM.getUser(this, userId, groups);
+        if(DB.isValid(userId)) editUser = binder.getUser(userId);
         else editUser = new User();
 
         for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
@@ -128,7 +126,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
 
         userName_edt.setText(editUser.getName());
-        getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? editUser.getName(): "Add User"));
+        getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? "Edit "+editUser.getName(): "Add User"));
 
         if(DB.isValid(editUser.getId())) {
             action_fab.setDrawable(getResources().getDrawable(R.drawable.ic_action_accept));
@@ -141,6 +139,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             toggleSearch(SEARCH_NONE);
         } else {
             toggleSearch(SEARCH_OPTIONS);
+
+            editUser.getGroups().add(binder.getGroup());
         }
     }
 
@@ -196,6 +196,12 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         userThumbnail_iv = (ImageView) header.findViewById(R.id.user_thumbnail_iv);
         userThumbnail_pb = (ProgressBar) header.findViewById(R.id.user_thumbnail_pb);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
+        userName_edt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new RenameDialog(AddActivity.this, userName_edt, editUser.getThumbnail());
+            }
+        });
         groups_v = header.findViewById(R.id.groups_v);
 
         search_fab = (Fab) header.findViewById(R.id.search_fab);
@@ -541,15 +547,13 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
                 //TODO make sure save is working
                 editUser.setName(userName_edt.getText().toString().trim());
-
-
-
                 editUser.addMediaFeed(mediaFeeds);
-
 
                 //editUser.setThumbnail((String) userPicture_sp.getSelectedItem());//TODO set thumbnail
 
-                UserORM.saveUser(this, editUser);
+
+                binder.saveUser(editUser);
+
 
                 finish();
             }
@@ -801,7 +805,6 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
     public class FeedAdapter extends ArrayAdapter<MediaFeed> {
 
         private LayoutInflater inflater;
-        Context context;
         List<MediaFeed> mediaFeeds;
 
         public FeedAdapter(Context context, List<MediaFeed> mediaFeeds) {
@@ -836,21 +839,27 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
-            ViewHolder holder;
+
 
             if(convertView == null) {
                 convertView = inflater.inflate(R.layout.item_youtube_feed, parent, false);
-                holder = new ViewHolder(convertView);
+                ViewHolder holder = new ViewHolder(convertView);
                 convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
             }
 
+            final ViewHolder holder = (ViewHolder) convertView.getTag();
             final MediaFeed feed = getItem(position);
 
             holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
             if(feed.getThumbnail() != null) binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
             holder.name_edt.setText(feed.getName());
+
+            holder.name_edt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new RenameDialog(AddActivity.this, holder.name_edt, feed.getThumbnail());
+                }
+            });
 
             holder.notification_v.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -867,36 +876,17 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
         }
 
-        class ViewHolder implements View.OnTouchListener {
-            View row;
+        class ViewHolder {
             ImageView image_iv;
             EditText name_edt;
             View notification_v;
             TextView notification_tv;
 
             public ViewHolder(View view) {
-                row = view;
-                row.setOnTouchListener(this);
                 image_iv = (ImageView) view.findViewById(R.id.thumbnail_iv);
                 name_edt = (EditText) view.findViewById(R.id.name_edt);
-                name_edt.setOnTouchListener(this);
                 notification_v = view.findViewById(R.id.notification_v);
                 notification_tv = (TextView) view.findViewById(R.id.notification_tv);
-            }
-
-            //Allow focusable view and onItemClick
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                if (view instanceof EditText) {
-                    EditText editText = (EditText) view;
-                    editText.setFocusable(true);
-                    editText.setFocusableInTouchMode(true);
-                } else {
-                    FeedAdapter.ViewHolder holder = (FeedAdapter.ViewHolder) view.getTag();
-                    holder.name_edt.setFocusable(false);
-                    holder.name_edt.setFocusableInTouchMode(false);
-                }
-                return false;
             }
         }
     }

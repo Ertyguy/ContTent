@@ -35,7 +35,7 @@ public class DataService extends Service {
     public List<ActionDispatch> actionDispatches = new ArrayList<ActionDispatch>();
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
-    App app = (App) getApplication();
+    App app;
     ImageLoader imageLoader;
 
     public SparseArray<Group> groups;
@@ -61,6 +61,7 @@ public class DataService extends Service {
         //selectedUser = 1;
 
         imageLoader = new ImageLoader(this);
+        app = (App) getApplication();
 
         tpe.submit(new Runnable() {
             @Override
@@ -69,7 +70,7 @@ public class DataService extends Service {
             }
         });
 
-
+        binder.fetchGroups();
 
 
         super.onCreate();
@@ -133,6 +134,10 @@ public class DataService extends Service {
             return users.get(userId) != null;
         }
 
+        public Group getGroup() {
+            return groups.get(selectedGroup);
+        }
+
         public void fetchBinder() {
             runOnUiThread(new Runnable() {
                 @Override
@@ -151,7 +156,7 @@ public class DataService extends Service {
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
-                    users = UserORM.getUsersByGroupId(DataService.this, selectedGroup);
+                    users = UserORM.getUsersByGroupId(DataService.this, selectedGroup, groupList);
                     userList.clear();
                     for(int i=0; i< users.size(); i++) {
                         userList.add(users.valueAt(i));
@@ -204,19 +209,18 @@ public class DataService extends Service {
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG, "fetchYoutubeItemsByMediaFeedId "+userId+ ", "+mediaFeedId);
+                    //Log.d(TAG, "fetchYoutubeItemsByMediaFeedId "+userId+ ", "+mediaFeedId);
                     try {
                         MediaFeed mediaFeed = getUser(userId).getCastMediaFeed().get(mediaFeedId);
-                        Log.d(TAG, "fetchYoutubeItemsfinish "+mediaFeed.toString());
+                        //Log.d(TAG, "fetchYoutubeItemsfinish "+mediaFeed.toString());
                         mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
                     } catch (Exception e) {e.printStackTrace(); }
 
-                    //TODO someting here
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d(TAG, "DispatchListener updatedUserMediaFeed");
+                            //Log.d(TAG, "DispatchListener updatedUserMediaFeed");
                             for (ActionDispatch ad : actionDispatches) {
                                 ad.updatedMediaFeed(mediaFeedId, Var.FEED_WAITING);
 
@@ -280,6 +284,26 @@ public class DataService extends Service {
 
 
 
+        }
+
+        public void saveUser(final User editUser) {
+            tpe.submit(new Runnable() {
+                @Override
+                public void run() {
+                    final User user = UserORM.saveUser(DataService.this, editUser);
+
+                    users.setValueAt(user.getId(), user);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (ActionDispatch ad : actionDispatches) {
+                                ad.updatedUser(user.getId());
+
+                            }
+                        }
+                    });
+                }
+            });
         }
     }
 

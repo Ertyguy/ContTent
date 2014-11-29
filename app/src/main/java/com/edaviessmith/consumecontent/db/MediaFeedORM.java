@@ -130,20 +130,22 @@ public class MediaFeedORM {
         }
     }
 
-    public static void saveMediaFeeds(SQLiteDatabase database, SparseArray<MediaFeed> mediaFeeds, SparseArray<MediaFeed> removedMediaFeeds, int userId) {
+    public static SparseArray<MediaFeed> saveMediaFeeds(SQLiteDatabase database, SparseArray<MediaFeed> mediaFeeds, SparseArray<MediaFeed> removedMediaFeeds, int userId) {
         if(removedMediaFeeds != null) {
             //for (MediaFeed removedMediaFeed : removedMediaFeeds) {
             for(int i=0; i< removedMediaFeeds.size(); i++) {
                 removeMediaFeed(database, removedMediaFeeds.valueAt(i));
             }
         }
-
+        SparseArray<MediaFeed> mediaFeedSparseArray = new SparseArray<MediaFeed>();
         for(int i=0; i< mediaFeeds.size(); i++) {
-            saveMediaFeed(database, mediaFeeds.valueAt(i), userId, i);
+            MediaFeed mediaFeed = saveMediaFeed(database, mediaFeeds.valueAt(i), userId, i);
+            mediaFeedSparseArray.put(mediaFeed.getId(), mediaFeed);
         }
+        return mediaFeedSparseArray;
     }
 
-    public static void saveMediaFeed(SQLiteDatabase database, MediaFeed mediaFeed, int userId, int sort) {
+    public static MediaFeed saveMediaFeed(SQLiteDatabase database, MediaFeed mediaFeed, int userId, int sort) {
 
         mediaFeed.setSort(sort);
         if(DB.isValid(mediaFeed.getId())) {
@@ -152,7 +154,8 @@ public class MediaFeedORM {
             mediaFeed.setId((int) database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false)));
         }
 
-        Log.d(TAG, "saveMediaFeed "+mediaFeed.getId());
+        Log.d(TAG, "saveMediaFeed "+mediaFeed.getId() + ", "+mediaFeed.getSort());
+        return mediaFeed;
     }
 
     public static void removeMediaFeed(SQLiteDatabase database, MediaFeed mediaFeed) {

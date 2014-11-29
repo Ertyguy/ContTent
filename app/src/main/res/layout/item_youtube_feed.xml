@@ -30,6 +30,8 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Display Name"
         android:id="@+id/name_edt"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/thumbnail_iv"
         android:layout_toEndOf="@+id/thumbnail_iv"

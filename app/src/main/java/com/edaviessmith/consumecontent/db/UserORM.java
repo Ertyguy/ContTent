@@ -127,7 +127,7 @@ public class UserORM {
     }
 
 
-    public static SparseArray<User> getUsersByGroupId(Context context, int groupId) {
+    public static SparseArray<User> getUsersByGroupId(Context context, int groupId, List<Group> groups) {
         DB databaseHelper = new DB(context);
         SparseArray<User> users = new SparseArray<User>();
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
@@ -143,7 +143,8 @@ public class UserORM {
                 while (!cursor.isAfterLast()) {
                     User user = cursorToUser(cursor);
 
-                    user.setGroups(GroupORM.getUserGroups(database, user.getId()));
+                    if(groups != null) user.setGroups(GroupORM.getUserGroups(database, user.getId(), groups));
+                    else user.setGroups(GroupORM.getUserGroups(database, user.getId()));
                     user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
 
                     users.put(user.getId(), user);
@@ -199,13 +200,12 @@ public class UserORM {
         return users;
     }
 
-    public static void saveUser(Context context, User user) {
+    public static User saveUser(Context context, User user) {
         DB databaseHelper = new DB(context);
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         database.beginTransaction();
         try {
-
 
             if(DB.isValid(user.getId())) {
                 database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = " + user.getId(), null);
@@ -213,7 +213,7 @@ public class UserORM {
                 user.setId((int) database.insert(DB.TABLE_USER, null, userToContentValues(user, false)));
             }
 
-            MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId());
+            user.setMediaFeed(MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId()));
             GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
 
             database.setTransactionSuccessful();
@@ -225,6 +225,10 @@ public class UserORM {
             database.endTransaction();
             database.close();
         }
+
+        user.clearRemoved();
+
+        return user;
     }
 
 

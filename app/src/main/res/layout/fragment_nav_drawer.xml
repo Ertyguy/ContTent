@@ -47,7 +47,7 @@
                 android:layout_height="40dp"
                 android:scaleType="centerInside"
                 android:contentDescription="@string/groups"
-                android:src="@drawable/ic_arrow_forward_grey600_36dp" />
+                android:src="@drawable/ic_chevron_right_grey600_36dp" />
         </LinearLayout>
 
         <ListView

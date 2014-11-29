@@ -52,6 +52,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             public void updatedUsers() {
                 super.updatedUsers();
 
+                navigationDrawerFragment.selectItem(binder.getUser().getSort());
+
                 openUsers();
             }
 
@@ -67,6 +69,22 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
                 super.updateUserChanged();
 
                 openUsers();
+            }
+
+            @Override
+            public void updatedUser(int userId) {
+                super.updatedUsers();
+                Log.d(TAG,"updatedUser "+userId);
+                navigationDrawerFragment.adapter.notifyDataSetChanged();
+                openUsers();
+
+                //TODO not updating
+                if(contentState == Var.LIST_USERS && userId == binder.getSelectedUser()) {
+
+                } else {
+
+                }
+
             }
         };
 

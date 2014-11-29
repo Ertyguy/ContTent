@@ -59,13 +59,17 @@ public class User extends Content{
         return removed;
     }
 
+    public void clearRemoved() {
+        removed = null;
+    }
+
     //Utility method to update mediaFeeds and set removed feeds
     public void addMediaFeed(List<MediaFeed> mediaFeeds) {
         removed = getCastMediaFeed().clone();
         SparseArray<MediaFeed> feeds = new SparseArray<MediaFeed>();
         for(int i=0; i< mediaFeeds.size(); i++) {
             removed.remove(mediaFeeds.get(i).getId());
-            feeds.put(mediaFeeds.get(i).getId(), mediaFeeds.get(i));
+            feeds.put(i, mediaFeeds.get(i));
         }
 
         setMediaFeed(feeds);

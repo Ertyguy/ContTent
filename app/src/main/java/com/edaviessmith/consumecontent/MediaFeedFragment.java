@@ -78,6 +78,15 @@ public class MediaFeedFragment extends ActionFragment {
 
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        try {
+            super.onSaveInstanceState(outState);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         //Call methods in activity when the fragment has been loaded

@@ -26,6 +26,7 @@ public class GroupORM {
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_GROUP;
 
 
+    //Works but cannot compare reference value of user>groups to groups
     public static List<Group> getUserGroups(SQLiteDatabase database, int userId) {
 
         Cursor cursor = database.rawQuery("SELECT G.* FROM "+DB.TABLE_GROUP+" AS G INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
@@ -88,7 +89,7 @@ public class GroupORM {
             while (!cursor.isAfterLast()) {
                 Group group = cursorToGroup(cursor);
 
-                group.setUsers(UserORM.getUsersByGroupId(context, group.getId()));
+                group.setUsers(UserORM.getUsersByGroupId(context, group.getId(), null));
 
                 groupList.put(group.getId(), group);
                 cursor.moveToNext();
