@@ -13,6 +13,7 @@ import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
+import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.UserORM;
@@ -39,6 +40,8 @@ public class DataService extends Service {
     ImageLoader imageLoader;
 
     public SparseArray<Group> groups;
+    
+
     public SparseArray<User> users; //todo possible just use current group
 
     private List<User> userList = new ArrayList<User>();
@@ -55,7 +58,7 @@ public class DataService extends Service {
         handler = new Handler();
 
         selectedGroup = Var.getIntPreference(this, Var.PREF_SELECTED_GROUP);
-        selectedUser = Var.getIntPreference(this, Var.PREF_SELECTED_USER);
+        selectedUser = Var.getIntPreference(this, Var.PREF_SELECTED_USER + selectedGroup);
 
         //selectedGroup = 1;
         //selectedUser = 1;
@@ -138,6 +141,20 @@ public class DataService extends Service {
             return groups.get(selectedGroup);
         }
 
+        private void updateUserList() {
+            userList.clear();
+            for(int i=0; i< users.size(); i++) {
+                userList.add(users.valueAt(i));
+            }
+        }
+
+        private void updateGroupList() {
+            groupList.clear();
+            for(int i=0; i< groups.size(); i++) {
+                groupList.add(groups.valueAt(i));
+            }
+        }
+
         public void fetchBinder() {
             runOnUiThread(new Runnable() {
                 @Override
@@ -157,12 +174,11 @@ public class DataService extends Service {
                 @Override
                 public void run() {
                     users = UserORM.getUsersByGroupId(DataService.this, selectedGroup, groupList);
-                    userList.clear();
-                    for(int i=0; i< users.size(); i++) {
-                        userList.add(users.valueAt(i));
-                    }
+                    updateUserList();
 
-                    selectedUser = userList.get(0).getId(); //TODO hardconding change (should come from pref)
+                    selectedUser = Var.getIntPreference(DataService.this, Var.PREF_SELECTED_USER + selectedGroup);
+                    if(!DB.isValid(selectedUser)) selectedUser = userList.get(0).getId();
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -182,10 +198,7 @@ public class DataService extends Service {
                 @Override
                 public void run() {
                     groups = GroupORM.getGroups(DataService.this);
-                    groupList.clear();
-                    for(int i=0; i< groups.size(); i++) {
-                        groupList.add(groups.valueAt(i));
-                    }
+                    updateGroupList();
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -204,7 +217,7 @@ public class DataService extends Service {
         public void fetchYoutubeItemsByMediaFeedId(final int mediaFeedId) {
 
             final int userId = selectedUser;
-            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_USER, selectedUser);
+            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_USER + selectedGroup, selectedUser);
 
             tpe.submit(new Runnable() {
                 @Override
@@ -213,7 +226,8 @@ public class DataService extends Service {
                     try {
                         MediaFeed mediaFeed = getUser(userId).getCastMediaFeed().get(mediaFeedId);
                         //Log.d(TAG, "fetchYoutubeItemsfinish "+mediaFeed.toString());
-                        mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
+                        if(mediaFeed != null)
+                            mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
                     } catch (Exception e) {e.printStackTrace(); }
 
 
@@ -292,7 +306,7 @@ public class DataService extends Service {
                 public void run() {
                     final User user = UserORM.saveUser(DataService.this, editUser);
 
-                    users.setValueAt(user.getId(), user);
+                    users.put(user.getId(), user);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -300,6 +314,27 @@ public class DataService extends Service {
                                 ad.updatedUser(user.getId());
 
                             }
+                        }
+                    });
+                }
+            });
+        }
+
+        public void saveGroup(final Group editGroup) {
+            tpe.submit(new Runnable() {
+                @Override
+                public void run() {
+                    final Group group = GroupORM.saveGroup(DataService.this, editGroup);
+
+                    groups.put(group.getId(), group);
+                    updateGroupList();
+                    for (ActionDispatch ad : actionDispatches) {
+                        ad.updatedGroup(group.getId());
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
                         }
                     });
                 }

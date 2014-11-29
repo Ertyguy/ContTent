@@ -105,7 +105,8 @@ public class YoutubeFragment extends ActionFragment {
 
     private boolean isFragmentOpen(int userId, int mediaFeedId) {
 
-        return (getBinder() != null && getBinder().containsUser(userId) && this.mediaFeedId == mediaFeedId);
+        return (getBinder() != null && getBinder().containsUser(userId) &&
+                getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId) != null && this.mediaFeedId == mediaFeedId);
     }
 
     @Override

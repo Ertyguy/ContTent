@@ -1,6 +1,5 @@
 package com.edaviessmith.consumecontent.util;
 
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -479,15 +478,10 @@ public class Var {
         return settings.getBoolean(pref, getPrefDefault(pref));
     }
 
-    @SuppressLint("NewApi")
     public static void setBoolPreference(Context context, String pref, boolean state) {
         SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
         settings.putBoolean(pref, state);
-        if (android.os.Build.VERSION.SDK_INT >= 9) {
             settings.apply();
-        } else {
-            settings.commit();
-        }
     }
 
     public static int getIntPreference(Context context, String pref) {
@@ -495,15 +489,10 @@ public class Var {
         return settings.getInt(pref, -1);
     }
 
-    @SuppressLint("NewApi")
     public static void setIntPreference(Context context, String pref, int state) {
         SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
         settings.putInt(pref, state);
-        if (android.os.Build.VERSION.SDK_INT >= 9) {
-            settings.apply();
-        } else {
-            settings.commit();
-        }
+        settings.apply();
     }
 
 
@@ -512,15 +501,10 @@ public class Var {
         return settings.getLong(pref, 0L);
     }
 
-    @SuppressLint("NewApi")
     public static void setLongPreference(Context context, String pref, long l) {
         SharedPreferences.Editor settings = context.getSharedPreferences(Var.PREFS, 0).edit();
         settings.putLong(pref, l);
-        if (android.os.Build.VERSION.SDK_INT >= 9) {
-            settings.apply();
-        } else {
-            settings.commit();
-        }
+        settings.apply();
     }
 
     private static boolean getPrefDefault(String pref) {
@@ -581,12 +565,12 @@ public class Var {
         int minutes = nextAlarm.get(Calendar.MINUTE);
 
         String time = "in ";
-        if (days > 0) time += days + " day" + (days == 1 ? "" : "s");
+        if (days > 0) time += days + "d";
         if (days > 0 && hours > 0 && minutes > 0) time += ", ";
         else if (days > 0 && hours > 0 && minutes == 0 || days > 0 && minutes > 0) time += " and ";
-        if (hours > 0) time += hours + " hour" + (hours == 1 ? "" : "s");
+        if (hours > 0) time += hours + "h" ;
         if (hours > 0 && minutes > 0) time += " and ";
-        if (minutes > 0) time += minutes + " minute" + (minutes == 1 ? "" : "s");
+        if (minutes > 0) time += minutes + "m";
 
         if (days > 0 || hours > 0 || minutes > 0) return time;
         return "never";

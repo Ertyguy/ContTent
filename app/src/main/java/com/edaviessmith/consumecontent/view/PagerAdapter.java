@@ -6,6 +6,7 @@ import com.edaviessmith.consumecontent.ContentActivity;
 import com.edaviessmith.consumecontent.PlaceholderFragment;
 import com.edaviessmith.consumecontent.TwitterFragment;
 import com.edaviessmith.consumecontent.YoutubeFragment;
+import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.util.Var;
 
@@ -31,9 +32,10 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     // Returns the fragment to display for that page
     @Override
     public Fragment getItem(int position) {
-        int type = act.binder.getUser().getCastMediaFeed().valueAt(position).getType();
+        MediaFeed mediaFeed = act.binder.getUser().getMediaFeedSort(position);
+        int type = mediaFeed.getType();
         if(Var.isTypeYoutube(type)) {
-            return YoutubeFragment.newInstance(act.binder.getSelectedUser(), act.binder.getUser().getCastMediaFeed().valueAt(position).getId());
+            return YoutubeFragment.newInstance(act.binder.getSelectedUser(), mediaFeed.getId());
         } else if(type == Var.TYPE_TWITTER) {
             return TwitterFragment.newInstance(act, position);
         }
@@ -46,7 +48,7 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
 
-        if(position < user.getMediaFeed().size())  return act.binder.getUser().getCastMediaFeed().valueAt(position).getName();
+        if(position < user.getMediaFeed().size())  return act.binder.getUser().getMediaFeedSort(position).getName();
 
         return "Placeholder (nothing to see here)";
 

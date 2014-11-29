@@ -28,6 +28,7 @@ import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.DB;
+import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
@@ -75,6 +76,22 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         return new GroupFragment();
     }
 
+    public GroupFragment() {
+        actionDispatch = new ActionDispatch() {
+
+            @Override
+            public void updatedGroup(int groupId) {
+                super.updatedGroup(groupId);
+
+                groupList = getGroups();
+                groupAdapter.notifyDataSetChanged();
+                Log.d(TAG, "updatedGroup");
+            }
+
+
+        };
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_group, container, false);
@@ -119,6 +136,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         toggleState(GROUPS_LIST);
 
         act.actionEdit.setOnClickListener(this);
+        act.actionDelete.setOnClickListener(this);
 
         editGroupAdapter = new EditGroupAdapter(act, users);
         group_lv.setAdapter(editGroupAdapter);
@@ -241,9 +259,36 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             groupAdapter.notifyDataSetChanged();
         }
 
+        if(act.actionDelete == v) {
+
+            for(User user: selectedUsers) {
+                users.remove(user);
+            }
+
+            clearSelection(-1);
+
+        }
+
         if(visible_v == v) {
             editGroup.setVisible(!editGroup.isVisible());
             visible_sw.setChecked(editGroup.isVisible());
+        }
+
+        if(save_fab == v) {
+
+
+            editGroup.setName(groupName_edt.getText().toString().trim());
+            //editGroup.add
+            editGroup.setUserList(users);
+            getBinder().saveGroup(editGroup);
+            //editUser.setName(userName_edt.getText().toString().trim());
+            //editUser.addMediaFeed(mediaFeeds);
+
+            //editUser.setThumbnail((String) userPicture_sp.getSelectedItem());//TODO set thumbnail
+
+
+            //binder.saveUser(editUser);
+            toggleState(GROUPS_LIST);
         }
 
     }
@@ -356,8 +401,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
                 int watchingCount = 0;
                 for (int u = 0; u < item.getUsers().size(); u++) {
-                    for (int m = 0; m < item.getUsers().valueAt(m).getCastMediaFeed().size(); m++) {
-                        if (DB.isValid(item.getUsers().valueAt(m).getCastMediaFeed().valueAt(m).getNotificationId())) {
+                    User user = item.getUsers().valueAt(u);
+                    for (int m = 0; m < user.getCastMediaFeed().size(); m++) {
+                        if (DB.isValid(user.getCastMediaFeed().valueAt(m).getNotificationId())) {
                             watchingCount++;
                             break;
                         }

@@ -3,11 +3,15 @@ package com.edaviessmith.consumecontent.data;
 
 import android.util.SparseArray;
 
+import java.util.List;
+
 public class Group extends Content {
 
     private boolean isVisible;
 
     private SparseArray<User> users;
+    SparseArray<User> removed;
+
 
     public Group () { }
 
@@ -49,6 +53,28 @@ public class Group extends Content {
         this.users = users;
     }
 
+
+    public SparseArray<User> getRemoved() {
+        return removed;
+    }
+
+    public void clearRemoved() {
+        removed = null;
+    }
+
+    //Utility method to update users and set removed users
+    public void setUserList(List<User> newUsers) {
+        removed = getUsers().clone();
+        SparseArray<User> us = new SparseArray<User>();
+        for(int i=0; i < newUsers.size(); i++) {
+            removed.remove(newUsers.get(i).getId());
+            us.put(i, newUsers.get(i));        //Places user in order of sort not by ID
+
+        }
+        setUsers(us);
+    }
+
+
     @Override
     public String toString() {
         return "new Group(" + getId() +
@@ -57,4 +83,6 @@ public class Group extends Content {
                 ", \"" + getThumbnail() + '\"' +
                 ", true);";
     }
+
+
 }

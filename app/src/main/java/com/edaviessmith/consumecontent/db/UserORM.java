@@ -231,6 +231,33 @@ public class UserORM {
         return user;
     }
 
+    public static SparseArray<User> saveUsers(SQLiteDatabase database, SparseArray<User> users, SparseArray<User> removed, int groupId) {
+        if(removed != null) {
+            //for (MediaFeed removedMediaFeed : removedMediaFeeds) {
+            for(int i=0; i< removed.size(); i++) {
+                if(GroupUserORM.romoveUserFromGroup(database, removed.valueAt(i).getId(), groupId)) {
+                    //User has no groups so remove the user
+                    removeUser(database, removed.valueAt(i));
+                }
+            }
+        }
+        SparseArray<User> userSparseArray = new SparseArray<User>();    //
+        for(int i=0; i< users.size(); i++) {
+            User user = saveUser(database, users.valueAt(i), i);
+            userSparseArray.put(user.getId(), user);
+        }
+        return userSparseArray;
+    }
+
+    private static void removeUser(SQLiteDatabase database, User user) {
+        if(DB.isValid(user.getId())) {
+            for(int i=0; i< user.getCastMediaFeed().size(); i++) {
+                MediaFeedORM.removeMediaFeed(database, user.getCastMediaFeed().valueAt(i));
+            }
+            database.delete(DB.TABLE_USER, DB.COL_ID + " = "+user.getId(), null);
+            Log.d(TAG, "removeUser "+user.getId());
+        }
+    }
 
 
     public static void saveUsers(SQLiteDatabase database, SparseArray<User> users) {
@@ -239,23 +266,20 @@ public class UserORM {
         }
     }
 
-    public static void saveUser(SQLiteDatabase database, User user, int sort) {
+    public static User saveUser(SQLiteDatabase database, User user, int sort) {
 
         user.setSort(sort);
         if(DB.isValid(user.getId())) {
             database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = " + user.getId(), null);
-            Log.e(TAG, "why won't update work here");
         } else {
             user.setId((int) database.insert(DB.TABLE_USER, null, userToContentValues(user, false)));
-            Log.e(TAG, "why won't update work here");
         }
 
 
         MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId());
         GroupUserORM.saveUserGroups(database, user.getGroups(), user.getId());
 
-
-
+        return user;
     }
 
     private static ContentValues userToContentValues(User user, boolean includeId) {
@@ -273,5 +297,6 @@ public class UserORM {
                          cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
                          cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)));
     }
+
 
 }

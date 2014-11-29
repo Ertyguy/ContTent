@@ -43,5 +43,10 @@ public class ActionDispatch implements DispatchListener {
     public void updatedUser(int userId) {}
 
     @Override
+    public void updatedGroup(int id) {
+
+    }
+
+    @Override
     public void updateMediaFeed(MediaFeed mediaFeed) {}
 }

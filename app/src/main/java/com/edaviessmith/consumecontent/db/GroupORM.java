@@ -181,6 +181,34 @@ public class GroupORM {
 
     }
 
+    public static Group saveGroup(Context context, Group group) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+        try {
+            database.beginTransaction();
+
+            if(DB.isValid(group.getId())) {
+                database.update(DB.TABLE_GROUP, groupToContentValues(group, false), DB.COL_ID + " = "+group.getId(), null);
+            } else {
+                group.setId((int) database.insert(DB.TABLE_GROUP, null, groupToContentValues(group, false)));
+            }
+
+            group.setUsers(UserORM.saveUsers(database, group.getUsers(), group.getRemoved(), group.getId()));
+            group.clearRemoved();
+            //user.setMediaFeed(MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId()));
+
+
+
+            database.setTransactionSuccessful();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return group;
+    }
 
     private static ContentValues groupToContentValues(Group group, boolean includeId) {
         ContentValues values = new ContentValues();

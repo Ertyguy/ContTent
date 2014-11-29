@@ -121,7 +121,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         else editUser = new User();
 
         for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
-            mediaFeeds.add( editUser.getCastMediaFeed().valueAt(i));
+            mediaFeeds.add( editUser.getMediaFeedSort(i));
         }
 
 

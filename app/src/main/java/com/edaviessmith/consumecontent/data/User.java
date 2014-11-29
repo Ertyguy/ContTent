@@ -8,7 +8,7 @@ import java.util.List;
 public class User extends Content{
 
 
-	public SparseArray mediaFeed;
+	public SparseArray mediaFeed; //Id should be the sort value
     private List<Group> groups;
 
     private SparseArray<MediaFeed> removed;
@@ -49,6 +49,15 @@ public class User extends Content{
 
     public void setMediaFeed(SparseArray mediaFeed) {
         this.mediaFeed = mediaFeed;
+    }
+
+
+    public MediaFeed getMediaFeedSort(int sort) {
+        for(int i=0; i < mediaFeed.size(); i++) {
+            if(((MediaFeed)mediaFeed.valueAt(i)).getSort() == sort) return (MediaFeed) mediaFeed.valueAt(i);
+        }
+
+        return null;
     }
 
     public SparseArray<MediaFeed> getCastMediaFeed() {

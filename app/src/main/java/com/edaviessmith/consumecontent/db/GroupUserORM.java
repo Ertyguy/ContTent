@@ -33,6 +33,19 @@ public class GroupUserORM {
     }
 
 
+
+    //Return true if user no longer has a group
+    public static boolean romoveUserFromGroup(SQLiteDatabase database, int userId, int groupId) {
+        //remove user from group
+        database.delete(DB.TABLE_GROUP_USER,  DB.COL_USER + " = "+ userId + " AND " + DB.COL_GROUP + " = "+groupId, null);
+        //Log.i(TAG, "removed groupUser "+userId);
+
+        Cursor cursor = database.query(false, DB.TABLE_GROUP_USER, null, DB.COL_USER+" = "+userId, null, null, null, null, null);
+        return cursor.getCount() > 0;
+
+
+    }
+
     private static ContentValues groupUserToContentValues(GroupUser group) {
         ContentValues values = new ContentValues();
         values.put(DB.COL_GROUP, group.getGroupId());

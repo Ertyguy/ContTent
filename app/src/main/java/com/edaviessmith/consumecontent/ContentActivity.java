@@ -49,6 +49,14 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         actionDispatch = new ActionDispatch() {
 
             @Override
+            public void binderReady() {
+                super.binderReady();
+
+                if(mediaFeedFragment != null) mediaFeedFragment.adapterViewPager.notifyDataSetChanged();
+                Log.d(TAG, "binderReady");
+            }
+
+            @Override
             public void updatedUsers() {
                 super.updatedUsers();
 

@@ -112,13 +112,15 @@ public class NotificationDialog extends Dialog implements View.OnClickListener, 
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        int notificationId = position > 0? notificationAdapter.getItem(position - 1).getId(): -1;
+
         if(dialogType == DIALOG_MEDIA_FEED) {
             for(MediaFeed mediaFeed: mediaFeeds)
-            mediaFeed.setNotificationId(notificationAdapter.getItem(position - 1).getId());
+                mediaFeed.setNotificationId(notificationId);
             addActivity.feedAdapter.notifyDataSetChanged();
         }
         if(dialogType == DIALOG_SELECTED_USERS) {
-            int notificationId = position > 0? notificationAdapter.getItem(position - 1).getId(): -1;
+
             for(User user: selectedUsers) {
                 SparseArray<MediaFeed> mediaFeeds = user.getCastMediaFeed();
                 if(mediaFeeds.size() > 0) mediaFeeds.valueAt(0).setNotificationId(notificationId);

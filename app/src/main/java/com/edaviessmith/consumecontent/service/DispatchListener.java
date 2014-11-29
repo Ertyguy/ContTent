@@ -12,12 +12,17 @@ public interface DispatchListener {
     void updatedGroups();
 
     void updatedMediaFeed(int mediaFeedId, int feedState);
-    void updatedUser(int userId);
     void updateMediaFeedDatabase(int userId, int mediaFeedId);
+
+    void updatedUser(int userId);
+    void updatedGroup(int id);
+
 
     void updateUserChanged();
 
     void updateGroup(Group group);
 
     void updateMediaFeed(MediaFeed mediaFeed);
+
+
 }

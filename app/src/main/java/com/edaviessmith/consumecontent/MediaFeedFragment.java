@@ -3,11 +3,11 @@ package com.edaviessmith.consumecontent;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
@@ -35,7 +35,13 @@ public class MediaFeedFragment extends ActionFragment {
             public void binderReady() {
                 super.binderReady();
 
-
+                Log.d(TAG, "binderReady");
+            }
+            @Override
+            public void updatedUser(int userId) {
+                super.updatedUsers();
+                Log.d(TAG, "updatedUser "+userId);
+                adapterViewPager.notifyDataSetChanged();
             }
         };
     }
@@ -56,7 +62,7 @@ public class MediaFeedFragment extends ActionFragment {
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                int type = ((MediaFeed) getBinder().getUser().getMediaFeed().valueAt(position)).getType();
+                int type = (getBinder().getUser().getMediaFeedSort(position)).getType();
                 if(Var.isTypeYoutube(type)) {
                     return act.getResources().getColor(R.color.red_youtube);
                 }else if(type == Var.TYPE_TWITTER) {
