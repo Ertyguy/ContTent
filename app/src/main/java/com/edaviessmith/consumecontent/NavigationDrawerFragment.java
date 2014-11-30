@@ -41,7 +41,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 	/** Helper component that ties the action bar to the navigation drawer. */
 	public ActionBarDrawerToggle actionBarDrawerToggle;
 
-	private DrawerLayout mDrawerLayout;
+	public DrawerLayout drawerLayout;
 	private ListView mDrawerListView;
 	private View mFragmentContainerView;
 
@@ -94,7 +94,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
     public void setUp() {
         act = (ContentActivity) getActivity();
         mFragmentContainerView = act.findViewById(R.id.navigation_drawer);
-        mDrawerLayout = (DrawerLayout) act.findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) act.findViewById(R.id.drawer_layout);
 
 
         adapter = new ListAdapter(act);
@@ -102,7 +102,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
 
-        actionBarDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, act.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close ) {
+        actionBarDrawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, act.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close ) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -139,18 +139,25 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer, per the navigation drawer design guidelines.
         //if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
-        //    mDrawerLayout.openDrawer(mFragmentContainerView);
+        //    drawerLayout.openDrawer(mFragmentContainerView);
         //}
 
         // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable() {
+        actionBarDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                act.homeNavDrawerIndicatorClick();
+            }
+        });
+
+        drawerLayout.post(new Runnable() {
             @Override
             public void run() {
                 actionBarDrawerToggle.syncState();
             }
         });
 
-        mDrawerLayout.setDrawerListener(actionBarDrawerToggle);
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
     }
 
 
@@ -202,7 +209,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
             startActivity(i);
         }
         if(groups_v == v) {
-            mDrawerLayout.closeDrawer(mFragmentContainerView);
+            drawerLayout.closeDrawer(mFragmentContainerView);
             getBinder().fetchGroups();
         }
 
@@ -253,7 +260,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mDrawerLayout.closeDrawer(mFragmentContainerView);
+                    drawerLayout.closeDrawer(mFragmentContainerView);
                     Intent i = new Intent(act, AddActivity.class);
                     i.putExtra(Var.INTENT_USER_ID, user.getId());
                     startActivity(i);
@@ -288,8 +295,8 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 		if (mDrawerListView != null) {
 			mDrawerListView.setItemChecked(position, true);
 		}
-		if (mDrawerLayout != null) {
-			mDrawerLayout.closeDrawer(mFragmentContainerView);
+		if (drawerLayout != null) {
+			drawerLayout.closeDrawer(mFragmentContainerView);
 		}
 		if (mCallbacks != null) {
 			mCallbacks.onNavigationDrawerItemSelected(position);

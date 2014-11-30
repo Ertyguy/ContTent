@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -222,13 +222,13 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         }
     }
 
-
+/*
 	public void restoreActionBar() {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setHomeButtonEnabled(true);
 		actionBar.setTitle(actionBarTitle);
-	}
+	}*/
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -246,12 +246,16 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-		/*int id = item.getItemId();
-		if (id == R.id.action_settings) {
-            Intent dbmanager = new Intent(this, AndroidDatabaseManager.class);
-            startActivity(dbmanager);
+		Log.d(TAG, "onOptionsItemSelected");
+        int id = item.getItemId();
+		if (id == android.R.id.home) {
+            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
+                groupFragment.toggleState(GroupFragment.GROUPS_LIST);
+            } else {
+                toggleState(Var.LIST_USERS);
+            }
 			return true;
-		}*/
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -339,7 +343,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         groupFragment = GroupFragment.newInstance();
         getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
 
-        navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
+        toggleNavDrawerIndicator(false);
     }
 
     public void openUsers() {
@@ -353,6 +357,30 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         if(binder.getUser() != null)
             getSupportActionBar().setTitle(binder.getUser().getName());
 
-        navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+        toggleNavDrawerIndicator(true);
     }
+
+    public void toggleNavDrawerIndicator(boolean show) {
+        Log.d(TAG, "toggleNavDrawerIndicator "+show);
+        navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
+
+        navigationDrawerFragment.drawerLayout.setDrawerLockMode(show? DrawerLayout.LOCK_MODE_UNLOCKED: DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        navigationDrawerFragment.actionBarDrawerToggle.syncState();
+
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(!show);
+        getSupportActionBar().setHomeButtonEnabled(!show);
+    }
+
+    public void homeNavDrawerIndicatorClick() {
+
+        if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
+            groupFragment.toggleState(GroupFragment.GROUPS_LIST);
+        } else {
+            openUsers();
+        }
+
+    }
+
+
 }

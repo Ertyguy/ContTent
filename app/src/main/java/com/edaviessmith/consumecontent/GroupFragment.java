@@ -97,7 +97,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_group, container, false);
         act = (ContentActivity) getActivity();
 
-        act.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //act.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
         editGroup = new Group();

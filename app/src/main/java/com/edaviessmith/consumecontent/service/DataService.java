@@ -73,7 +73,7 @@ public class DataService extends Service {
             }
         });
 
-        binder.fetchGroups();
+        binder.fetchGroups(false);
 
 
         super.onCreate();
@@ -193,21 +193,25 @@ public class DataService extends Service {
         }
 
         public void fetchGroups() {
+            fetchGroups(true);
+        }
+        public void fetchGroups(final boolean update) {
 
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
                     groups = GroupORM.getGroups(DataService.this);
                     updateGroupList();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            for(ActionDispatch ad: actionDispatches) {
-                                ad.updatedGroups();
+                    if(update) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (ActionDispatch ad : actionDispatches) {
+                                    ad.updatedGroups();
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
 
                 }
             });
