@@ -311,15 +311,10 @@ public class DataService extends Service {
                     final User user = UserORM.saveUser(DataService.this, editUser);
 
                     users.put(user.getId(), user);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (ActionDispatch ad : actionDispatches) {
-                                ad.updatedUser(user.getId());
 
-                            }
-                        }
-                    });
+                    for (ActionDispatch ad : actionDispatches) {
+                        ad.updatedUser(user.getId());
+                    }
                 }
             });
         }
@@ -335,12 +330,6 @@ public class DataService extends Service {
                     for (ActionDispatch ad : actionDispatches) {
                         ad.updatedGroup(group.getId());
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                        }
-                    });
                 }
             });
         }

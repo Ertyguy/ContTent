@@ -266,14 +266,15 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             videoPlayerLayout.minimize();
             return;
         }
+
         if(contentState != Var.LIST_USERS) {
-            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
+            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST)
                 groupFragment.toggleState(GroupFragment.GROUPS_LIST);
-            } else {
-                toggleState(Var.LIST_USERS);
-            }
+            else
+                openUsers();
             return;
         }
+
         super.onBackPressed();
 
     }
@@ -340,6 +341,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
     public void openGroups() {
         //Init Groups
+        toggleState(Var.LIST_GROUPS);
         groupFragment = GroupFragment.newInstance();
         getSupportFragmentManager().beginTransaction().replace(R.id.container, groupFragment).commit();
 
@@ -361,15 +363,18 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     }
 
     public void toggleNavDrawerIndicator(boolean show) {
-        Log.d(TAG, "toggleNavDrawerIndicator "+show);
-        navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
+        Log.d(TAG, "toggleNavDrawerIndicator " + show);
 
-        navigationDrawerFragment.drawerLayout.setDrawerLockMode(show? DrawerLayout.LOCK_MODE_UNLOCKED: DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        navigationDrawerFragment.actionBarDrawerToggle.syncState();
-
-
+        //The order matters
+        if(!show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
         getSupportActionBar().setDisplayHomeAsUpEnabled(!show);
         getSupportActionBar().setHomeButtonEnabled(!show);
+        if(show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
+
+
+        navigationDrawerFragment.drawerLayout.setDrawerLockMode(show ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        navigationDrawerFragment.actionBarDrawerToggle.syncState();
+
     }
 
     public void homeNavDrawerIndicatorClick() {

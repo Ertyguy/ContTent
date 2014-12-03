@@ -84,8 +84,12 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 super.updatedGroup(groupId);
 
                 groupList = getGroups();
-                groupAdapter.notifyDataSetChanged();
-                Log.d(TAG, "updatedGroup");
+                act.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        groupAdapter.notifyDataSetChanged();
+                    }
+                });
             }
 
 
@@ -133,7 +137,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         save_fab = (Fab) view.findViewById(R.id.save_fab);
         save_fab.setOnClickListener(this);
 
-        toggleState(GROUPS_LIST);
+
 
         act.actionEdit.setOnClickListener(this);
         act.actionDelete.setOnClickListener(this);
@@ -154,6 +158,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         group_lv.setDragEnabled(dragEnabled);
         group_lv.setOnItemClickListener(this);
 
+        toggleState(GROUPS_LIST);
 
         return view;
     }
@@ -228,10 +233,12 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         if(groupState == GROUPS_LIST){
             act.getSupportActionBar().setTitle("Groups");
             act.actionEdit.setImageResource(R.drawable.ic_create_white_24dp);
+            groupAdapter.notifyDataSetChanged();
         }
         if(groupState == GROUPS_ALL) {
             act.getSupportActionBar().setTitle("Edit Groups");
             act.actionEdit.setImageResource(R.drawable.ic_check_white_24dp);
+            groupAdapter.notifyDataSetChanged();
         }
         if(groupState == GROUP_EDIT){
             act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
@@ -278,7 +285,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
 
             editGroup.setName(groupName_edt.getText().toString().trim());
-            //editGroup.add
+            editGroup.setVisible(visible_sw.isChecked());
             editGroup.setUserList(users);
             getBinder().saveGroup(editGroup);
             //editUser.setName(userName_edt.getText().toString().trim());

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
@@ -21,6 +22,7 @@ public class MediaFeedFragment extends ActionFragment {
     public FragmentStateCachePagerAdapter adapterViewPager;
     public SlidingTabLayout slidingTabLayout;
     private ContentActivity act;
+    private User user;
     ViewPager viewPager;
 
 
@@ -41,7 +43,9 @@ public class MediaFeedFragment extends ActionFragment {
             public void updatedUser(int userId) {
                 super.updatedUsers();
                 Log.d(TAG, "updatedUser "+userId);
-                adapterViewPager.notifyDataSetChanged();
+                if(user.getId() == userId)
+                    adapterViewPager.notifyDataSetChanged();
+
             }
         };
     }
@@ -50,19 +54,19 @@ public class MediaFeedFragment extends ActionFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_media_feed, container, false);
         act = (ContentActivity) getActivity();
-
+        user = getBinder().getUser();
 
         viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
         slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
 
-        adapterViewPager = new PagerAdapter(act, getBinder().getUser());
+        adapterViewPager = new PagerAdapter(act, user);
         viewPager.setAdapter(adapterViewPager);
 
         slidingTabLayout.setViewPager(viewPager);
         slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                int type = (getBinder().getUser().getMediaFeedSort(position)).getType();
+                int type = (user.getMediaFeedSort(position)).getType();
                 if(Var.isTypeYoutube(type)) {
                     return act.getResources().getColor(R.color.red_youtube);
                 }else if(type == Var.TYPE_TWITTER) {

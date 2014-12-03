@@ -328,7 +328,7 @@ public class YoutubeFragment extends ActionFragment {
 
         @Override
         public int getItemCount() {
-            return (getBinder() == null || getFeed().getItems() == null) ? 1 : getFeed().getItems().size() + 1;
+            return (getBinder() == null  || getFeed() == null || getFeed().getItems() == null) ? 1 : getFeed().getItems().size() + 1;
         }
 
 
