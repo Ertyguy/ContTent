@@ -26,9 +26,6 @@ public class YoutubeFragment extends ActionFragment {
 
     private ContentActivity act;
     private int userId, mediaFeedId;
-    //private Handler handler;
-
-    //private boolean isSearchBusy; //Only make a single request to API
     private int feedState = Var.FEED_WAITING;
 
     private RecyclerView feed_rv;
@@ -55,7 +52,7 @@ public class YoutubeFragment extends ActionFragment {
                 super.binderReady();
 
                 if (isFragmentOpen(userId, mediaFeedId)) {
-                    getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+                    getBinder().fetchItemsByMediaFeedId(getFeed().getId());
                 }
                 Log.d(TAG, "binderReady");
             }
@@ -118,24 +115,6 @@ public class YoutubeFragment extends ActionFragment {
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
         view.setId(userId);
 
-      /*  new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == 0) {
-                    setFeedState(Var.FEED_WAITING);
-                    if (swipeRefreshLayout.isRefreshing()) swipeRefreshLayout.setRefreshing(false);
-
-                    if (getFeed() != null && msg.arg1 == 1 && getFeed().getId() == msg.arg2) {
-                        if (getFeed().getItems() != null && getFeed().getItems().size() > 0) {
-
-                        }
-                    }
-                } else {
-                    if (getFeed().getId() == msg.arg2) setFeedState(msg.arg1);
-                }
-            }
-        };*/
-
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
         linearLayoutManager = new LinearLayoutManager(act);
         feed_rv.setLayoutManager(linearLayoutManager);
@@ -152,8 +131,6 @@ public class YoutubeFragment extends ActionFragment {
                 }
             }
         });
-
-
 
         itemAdapter = new YoutubeItemAdapter(act);
         feed_rv.setAdapter(itemAdapter);
@@ -173,17 +150,8 @@ public class YoutubeFragment extends ActionFragment {
                     new YoutubeFeedAsyncTask(act, getFeed(),userId, actionDispatch).execute(getFeed().getNextPageToken());
                     Log.d(TAG,"onScrolled getFeed called");
                 }
-
-                Log.d(TAG, "onScrolled " + feedState);
-                //TODO much thinking needed to hide toolbar on scroll
-                //if (dy >= mActionBarHeight && act.getSupportActionBar().isShowing()) {
-                //if (android.os.Build.VERSION.SDK_INT >= 12) ;
-                     //act.toolbar.animate().translationY(-act.toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).start();
-                    //act.getSupportActionBar().hide();
-                //} else if (dy <= -mActionBarHeight && !act.getSupportActionBar().isShowing()) {
-                    //act.getSupportActionBar().show();
-                //}
             }
+
         });
 
         return view;
@@ -193,22 +161,18 @@ public class YoutubeFragment extends ActionFragment {
     public void onStart() {
         super.onStart();
 
-        if(getBinder() != null) getBinder().fetchYoutubeItemsByMediaFeedId(getFeed().getId());
+        if(getBinder() != null) getBinder().fetchItemsByMediaFeedId(getFeed().getId());
     }
 
 
 
     private YoutubeFeed getFeed() {
-        //Log.d(TAG, "youtubeFragment getFeed: "+(getBinder().getUsers().size()));
         return (YoutubeFeed) getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId);
     }
 
 
     public void setFeedState(int feedState) {
-        //boolean change = (this.feedState != feedState);
         this.feedState = feedState;
-        //if(change) itemAdapter.notifyDataSetChanged();
-        //itemAdapter.notifyItemChanged(itemAdapter.getItemCount() - 1);
     }
 
     public class YoutubeItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
@@ -217,8 +181,6 @@ public class YoutubeFragment extends ActionFragment {
         private static final int TYPE_ITEM = 1;
         private static final int TYPE_FOOTER = 2;
         private Context context;
-
-
 
         public YoutubeItemAdapter( Context context) {
             this.context = context;
@@ -265,7 +227,7 @@ public class YoutubeFragment extends ActionFragment {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
             if (viewHolder instanceof ViewHolderItem) {
-                //if (getFeed().getItems().size() > i) {
+
                 ViewHolderItem holder = (ViewHolderItem) viewHolder;
                 YoutubeItem item = getFeed().getItems().get(i);
 
@@ -279,7 +241,6 @@ public class YoutubeFragment extends ActionFragment {
                 if (getFeed().getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
                     holder.views_tv.setText(Var.displayActivity(item.getType()));
                 }
-                //holder.views_tv.setText(Var.simpleDate.format(new Date(item.getDate())));
 
                 if (getItemViewType(i) == TYPE_DIV) {
                     int[] dateCats = Var.getTimeCategory((getFeed().getItems().get(i)).getDate());
@@ -302,8 +263,8 @@ public class YoutubeFragment extends ActionFragment {
                     }
                     holder.div_tv.setText(dividerTitle);
                 }
-                //}
             }
+
             if (viewHolder instanceof ViewHolderFooter) {
                 ViewHolderFooter footer = (ViewHolderFooter) viewHolder;
 

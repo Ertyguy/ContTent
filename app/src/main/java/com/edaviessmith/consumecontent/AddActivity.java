@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
@@ -35,8 +34,6 @@ import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.service.ActionActivity;
-import com.edaviessmith.consumecontent.util.Listener;
-import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
@@ -68,7 +65,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
     private SearchYoutubeTask searchTask;
     private SearchTwitterTask searchTwitterTask;
     private GetFeedAsyncTask feedTask;
-    private TwitterUtil twitter;
+    //private TwitterUtil twitter;
     private Toolbar toolbar;
 
 
@@ -259,22 +256,6 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         youtube_ll.setOnClickListener(this);
         twitter_ll.setOnClickListener(this);
 
-        twitter = new TwitterUtil(this);
-        twitter.setListener(new Listener() {
-            @Override
-            public void onError(String value) {
-                Toast.makeText(AddActivity.this, "Login Failed", Toast.LENGTH_LONG).show();
-                Log.e("TWITTER", value);
-                twitter.resetAccessToken();
-            }
-
-            @Override
-            public void onComplete(String value) {
-                Log.d(TAG, "twitter listener authorized " + twitter.getUsername());
-            }
-        });
-
-
     }
 
     private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
@@ -309,8 +290,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         this.searchMode = searchMode;
 
         search_v.setVisibility(searchModePreSearch() ? View.GONE: View.VISIBLE);
-        searchTwitter_v.setVisibility((searchMode == SEARCH_TWITTER && !twitter.hasAccessToken()) ? View.VISIBLE: View.GONE);
-        searchDiv_v.setVisibility((searchMode == SEARCH_TWITTER && twitter.hasAccessToken()) ? View.GONE: View.VISIBLE);
+        searchTwitter_v.setVisibility((searchMode == SEARCH_TWITTER && !binder.getTwitter().hasAccessToken()) ? View.VISIBLE: View.GONE);
+        searchDiv_v.setVisibility((searchMode == SEARCH_TWITTER && binder.getTwitter().hasAccessToken()) ? View.GONE: View.VISIBLE);
         youtube_ll.setVisibility((searchMode == SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
         twitter_ll.setVisibility((searchMode == SEARCH_OPTIONS) ? View.VISIBLE: View.GONE);
         channel_v.setVisibility((searchMode == SEARCH_YT_CHANNEL) ? View.VISIBLE: View.GONE);
@@ -404,8 +385,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                 searchTwitterTask.cancel(true);
                 searchTwitterTask = null;
             }
-            searchTwitter_v.setVisibility(twitter.hasAccessToken() ? View.GONE: View.VISIBLE);
-            searchDiv_v.setVisibility(twitter.hasAccessToken() ? View.GONE: View.VISIBLE);
+            searchTwitter_v.setVisibility(binder.getTwitter().hasAccessToken() ? View.GONE: View.VISIBLE);
+            searchDiv_v.setVisibility(binder.getTwitter().hasAccessToken() ? View.GONE: View.VISIBLE);
 
             searchTwitterTask = new SearchTwitterTask();
             searchTwitterTask.execute();
@@ -562,8 +543,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(v == twitter_ll) toggleSearch(SEARCH_TWITTER);
         if(v == search_v) toggleSearch(SEARCH_NONE);
         if(v == searchTwitterLogin_tv) {
-            twitter.resetAccessToken();
-            if (!twitter.hasAccessToken()) twitter.authorize();
+            binder.getTwitter().resetAccessToken();
+            if (!binder.getTwitter().hasAccessToken()) binder.getTwitter().authorize();
             //Hide the signin
             searchTwitter_v.setVisibility(View.GONE);
             searchDiv_v.setVisibility(View.GONE);
@@ -992,15 +973,15 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         protected Integer doInBackground(Void... params) {
             searchBusy = true;
             try {
-                if(!twitter.hasAccessToken()) {
+                if(!binder.getTwitter().hasAccessToken()) {
                     String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
                     HttpGet httpget = new HttpGet(tweeterURL);
-                    httpget.setHeader("Authorization", "Bearer " + twitter.getBearerToken());
+                    httpget.setHeader("Authorization", "Bearer " + binder.getTwitter().getBearerToken());
                     httpget.setHeader("Content-type", "application/json");
 
                     jsonTokenStream = Var.HTTPGet(httpget);
                 } else {
-                    users = twitter.twitter.searchUsers(search, twitterPage++);
+                    users = binder.getTwitter().twitter.searchUsers(search, twitterPage++);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1056,7 +1037,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                             }
                         } else if (json instanceof JSONArray) {
 
-                            if (!twitter.hasAccessToken()) {
+                            if (!binder.getTwitter().hasAccessToken()) {
 
                                 JSONArray results = new JSONArray(jsonTokenStream);
                                 for (int i = 0; i < results.length(); i++) {

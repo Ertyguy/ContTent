@@ -12,14 +12,16 @@ import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.data.User;
-import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
+import com.edaviessmith.consumecontent.db.TwitterItemORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 import com.edaviessmith.consumecontent.util.App;
 import com.edaviessmith.consumecontent.util.ImageLoader;
+import com.edaviessmith.consumecontent.util.Listener;
+import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class DataService extends Service {
 
     App app;
     ImageLoader imageLoader;
+    TwitterUtil twitter;
 
     public SparseArray<Group> groups;
     
@@ -74,6 +77,20 @@ public class DataService extends Service {
         });
 
         binder.fetchGroups(false);
+
+        twitter = new TwitterUtil(this);
+        twitter.setListener(new Listener() {
+            @Override
+            public void onError(String value) {
+                Log.e(TAG, "twitter: "+value);
+                twitter.resetAccessToken();
+            }
+
+            @Override
+            public void onComplete(String value) {
+                Log.d(TAG, "twitter listener authorized " + twitter.getUsername());
+            }
+        });
 
 
         super.onCreate();
@@ -218,7 +235,7 @@ public class DataService extends Service {
         }
 
 
-        public void fetchYoutubeItemsByMediaFeedId(final int mediaFeedId) {
+        public void fetchItemsByMediaFeedId(final int mediaFeedId) {
 
             final int userId = selectedUser;
             Var.setIntPreference(DataService.this, Var.PREF_SELECTED_USER + selectedGroup, selectedUser);
@@ -226,19 +243,21 @@ public class DataService extends Service {
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
-                    //Log.d(TAG, "fetchYoutubeItemsByMediaFeedId "+userId+ ", "+mediaFeedId);
                     try {
                         MediaFeed mediaFeed = getUser(userId).getCastMediaFeed().get(mediaFeedId);
-                        //Log.d(TAG, "fetchYoutubeItemsfinish "+mediaFeed.toString());
-                        if(mediaFeed != null)
-                            mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
+
+                        if(mediaFeed != null) {
+                            if(Var.isTypeYoutube(mediaFeed.getType()))
+                                mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
+                            if(mediaFeed.getType() == Var.TYPE_TWITTER)
+                                mediaFeed.setItems(TwitterItemORM.getTwitterItems(DataService.this, mediaFeedId));
+                        }
                     } catch (Exception e) {e.printStackTrace(); }
 
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //Log.d(TAG, "DispatchListener updatedUserMediaFeed");
                             for (ActionDispatch ad : actionDispatches) {
                                 ad.updatedMediaFeed(mediaFeedId, Var.FEED_WAITING);
 
@@ -291,12 +310,17 @@ public class DataService extends Service {
             return app;
         }
 
+        public TwitterUtil getTwitter() {
+            return twitter;
+        }
+
         public void saveMediaFeedItems(final int userId, final int mediaFeedId) {
 
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
-                    MediaFeedORM.saveYoutubeFeedItems(DataService.this, (YoutubeFeed) getUser(userId).getMediaFeed().get(mediaFeedId));
+                    MediaFeedORM.saveMediaFeedItems(DataService.this, ((MediaFeed) getUser(userId).getMediaFeed().get(mediaFeedId)));
+                    //MediaFeedORM.saveYoutubeFeedItems(DataService.this, (YoutubeFeed) getUser(userId).getMediaFeed().get(mediaFeedId));
                 }
             });
 

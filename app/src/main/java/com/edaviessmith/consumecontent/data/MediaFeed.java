@@ -13,12 +13,12 @@ public class MediaFeed {
     private String feedId;
     private int type;
 
+    private int userId;
     private int notificationId = -1;
     private long lastUpdate;
 
     private List items;
 
-    private String nextPageToken = null; //Not db related
 
     public MediaFeed() { }
 
@@ -120,14 +120,6 @@ public class MediaFeed {
         this.items = items;
     }
 
-    public String getNextPageToken() {
-        return nextPageToken;
-    }
-
-    public void setNextPageToken(String nextPageToken) {
-        this.nextPageToken = nextPageToken;
-    }
-
     public int getNotificationId() {
         return notificationId;
     }
@@ -144,6 +136,13 @@ public class MediaFeed {
         this.lastUpdate = lastUpdate;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
     @Override
     public String toString() {
         return "add(new MediaFeed(" + id +

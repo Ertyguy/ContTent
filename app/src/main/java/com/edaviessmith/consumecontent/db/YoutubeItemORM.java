@@ -63,7 +63,6 @@ public class YoutubeItemORM {
             database.close();
         }
         return youtubeItems;
-
     }
 
     public static List<YoutubeItem> getYoutubeItems(SQLiteDatabase db, int mediaFeedId) {

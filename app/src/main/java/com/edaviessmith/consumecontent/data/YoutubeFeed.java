@@ -12,7 +12,8 @@ public class YoutubeFeed extends MediaFeed {
 
     final static String TAG = "YoutubeFeed";
 
-    private int userId;
+
+    private String nextPageToken = null; //Not db related
 
     public YoutubeFeed() {
         setType(Var.TYPE_YOUTUBE_ACTIVTY);
@@ -35,12 +36,13 @@ public class YoutubeFeed extends MediaFeed {
         setType(type);
     }
 
-    public int getUserId() {
-        return userId;
+
+    public String getNextPageToken() {
+        return nextPageToken;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setNextPageToken(String nextPageToken) {
+        this.nextPageToken = nextPageToken;
     }
 
     public List<YoutubeItem> getItems() {

@@ -53,8 +53,8 @@
 
             <ImageView
                 android:id="@+id/notification_iv"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:scaleType="fitCenter"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_alarm_grey600_36dp"
@@ -68,7 +68,7 @@
                 android:paddingTop="3dp"
                 android:text="No notification set"
                 android:id="@+id/notification_tv"
-                android:textColor="@drawable/selector_accent_text"/>
+                android:textColor="@drawable/selector_accent_text_gray"/>
 
         </LinearLayout>
 

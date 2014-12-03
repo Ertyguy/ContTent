@@ -11,7 +11,6 @@ public class YoutubeItem extends MediaItem{
     private int views;
     private int likes;
     private int dislikes;
-    private int status; // Used internally (watch later, new)
 
     public YoutubeItem() {
         super();
@@ -19,16 +18,15 @@ public class YoutubeItem extends MediaItem{
     }
 
     public YoutubeItem(String title, long date, String imageMed, String imageHigh, String videoId, String duration, int views, int status) {
-        super(title, date, imageMed, imageHigh);
+        super(title, date, imageMed, imageHigh, status);
         this.videoId = videoId;
         this.duration = duration;
         this.views = views;
-        this.status = status;
         this.type = Var.TYPE_UPLOAD;
     }
 
     public YoutubeItem(String title, long date, String imageMed, String imageHigh, String videoId, int type, String description, String duration, int views, int likes, int dislikes, int status) {
-        super(title, date, imageMed, imageHigh);
+        super(title, date, imageMed, imageHigh, status);
         this.videoId = videoId;
         this.type = type;
         this.description = description;
@@ -36,7 +34,6 @@ public class YoutubeItem extends MediaItem{
         this.views = views;
         this.likes = likes;
         this.dislikes = dislikes;
-        this.status = status;
     }
 
     public String getVideoId() {
@@ -45,14 +42,6 @@ public class YoutubeItem extends MediaItem{
 
     public void setVideoId(String videoId) {
         this.videoId = videoId;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
     }
 
     public String getLength() {

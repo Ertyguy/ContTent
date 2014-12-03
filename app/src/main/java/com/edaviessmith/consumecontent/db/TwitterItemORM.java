@@ -2,6 +2,7 @@ package com.edaviessmith.consumecontent.db;
 
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -27,7 +28,36 @@ public class TwitterItemORM {
 
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_TWITTER_ITEM;
 
-    
+
+
+    public static List<TwitterItem> getTwitterItems(Context context, int mediaFeedId) {
+        List<TwitterItem> twitterItems = new ArrayList<TwitterItem>();
+
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+            Cursor cursor = database.query(false, DB.TABLE_TWITTER_ITEM, null, DB.COL_MEDIA_FEED + " = " + mediaFeedId, null, null, null, DB.ORDER_BY_DATE, null);
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    twitterItems.add(cursorToTwitterItem(cursor));
+                    cursor.moveToNext();
+                }
+            }
+            Log.i(TAG, "TwitterItems loaded successfully " +twitterItems.size());
+            database.setTransactionSuccessful();
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+            database.close();
+        }
+        return twitterItems;
+
+    }
     
     public static List<TwitterItem> getTwitterItems(SQLiteDatabase database, int mediaFeedId) {
         List<TwitterItem> twitterItems = new ArrayList<TwitterItem>();

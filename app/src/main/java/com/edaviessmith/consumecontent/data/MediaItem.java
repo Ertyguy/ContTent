@@ -11,6 +11,8 @@ public class MediaItem {
     private String imageMed;
     private String imageHigh;
 
+    private int status; // Used internally (watch later, new)
+
     public MediaItem() { }
 
     public MediaItem(String title, long date, String imageMed, String imageHigh) {
@@ -20,6 +22,14 @@ public class MediaItem {
         this.imageHigh = imageHigh;
     }
 
+    public MediaItem(String title, long date, String imageMed, String imageHigh, int status) {
+        this.title = title;
+        this.date = date;
+        this.imageMed = imageMed;
+        this.imageHigh = imageHigh;
+        this.status = status;
+    }
+
     public MediaItem(int id, String title, long date, String imageMed, String imageHigh) {
         this.id = id;
         this.title = title;
@@ -27,6 +37,7 @@ public class MediaItem {
         this.imageMed = imageMed;
         this.imageHigh = imageHigh;
     }
+
 
     public int getId() {
         return id;
@@ -66,6 +77,14 @@ public class MediaItem {
 
     public void setImageHigh(String imageHigh) {
         this.imageHigh = imageHigh;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String toString() {

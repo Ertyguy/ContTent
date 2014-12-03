@@ -268,11 +268,13 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         }
 
         if(contentState != Var.LIST_USERS) {
-            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST)
+            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
                 groupFragment.toggleState(GroupFragment.GROUPS_LIST);
-            else
+                return;
+            } else if(DB.isValid(binder.getSelectedGroup()) && DB.isValid(binder.getSelectedUser())) {
                 openUsers();
-            return;
+                return;
+            }
         }
 
         super.onBackPressed();
@@ -364,11 +366,11 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
     public void toggleNavDrawerIndicator(boolean show) {
         Log.d(TAG, "toggleNavDrawerIndicator " + show);
-
+        boolean validGroupUser = DB.isValid(binder.getSelectedGroup()) && DB.isValid(binder.getSelectedUser());
         //The order matters
         if(!show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(!show);
-        getSupportActionBar().setHomeButtonEnabled(!show);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(!show && validGroupUser);
+        getSupportActionBar().setHomeButtonEnabled(!show && validGroupUser);
         if(show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
 
 

@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:text="Not watching"
                 android:id="@+id/next_alarm_tv"
-                android:textColor="@drawable/selector_accent_text"
+                android:textColor="@drawable/selector_accent_text_gray"
                 android:minLines="1"
                 android:maxLines="1"
                 android:ellipsize="end"

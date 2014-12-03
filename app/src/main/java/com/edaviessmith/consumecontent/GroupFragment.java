@@ -421,9 +421,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 holder.editIcon_iv.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
                 holder.watchingCount_v.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
                 if(groupState == GROUPS_ALL) {
-                    holder.watchingCount_tv.setText(watchingCount > 0? ("Watching " + watchingCount + " users") : "Not watching");
+                    holder.watchingIcon_iv.setVisibility(item.isVisible()? View.VISIBLE: View.GONE);
+                    holder.watchingCount_tv.setText(item.isVisible()? (watchingCount > 0? ("Watching " + watchingCount + " users") : "Not watching"): "Hidden");
                 }
-
 
             }
         }
@@ -436,6 +436,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             public TextView userCount_tv;
             public View watchingCount_v;
             public TextView watchingCount_tv;
+            public ImageView watchingIcon_iv;
             public ImageView editIcon_iv;
 
             public ViewHolderItem(View itemView) {
@@ -447,6 +448,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 userCount_tv = (TextView) itemView.findViewById(R.id.user_count_tv);
                 watchingCount_v = itemView.findViewById(R.id.watching_count_v);
                 watchingCount_tv = (TextView) itemView.findViewById(R.id.watching_count_tv);
+                watchingIcon_iv = (ImageView) itemView.findViewById(R.id.watching_icon_iv);
                 editIcon_iv = (ImageView) itemView.findViewById(R.id.edit_icon_iv);
 
             }

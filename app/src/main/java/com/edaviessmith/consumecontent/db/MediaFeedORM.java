@@ -9,6 +9,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
+import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
@@ -106,6 +107,33 @@ public class MediaFeedORM {
 
         return null;
     }
+
+    public static void saveMediaFeedItems(Context context, MediaFeed mediaFeed) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+
+            database.update(DB.TABLE_MEDIA_FEED,lastUpdateToContentValues(Calendar.getInstance(Locale.getDefault()).getTimeInMillis()), DB.COL_ID + " = " + mediaFeed.getId(), null);
+
+            if(mediaFeed.getType() == Var.TYPE_YOUTUBE_ACTIVTY || mediaFeed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
+                YoutubeItemORM.saveYoutubeItems(database, mediaFeed.getItems(), mediaFeed.getId());
+            }
+            if(mediaFeed.getType() == Var.TYPE_TWITTER) {
+                TwitterItemORM.saveTwitterItems(database, mediaFeed.getItems(), mediaFeed.getId());
+            }
+
+            database.setTransactionSuccessful();
+            Log.e(TAG, "saveMediaFeedItems");
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+            database.close();
+        }
+    }
+
 
     public static void saveYoutubeFeedItems(Context context, YoutubeFeed mediaFeed) {
         DB databaseHelper = new DB(context);
@@ -205,6 +233,21 @@ public class MediaFeedORM {
                     cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
             if(includeUserId) youtubeFeed.setUserId(cursor.getInt(cursor.getColumnIndex(DB.COL_USER)));
             return youtubeFeed;
+
+        }
+
+        if(type == Var.TYPE_TWITTER) {
+            TwitterFeed twitterFeed = new TwitterFeed(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
+                    cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
+                    cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
+                    DB.getForeignKey(cursor, DB.COL_NOTIFICATION),
+                    cursor.getLong(cursor.getColumnIndex(DB.COL_LAST_UPDATE)));
+            if(includeUserId) twitterFeed.setUserId(cursor.getInt(cursor.getColumnIndex(DB.COL_USER)));
+            return twitterFeed;
 
         }
 
