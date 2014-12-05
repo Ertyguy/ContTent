@@ -242,6 +242,12 @@ public class YoutubeFragment extends ActionFragment {
                     holder.views_tv.setText(Var.displayActivity(item.getType()));
                 }
 
+                switch(item.getStatus()) {
+                    case Var.STATUS_SEEN: holder.status_tv.setText(""); break;
+                    case Var.STATUS_NEW: holder.status_tv.setText("New"); break;
+                }
+
+
                 if (getItemViewType(i) == TYPE_DIV) {
                     int[] dateCats = Var.getTimeCategory((getFeed().getItems().get(i)).getDate());
                     String dividerTitle = "";

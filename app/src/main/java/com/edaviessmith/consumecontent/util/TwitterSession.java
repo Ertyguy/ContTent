@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import twitter4j.auth.AccessToken;
+import twitter4j.auth.OAuth2Token;
 
 public final class TwitterSession {
 
     private static final String TWEET_AUTH_KEY = "auth_key";
     private static final String TWEET_AUTH_SECRET_KEY = "auth_secret_key";
     private static final String TWEET_USER_NAME = "user_name";
+    private static final String BEARER_ACCESS_TOKEN = "bearer_access_token";
+    private static final String BEARER_TOKEN_TYPE = "bearer_token_type";
+
     private static final String SHARED = "Twitter_Preferences";
 
     private final SharedPreferences pref;
@@ -32,6 +36,20 @@ public final class TwitterSession {
         editor.putString(TWEET_AUTH_SECRET_KEY, null);
         editor.putString(TWEET_USER_NAME, null);
         editor.commit();
+    }
+
+    public void storeBearerToken(OAuth2Token token) {
+        editor.putString(BEARER_ACCESS_TOKEN, token.getAccessToken());
+        editor.putString(BEARER_TOKEN_TYPE, token.getTokenType());
+        editor.commit();
+    }
+
+    public OAuth2Token getBearerToken() {
+        String accessToken = pref.getString(BEARER_ACCESS_TOKEN, "");
+        String tokenType = pref.getString(BEARER_TOKEN_TYPE, "");
+        if(!Var.isEmpty(accessToken) && !Var.isEmpty(tokenType))
+            return new OAuth2Token(accessToken, tokenType);
+        return null;
     }
 
     public String getUsername() {

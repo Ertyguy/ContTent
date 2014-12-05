@@ -39,10 +39,8 @@ import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 
-import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -974,14 +972,16 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             searchBusy = true;
             try {
                 if(!binder.getTwitter().hasAccessToken()) {
-                    String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
+                    /*String tweeterURL = "https://api.twitter.com/1.1/users/lookup.json?screen_name=" + search;
                     HttpGet httpget = new HttpGet(tweeterURL);
                     httpget.setHeader("Authorization", "Bearer " + binder.getTwitter().getBearerToken());
-                    httpget.setHeader("Content-type", "application/json");
+                    httpget.setHeader("Content-type", "application/json");*/
 
-                    jsonTokenStream = Var.HTTPGet(httpget);
+                    users = binder.getTwitter().getAppTwitter().lookupUsers(new String[]{search});
+
+                    //jsonTokenStream = Var.HTTPGet(httpget);
                 } else {
-                    users = binder.getTwitter().twitter.searchUsers(search, twitterPage++);
+                    users = binder.getTwitter().getUserTwitter().searchUsers(search, twitterPage++);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -990,8 +990,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         }
 
         protected void onPostExecute(Integer result) {
-            if (isCancelled()) return;
-            else {
+            if (!isCancelled()) {
 
                 if(users == null || twitterPage == 1) {
                     twitterFeedSearch.clear();
@@ -1004,13 +1003,13 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                             TwitterFeed feed = new TwitterFeed(String.valueOf(u.getId()));
                             feed.setDisplayName(u.getName());
                             feed.setChannelHandle("@" + u.getScreenName());
-                            feed.setThumbnail(u.getProfileImageURL());
+                            feed.setThumbnail(u.getProfileImageURL().replace("_normal", "_bigger"));
 
                             twitterFeedSearch.add(feed);
                         }
 
                         searchBusy = false;
-                    } else if(jsonTokenStream != null) {
+                    } /*else if(jsonTokenStream != null) {
 
                         //  Log error and clear the adapter
                         Object json = new JSONTokener(jsonTokenStream).nextValue();
@@ -1058,7 +1057,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                                 }
                             }
                         }
-                    }
+                    }*/
                     searchAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
                     Log.e("Tweet", "Error retrieving JSON stream" + e.getMessage());

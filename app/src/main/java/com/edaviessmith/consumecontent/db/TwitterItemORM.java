@@ -17,13 +17,17 @@ public class TwitterItemORM {
 
     public static String SQL_CREATE_TABLE = "CREATE TABLE "+ DB.TABLE_TWITTER_ITEM +" (" +
             //DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+      //I beleive this won't hinder anything (probably)
-            DB.COL_MEDIA_FEED        + " INTEGER, " +
-            DB.COL_TITLE            + " TEXT ," +
+            DB.COL_MEDIA_FEED       + " INTEGER, " +
+            DB.COL_TYPE             + " INTEGER ," +
+            DB.COL_TWEET_ID         + " INTEGER ," +
             DB.COL_DATE             + " INTEGER, " +
+            DB.COL_TITLE            + " TEXT ," +
+            DB.COL_DESCRIPTION      + " TEXT ," +
             DB.COL_IMAGE_MED        + " TEXT ," +
             DB.COL_IMAGE_HIGH       + " TEXT ," +
-            DB.COL_TWEET_ID         + " INTEGER ," +
-            DB.COL_SORT             + " INTEGER, " +    //Used to minimize updates
+            DB.COL_TWEET_THUMBNAIL  + " TEXT ," +
+            DB.COL_STATUS           + " INTEGER, " +
+            DB.COL_SORT             + " INTEGER, " +     //Used to minimize updates
             "FOREIGN KEY("+DB.COL_MEDIA_FEED +") REFERENCES "+DB.TABLE_MEDIA_FEED+"("+DB.COL_ID+")" +");";
 
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_TWITTER_ITEM;
@@ -90,24 +94,33 @@ public class TwitterItemORM {
         if(updated == 0) database.insert(DB.TABLE_TWITTER_ITEM, null, twitterItemToContentValues(twitterItem, youtubeFeedId, sort));
     }
 
-    private static ContentValues twitterItemToContentValues(TwitterItem twitterItem, int userId, int sort) {
+    private static ContentValues twitterItemToContentValues(TwitterItem twitterItem, int mediaFeedId, int sort) {
         ContentValues values = new ContentValues();
-        values.put(DB.COL_MEDIA_FEED, userId);
-        values.put(DB.COL_TITLE, twitterItem.getTitle());
-        values.put(DB.COL_DATE, twitterItem.getDate());
-        values.put(DB.COL_IMAGE_MED, twitterItem.getImageMed());
-        values.put(DB.COL_IMAGE_HIGH, twitterItem.getImageHigh());
-        values.put(DB.COL_TWEET_ID, twitterItem.getTweetId());
-        values.put(DB.COL_SORT, sort);
+        values.put(DB.COL_MEDIA_FEED        , mediaFeedId);
+        values.put(DB.COL_TYPE              , twitterItem.getType());
+        values.put(DB.COL_TITLE             , twitterItem.getTitle());
+        values.put(DB.COL_DESCRIPTION       , twitterItem.getDescription());
+        values.put(DB.COL_DATE              , twitterItem.getDate());
+        values.put(DB.COL_IMAGE_MED         , twitterItem.getImageMed());
+        values.put(DB.COL_IMAGE_HIGH        , twitterItem.getImageHigh());
+        values.put(DB.COL_TWEET_ID          , twitterItem.getTweetId());
+        values.put(DB.COL_TWEET_THUMBNAIL   , twitterItem.getTweetThumbnail());
+        values.put(DB.COL_STATUS            , twitterItem.getStatus());
+        values.put(DB.COL_SORT              , sort);
         return values;
     }
 
     private static TwitterItem cursorToTwitterItem(Cursor cursor) {
-        return new TwitterItem(cursor.getString(cursor.getColumnIndex(DB.COL_TITLE)),
-                               cursor.getLong(cursor.getColumnIndex(DB.COL_DATE)),
-                               cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_MED)),
-                               cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_HIGH)),
-                               cursor.getLong(cursor.getColumnIndex(DB.COL_TWEET_ID)) );
+        return new TwitterItem(cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
+                cursor.getString(cursor.getColumnIndex(DB.COL_TITLE)),
+                cursor.getString(cursor.getColumnIndex(DB.COL_DESCRIPTION)),
+                cursor.getLong(cursor.getColumnIndex(DB.COL_DATE)),
+                cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_MED)),
+                cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_HIGH)),
+                cursor.getInt(cursor.getColumnIndex(DB.COL_STATUS)),
+                cursor.getLong(cursor.getColumnIndex(DB.COL_TWEET_ID)),
+                cursor.getString(cursor.getColumnIndex(DB.COL_TWEET_THUMBNAIL)) );
+
     }
 
 }

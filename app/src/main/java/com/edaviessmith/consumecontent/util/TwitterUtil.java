@@ -5,13 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Window;
-
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,38 +19,104 @@ import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.auth.AccessToken;
+import twitter4j.auth.OAuth2Token;
+import twitter4j.conf.ConfigurationBuilder;
 
 public final class TwitterUtil {
+    private static final String TAG = "TwitterUtil";
 
     private final Context context;
-    public final Twitter twitter;
+    public final Twitter userTwitter, appTwitter;
     private final TwitterSession session;
     private final CommonsHttpOAuthConsumer httpOauthConsumer;
     private final OAuthProvider httpOauthProvider;
     private final ProgressDialog progressDialog;
     private Listener listener;
-    private AccessToken accessToken;
-    private String bearerToken;
+    public AccessToken accessToken;
+    //private String bearerToken;
 
-    public static final String CALLBACK_URL = "app://connect";
+    public  static final String CALLBACK_URL = "app://connect";
     private static final String TWITTER_ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token";
     private static final String TWITTER_AUTHORIZE_URL = "https://api.twitter.com/oauth/authorize";
     private static final String TWITTER_REQUEST_URL = "https://api.twitter.com/oauth/request_token";
     private static final String TWITTER_BEARER_TOKEN_URL = "https://api.twitter.com/oauth2/token";
 
+    static public final String PREF_TW_ACCESS_TOKEN = "twitter_beareraccesstoken";
+    static public final String PREF_TW_TOKEN_TYPE = "twitter_bearertokentype";
+
     public TwitterUtil(Context context) {
         this.context = context;
 
-        twitter = new TwitterFactory().getInstance();
+        ConfigurationBuilder cb = new ConfigurationBuilder();
+              cb.setOAuthConsumerKey(Var.TWITTER_OAUTH_CONSUMER_KEY)
+                .setOAuthConsumerSecret(Var.TWITTER_OAUTH_CONSUMER_SECRET)
+
+                      .setOAuthAccessToken(Var.TWITTER_ACCESS_TOKEN)
+                      .setOAuthAccessTokenSecret(Var.TWITTER_ACCESS_TOKEN_SECRET)
+                .setHttpConnectionTimeout(100000);
+
+
+        userTwitter = new TwitterFactory(cb.build()).getInstance();
+        //userTwitter = null;
         session = new TwitterSession(context);
         progressDialog = new ProgressDialog(context);
         progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         httpOauthConsumer = new CommonsHttpOAuthConsumer(Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
         httpOauthProvider = new DefaultOAuthProvider(TWITTER_REQUEST_URL, TWITTER_ACCESS_TOKEN_URL, TWITTER_AUTHORIZE_URL);
+        //httpOauthConsumer.setTokenWithSecret(Var.TWITTER_ACCESS_TOKEN, Var.TWITTER_ACCESS_TOKEN_SECRET);
         accessToken = session.getAccessToken();
-
         configureToken();
+
+
+
+        ConfigurationBuilder builder = new ConfigurationBuilder();
+        builder.setOAuthConsumerKey(Var.TWITTER_OAUTH_CONSUMER_KEY)
+               .setOAuthConsumerSecret(Var.TWITTER_OAUTH_CONSUMER_SECRET)
+               .setOAuthAccessToken(Var.TWITTER_ACCESS_TOKEN)
+               .setOAuthAccessTokenSecret(Var.TWITTER_ACCESS_TOKEN_SECRET)
+               .setApplicationOnlyAuthEnabled(true)
+               .setHttpConnectionTimeout(100000);
+        OAuth2Token token = null;//session.getBearerToken();
+        if(token != null) {
+            Log.d("TwitterUtil", "session "+token.getAccessToken() + ", " + token.getTokenType());
+            builder.setOAuth2TokenType(token.getTokenType());
+            builder.setOAuth2AccessToken(token.getAccessToken());
+        }
+
+        appTwitter = new TwitterFactory(builder.build()).getInstance();
+        //appTwitter = factory.getInstance();
+        //if(token == null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        OAuth2Token token = appTwitter.getOAuth2Token();
+                        //appTwitter.setOAuth2Token(token);
+                        session.storeBearerToken(token);
+                        Log.d("TwitterUtil", "runnable "+token.getAccessToken() + ", " + token.getTokenType());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        /*} else {
+            appTwitter.setOAuth2Token(session.getBearerToken());
+        }*/
+
+
+
+        //twitter.setOAuth2Token(new OAuth2Token(Var.TWITTER_ACCESS_TOKEN, Var.TWITTER_ACCESS_TOKEN_SECRET));
+        //if(accessToken != null) twitter.setOAuthAccessToken(accessToken);
+
+    }
+
+    public Twitter getUserTwitter() {
+        return userTwitter;
+    }
+
+    public Twitter getAppTwitter() {
+        return appTwitter;
     }
 
     public void setListener(Listener listener) {
@@ -64,13 +125,14 @@ public final class TwitterUtil {
 
     private void configureToken() {
         if (accessToken != null) {
-            twitter.setOAuthConsumer(Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
-            twitter.setOAuthAccessToken(accessToken);
+            userTwitter.setOAuthConsumer(Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
+            userTwitter.setOAuthAccessToken(accessToken);
         }
+
     }
 
     public boolean hasAccessToken() {
-        return (accessToken == null) ? false : true;
+        return accessToken != null;
     }
 
 
@@ -120,13 +182,11 @@ public final class TwitterUtil {
 
                 try {
                     httpOauthProvider.retrieveAccessToken(httpOauthConsumer, verifier);
-
                     accessToken = new AccessToken(httpOauthConsumer.getToken(), httpOauthConsumer.getTokenSecret());
 
                     configureToken();
 
-                    User user = twitter.verifyCredentials();
-
+                    User user = userTwitter.verifyCredentials();
                     session.storeAccessToken(accessToken, user.getName());
 
                     what = 0;
@@ -183,7 +243,7 @@ public final class TwitterUtil {
 
 
     ////      Application authentication        ////
-    public String getBearerToken() {
+    /*public String getBearerToken() {
 
         if(bearerToken != null) return bearerToken;
 
@@ -201,8 +261,9 @@ public final class TwitterUtil {
             Log.e("loadTwitterToken", "onPost Error:" + e.getMessage());
         }
 
+
         return bearerToken;
-    }
+    }*/
 
 
     private Handler handler = new Handler() {

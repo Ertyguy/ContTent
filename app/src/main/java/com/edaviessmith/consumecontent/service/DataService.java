@@ -91,7 +91,9 @@ public class DataService extends Service {
                 Log.d(TAG, "twitter listener authorized " + twitter.getUsername());
             }
         });
+        //twitter.getBearerToken();
 
+        //if (!twitter.hasAccessToken()) twitter.authorize();
 
         super.onCreate();
         Log.d(TAG, "onCreate");

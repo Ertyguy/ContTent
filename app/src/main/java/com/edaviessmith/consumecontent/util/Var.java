@@ -48,7 +48,8 @@ public class Var {
     static public final String DEVELOPER_KEY = "AIzaSyCfyVwQZCgFDgt-s02mPbpYgVgA_m-r7jI";
     static public final String TWITTER_OAUTH_CONSUMER_KEY = "ZyQynwwUcoU885CixQM66gpk5";
     static public final String TWITTER_OAUTH_CONSUMER_SECRET = "Vb1cTAkmOL3NY459eIBl14FweUV3Z3Y4Z4K53fiiJCPk8QVC9a";
-
+    static public final String TWITTER_ACCESS_TOKEN = "481268817-ubSi5g1MTQQRIBm7rpux5uJL4c2PkmDjfQtOdYaH";
+    static public final String TWITTER_ACCESS_TOKEN_SECRET = "02d44JbFMzV5BMQ8s7zxli93uA4TeRoe5CSRqzKjE1waC";
 
     //Fragment Feed Types
     public static final int TYPE_YOUTUBE_PLAYLIST = 0;
@@ -56,11 +57,19 @@ public class Var {
     public static final int TYPE_TWITTER = 2;
     //public static final int TYPE_REDDIT  = 3;
 
-    //Youtube Item Types
+    //Youtube and Twitter item Types
     public static final int TYPE_UPLOAD = 0;
     public static final int TYPE_LIKE = 1;
     public static final int TYPE_FAVORITE = 2;
     public static final int TYPE_ADD_TO_PLAYLIST = 3;
+    public static final int TYPE_TWEET = 4;
+    public static final int TYPE_RETWEET = 5;
+
+
+    public static final int STATUS_SEEN = 0;
+    public static final int STATUS_NEW = 1;
+    public static final int STATUS_FAVORITE = 2;
+    public static final int STATUS_WATCH_LATER = 3;
 
     //Notification
     public static final int NOTIFICATION_ALARM = 0;
@@ -576,6 +585,23 @@ public class Var {
         return "never";
     }
 
+    public static String getShortTime(long date) {
+        Calendar time  = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+        time.setTimeInMillis(time.getTimeInMillis() - date);
+
+        int days = time.get(Calendar.DAY_OF_YEAR) - 1;
+        int hours = time.get(Calendar.HOUR_OF_DAY);
+        int minutes = time.get(Calendar.MINUTE);
+
+        if (days > 0) return days + "d";
+        if (hours > 0) return hours + "h" ;
+        if (minutes > 0) return minutes + "m";
+
+        return "?";
+
+    }
+
     public static Calendar getNextAlarmTime(Alarm alarm, Notification scheduleNotification) {
 
         Calendar now = Calendar.getInstance(Locale.getDefault());
@@ -643,5 +669,6 @@ public class Var {
 
         return (now.getTimeInMillis() - (Var.MINUTE_MILLI * 20) < lastUpdate);
     }
+
 
 }

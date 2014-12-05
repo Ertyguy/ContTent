@@ -93,8 +93,12 @@ public class YoutubeFeed extends MediaFeed {
                 }
             }
 
+            for(int i=0; i< youtubeItems.size(); i++)
+                if(i < newer) youtubeItems.get(i).setStatus(Var.STATUS_NEW);
+
             if(newer > 0) {
                 Log.d(TAG, "newer " + (newer) + youtubeItems.size());
+
                 getItems().addAll(0, youtubeItems.subList(0, newer)); // Prepend newer youtubeItems
             }
             if(older < youtubeItems.size()) {

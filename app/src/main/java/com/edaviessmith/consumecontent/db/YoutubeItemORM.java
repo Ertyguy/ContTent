@@ -18,7 +18,7 @@ public class YoutubeItemORM {
     public static String SQL_CREATE_TABLE = "CREATE TABLE "+ DB.TABLE_YOUTUBE_ITEM +" (" +
             //DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+      //I beleive this won't hinder anything (probably)
             DB.COL_MEDIA_FEED       + " INTEGER, " +
-            DB.COL_TYPE             + " TEXT ," +
+            DB.COL_TYPE             + " INTEGER ," +
             DB.COL_VIDEO_ID         + " TEXT ," +
             DB.COL_DATE             + " INTEGER, " +
             DB.COL_TITLE            + " TEXT ," +
@@ -97,9 +97,9 @@ public class YoutubeItemORM {
         database.delete(DB.TABLE_YOUTUBE_ITEM, DB.COL_MEDIA_FEED + " = " + youtubeFeedId, null);
     }
 
-    private static ContentValues youtubeItemToContentValues(YoutubeItem youtubeItem, int userId, int sort) {
+    private static ContentValues youtubeItemToContentValues(YoutubeItem youtubeItem, int mediaFeedId, int sort) {
         ContentValues values = new ContentValues();
-        values.put(DB.COL_MEDIA_FEED, userId);
+        values.put(DB.COL_MEDIA_FEED , mediaFeedId);
         values.put(DB.COL_TYPE       , youtubeItem.getType());
         values.put(DB.COL_VIDEO_ID   , youtubeItem.getVideoId());
         values.put(DB.COL_DATE       , youtubeItem.getDate());
@@ -117,18 +117,18 @@ public class YoutubeItemORM {
     }
 
     private static YoutubeItem cursorToYoutubeItem(Cursor cursor) {
-        return new YoutubeItem(cursor.getString(cursor.getColumnIndex(DB.COL_TITLE)),
+        return new YoutubeItem(cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
+                               cursor.getString(cursor.getColumnIndex(DB.COL_TITLE)),
+                               cursor.getString(cursor.getColumnIndex(DB.COL_DESCRIPTION)),
                                cursor.getLong(cursor.getColumnIndex(DB.COL_DATE)),
                                cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_MED)),
                                cursor.getString(cursor.getColumnIndex(DB.COL_IMAGE_HIGH)),
+                               cursor.getInt(cursor.getColumnIndex(DB.COL_STATUS)),
                                cursor.getString(cursor.getColumnIndex(DB.COL_VIDEO_ID)),
-                               cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
-                               cursor.getString(cursor.getColumnIndex(DB.COL_DESCRIPTION)),
                                cursor.getString(cursor.getColumnIndex(DB.COL_DURATION)),
                                cursor.getInt(cursor.getColumnIndex(DB.COL_VIEWS)),
                                cursor.getInt(cursor.getColumnIndex(DB.COL_LIKES)),
-                               cursor.getInt(cursor.getColumnIndex(DB.COL_DISLIKES)),
-                               cursor.getInt(cursor.getColumnIndex(DB.COL_STATUS)) );
+                               cursor.getInt(cursor.getColumnIndex(DB.COL_DISLIKES)) );
     }
 
 }

@@ -217,6 +217,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
 
                         }
 
+                        youtubeItem.setStatus(Var.STATUS_SEEN);
                         youtubeItems.add(youtubeItem);
                         //Log.d(TAG,"youtube feed added "+youtubeItem.getVideoId());
                     }

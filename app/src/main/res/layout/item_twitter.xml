@@ -9,30 +9,103 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dp"
-        android:paddingTop="25dp"
-        android:paddingRight="20dp"
-        android:paddingBottom="25dp">
+        android:paddingLeft="16dp"
+        android:paddingTop="5dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="5dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/date_tv"
+            android:layout_toStartOf="@+id/date_tv"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="5dp"
+            android:id="@+id/status_v">
+
+            <ImageView
+                android:id="@+id/title_iv"
+                android:layout_width="40dp"
+                android:layout_height="14dp"
+                android:scaleType="fitEnd"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_retweet_32" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lindsay Jones @IAmLindsayJones"
+                android:id="@+id/title_tv"
+                android:textColor="@color/gray_accent"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/user_iv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_person_grey600_36dp"
+            android:layout_alignTop="@+id/description_tv"
+            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Twitter Text to wright here"
+            android:id="@+id/description_tv"
+            android:autoLink="web"
+            android:textColor="@color/dark_gray"
+            android:textSize="18sp"
+            android:layout_toEndOf="@+id/user_iv"
+            android:layout_toRightOf="@+id/user_iv"
+            android:layout_below="@+id/date_tv"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nov 11"
+            android:id="@+id/date_tv"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"/>
+
 
         <RelativeLayout
             android:id="@+id/thumbnail_v"
-            android:layout_width="96dp"
-            android:layout_height="53dp"
-            android:visibility="gone"
-            android:layout_marginRight="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_alignParentTop="true"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_alignLeft="@+id/description_tv"
+            android:layout_alignStart="@+id/description_tv"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true">
+            android:layout_alignParentEnd="true"
+            android:visibility="gone"
+            android:layout_below="@+id/description_tv">
 
             <ImageView
                 android:id="@+id/thumbnail_iv"
-                android:layout_width="96dp"
-                android:layout_height="53dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:contentDescription="@null"
-                android:src="@null"
-                android:background="@android:color/black" />
+                android:src="@null" />
 
             <ProgressBar
                 style="?android:attr/android:progressBarStyle"
@@ -42,60 +115,6 @@
                 android:id="@+id/thumbnail_pb" />
 
         </RelativeLayout>
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lindsay Jones @IAmLindsayJones"
-            android:id="@+id/views_tv"
-            android:textColor="@color/gray_accent"
-            android:layout_toEndOf="@+id/thumbnail_v"
-            android:textSize="12sp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Twitter Text"
-            android:id="@+id/title_tv"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:textColor="@color/dark_gray"
-            android:minLines="2"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:layout_toLeftOf="@+id/thumbnail_v"
-            android:layout_toStartOf="@+id/thumbnail_v"
-            android:layout_below="@+id/views_tv" />
-
-        <!--
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nov 11"
-                    android:id="@+id/date_tv"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="10sp"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignRight="@+id/status_tv"
-                    android:layout_alignEnd="@+id/status_tv" />-->
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Status"
-            android:id="@+id/status_tv"
-            android:textColor="@color/dark_gray"
-            android:gravity="end"
-            android:layout_toEndOf="@+id/views_tv"
-            android:layout_alignBottom="@+id/thumbnail_v"
-            android:layout_toLeftOf="@+id/thumbnail_v"
-            android:layout_toStartOf="@+id/thumbnail_v" />
-
-
 
     </RelativeLayout>
 

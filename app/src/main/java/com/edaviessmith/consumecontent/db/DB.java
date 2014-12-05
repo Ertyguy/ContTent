@@ -265,7 +265,9 @@ public class DB extends SQLiteOpenHelper {
     static final String COL_LIKES = "likes";
     static final String COL_DISLIKES = "dislikes";
     static final String COL_STATUS = "status";
+
     static final String COL_TWEET_ID = "tweet_id";
+    static final String COL_TWEET_THUMBNAIL = "tweet_thumbnail";
 
     public static final int PAGE_SIZE = 20; //Number of items to save
 

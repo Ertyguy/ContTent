@@ -6,6 +6,9 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +24,10 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.TwitterFeedAsyncTask;
 import com.edaviessmith.consumecontent.util.Var;
+
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class TwitterFragment extends ActionFragment {
@@ -232,17 +239,49 @@ public class TwitterFragment extends ActionFragment {
                 ViewHolderItem holder = (ViewHolderItem) viewHolder;
                 TwitterItem item = getFeed().getItems().get(i);
 
-                getBinder().getImageLoader().DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
-                holder.title_tv.setText(item.getTitle());
-                /*
-                holder.length_tv.setText(item.getDuration());
+                holder.thumbnail_v.setVisibility(!Var.isEmpty(item.getImageHigh())? View.VISIBLE: View.GONE);
+                if(!Var.isEmpty(item.getImageHigh()))
+                    getBinder().getImageLoader().DisplayImage(item.getImageHigh(), holder.thumbnail_iv, holder.thumbnail_pb);
 
-                if (getFeed().getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
-                    holder.views_tv.setText(Var.displayViews(item.getViews()));
+                //Regex and highlight @
+                String text = item.getDescription();
+                if(!Var.isEmpty(text)) {
+                    ArrayList<Integer> tags = new ArrayList<Integer>();
+                    char tag = '@';
+                    for (int index = text.indexOf(tag); index >= 0; index = text.indexOf(tag, index + 1)) {
+                        tags.add(index);
+                    }
+
+                    Spannable wordToSpan = new SpannableString(text);
+                    for (int tagIndex : tags) {
+                        Pattern p = Pattern.compile("@[a-zA-Z0-9]+");
+                        Matcher m = p.matcher(text.substring(tagIndex));
+                        if (m.find()) {
+                            int tagEnd = m.end();
+                            if (tagEnd > 0) {
+                                wordToSpan.setSpan(new ForegroundColorSpan(R.color.blue_twitter), tagIndex, tagIndex + tagEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                        }
+                    }
+                    holder.description_tv.setText(wordToSpan);
                 }
-                if (getFeed().getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
-                    holder.views_tv.setText(Var.displayActivity(item.getType()));
-                }*/
+
+                holder.date_tv.setText(Var.getShortTime(item.getDate()));
+
+                holder.status_v.setVisibility(item.getType() != Var.TYPE_TWEET? View.VISIBLE: View.GONE);
+                //holder.user_iv.setVisibility(item.getType() != Var.TYPE_TWEET? View.VISIBLE: View.GONE);
+                if(item.getType() == Var.TYPE_TWEET) {
+
+                }
+                if(item.getType() == Var.TYPE_RETWEET) {
+                    holder.title_tv.setText(item.getTitle());
+
+                }
+
+                if (!Var.isEmpty(item.getTweetThumbnail())) {
+                    getBinder().getImageLoader().DisplayImage(item.getTweetThumbnail(), holder.user_iv);
+
+                }
 
                 if (getItemViewType(i) == TYPE_DIV) {
                     int[] dateCats = Var.getTimeCategory((getFeed().getItems().get(i)).getDate());
@@ -296,23 +335,28 @@ public class TwitterFragment extends ActionFragment {
 
 
         public class ViewHolderItem extends RecyclerView.ViewHolder {
+            public ImageView user_iv;
+            public View status_v;
+            public View thumbnail_v;
             public ImageView thumbnail_iv;
             public ProgressBar thumbnail_pb;
             public TextView title_tv;
-            public TextView length_tv;
-            public TextView views_tv;
+            public TextView description_tv;
             public TextView status_tv;
-
+            public TextView date_tv;
             public TextView div_tv;
 
             public ViewHolderItem(View itemView) {
                 super(itemView);
+                status_v = itemView.findViewById(R.id.status_v);
+                thumbnail_v = itemView.findViewById(R.id.thumbnail_v);
+                user_iv = (ImageView) itemView.findViewById(R.id.user_iv);
                 thumbnail_iv = (ImageView) itemView.findViewById(R.id.thumbnail_iv);
                 thumbnail_pb = (ProgressBar) itemView.findViewById(R.id.thumbnail_pb);
                 title_tv = (TextView) itemView.findViewById(R.id.title_tv);
-                length_tv = (TextView) itemView.findViewById(R.id.length_tv);
-                views_tv = (TextView) itemView.findViewById(R.id.views_tv);
+                description_tv = (TextView) itemView.findViewById(R.id.description_tv);
                 status_tv = (TextView) itemView.findViewById(R.id.status_tv);
+                date_tv = (TextView) itemView.findViewById(R.id.date_tv);
                 div_tv = (TextView) itemView.findViewById(R.id.text_tv);
             }
         }
