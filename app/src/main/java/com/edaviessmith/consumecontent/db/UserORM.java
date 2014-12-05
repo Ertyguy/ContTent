@@ -142,7 +142,7 @@ public class UserORM {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
                     User user = cursorToUser(cursor);
-
+                    Log.e(DB.STRIP, user.toString());
                     if(groups != null) user.setGroups(GroupORM.getUserGroups(database, user.getId(), groups));
                     else user.setGroups(GroupORM.getUserGroups(database, user.getId()));
                     user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));

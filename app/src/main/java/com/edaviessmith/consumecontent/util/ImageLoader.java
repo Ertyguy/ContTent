@@ -36,9 +36,7 @@ public class ImageLoader {
         fileCache = new FileCache(context);
         executorService = Executors.newFixedThreadPool(5);
     }
-     
-    //final int stub_id = R.drawable.ic_launcher;
-    
+
     public void DisplayImage(String url, ImageView imageView) {
         imageViews.put(imageView, url);
         Bitmap bitmap = memoryCache.get(url);
@@ -46,7 +44,6 @@ public class ImageLoader {
             imageView.setImageBitmap(bitmap);
         else {
             queuePhoto(url, imageView);
-            //imageView.setImageResource(stub_id);
         }
     }
 
@@ -79,7 +76,7 @@ public class ImageLoader {
         executorService.submit(new PhotosLoader(p));
     }
      
-    private Bitmap getBitmap(String url) 
+    public Bitmap getBitmap(String url)
     {
         File f = fileCache.getFile(url);
          

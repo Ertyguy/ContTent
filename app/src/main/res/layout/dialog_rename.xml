@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <View style="@style/shadow_bottom" android:layout_alignTop="@+id/thumbnail_iv" />
+        <View style="@style/shadow_bottom" android:layout_alignParentTop="true" />
 
         <ImageView
             android:layout_width="80dp"
@@ -46,6 +46,7 @@
             android:id="@+id/name_edt"
             android:maxLines="1"
             android:ellipsize="end"
+            android:imeOptions="actionDone"
             android:textSize="20sp"
             android:layout_marginRight="5dp"
             android:layout_marginEnd="5dp"

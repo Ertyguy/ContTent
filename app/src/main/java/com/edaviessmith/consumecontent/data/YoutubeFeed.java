@@ -29,11 +29,7 @@ public class YoutubeFeed extends MediaFeed {
     }
 
     public YoutubeFeed(String name, String thumbnail, String channelHandle, String feedId, int type){
-        setName(name);
-        setThumbnail(thumbnail);
-        setChannelHandle(channelHandle);
-        setFeedId(feedId);
-        setType(type);
+        super(name, thumbnail, channelHandle, feedId, type);
     }
 
 
@@ -113,21 +109,15 @@ public class YoutubeFeed extends MediaFeed {
         return newer <= DB.PAGE_SIZE;
     }
 
-    /*public String toString() {
-        return "YoutubeFeed ("+getId()+", "+getName()+", "+getFeedId()+", "+getThumbnail()+")";
-    }*/
 
     @Override
     public String toString() {
-        return "\tadd(new YoutubeFeed(" + getId() +
-                ", " + getSort() +
-                ", \"" + getName() + '"' +
+        return "\tput("+(getSort())+", new YoutubeFeed(\""
+                       + getName() + '"' +
                 ", \"" + getThumbnail() + '"' +
                 ", \"" + getChannelHandle() + '"' +
-                ", \"" + getFeedId() + '\"' +
-                ", " + getType() +
-                ", " + getNotificationId() +
-                "));";
+                (Var.isEmpty(getFeedId()) ? ", null": (", \"" + getFeedId() + '\"')) +
+                ", " + getType() + "));";
     }
 
 }

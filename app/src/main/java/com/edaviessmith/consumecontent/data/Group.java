@@ -77,11 +77,9 @@ public class Group extends Content {
 
     @Override
     public String toString() {
-        return "new Group(" + getId() +
-                ", " + getSort() +
-                ", \"" + getName() + '\"' +
-                ", \"" + getThumbnail() + '\"' +
-                ", true);";
+
+        return "}});\n\n"+getName().toLowerCase()+"Group"+".setUsers(new SparseArray<User>() {{";
+
     }
 
 

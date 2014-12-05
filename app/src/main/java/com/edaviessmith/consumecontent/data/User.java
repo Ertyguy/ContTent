@@ -86,12 +86,12 @@ public class User extends Content{
 
     @Override
     public String toString() {
-        return "}}); \n\nnew User(" + getId() +
-                ", " + getSort() +
-                ", \"" + getName() + '\"' +
+        return "}}, new ArrayList<Group>() {{add(groupName); }})); \n\n" +
+                "put("+getSort()+" new User(" +
+                  "\"" + getName() + '\"' +
                 ", \"" + getThumbnail() + '\"' +
-                ", new ArrayList<YoutubeFeed>(){{";
-    }
+                ", new SparseArray<YoutubeFeed>(){{";
+        }
 
 
 }

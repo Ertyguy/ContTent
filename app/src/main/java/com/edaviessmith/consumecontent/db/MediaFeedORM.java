@@ -28,7 +28,7 @@ public class MediaFeedORM {
             DB.COL_NAME   	        + " TEXT, " +
             DB.COL_THUMBNAIL 	    + " TEXT, " +
             DB.COL_CHANNEL_HANDLE	+ " TEXT ," +
-            //TODO twitterFeed display name is not handled (design decision required)
+            DB.COL_DISPLAY_NAME	    + " TEXT ," +  //TODO twitterFeed display name is not handled efficiently (design decision required)
             DB.COL_FEED_ID          + " TEXT, " +
             DB.COL_TYPE		        + " INTEGER, " +
             DB.COL_NOTIFICATION     + " INTEGER, " +
@@ -51,8 +51,9 @@ public class MediaFeedORM {
                 int type = cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE));
 
                 if(Var.isTypeYoutube(type)) mediaFeeds.put(id, (YoutubeFeed) cursorToMediaFeed(cursor, type, false));
+                if(type == Var.TYPE_TWITTER) mediaFeeds.put(id, (TwitterFeed) cursorToMediaFeed(cursor, type, false));
                 else mediaFeeds.put(id, (MediaFeed) cursorToMediaFeed(cursor, type, false));
-                Log.e(TAG, mediaFeeds.get(id).toString());
+                Log.e(DB.STRIP, mediaFeeds.get(id).toString());
                 cursor.moveToNext();
             }
             Log.i(TAG, "MediaFeeds loaded successfully "+mediaFeeds.size());
@@ -212,6 +213,7 @@ public class MediaFeedORM {
         values.put(DB.COL_SORT, mediaFeed.getSort());
         values.put(DB.COL_NAME, mediaFeed.getName());
         values.put(DB.COL_CHANNEL_HANDLE, mediaFeed.getChannelHandle());
+        if(!Var.isEmpty(mediaFeed.getDisplayName())) values.put(DB.COL_DISPLAY_NAME, mediaFeed.getDisplayName());
         values.put(DB.COL_THUMBNAIL, mediaFeed.getThumbnail());
         values.put(DB.COL_FEED_ID, mediaFeed.getFeedId());
         values.put(DB.COL_TYPE, mediaFeed.getType());
@@ -242,6 +244,7 @@ public class MediaFeedORM {
                     cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_CHANNEL_HANDLE)),
+                    cursor.getString(cursor.getColumnIndex(DB.COL_DISPLAY_NAME)),
                     cursor.getString(cursor.getColumnIndex(DB.COL_FEED_ID)),
                     cursor.getInt(cursor.getColumnIndex(DB.COL_TYPE)),
                     DB.getForeignKey(cursor, DB.COL_NOTIFICATION),

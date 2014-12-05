@@ -30,9 +30,10 @@ public final class TwitterUtil {
     private final TwitterSession session;
     private final CommonsHttpOAuthConsumer httpOauthConsumer;
     private final OAuthProvider httpOauthProvider;
-    private final ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
     private Listener listener;
     public AccessToken accessToken;
+    private Context actContext;
     //private String bearerToken;
 
     public  static final String CALLBACK_URL = "app://connect";
@@ -47,20 +48,9 @@ public final class TwitterUtil {
     public TwitterUtil(Context context) {
         this.context = context;
 
-        ConfigurationBuilder cb = new ConfigurationBuilder();
-              cb.setOAuthConsumerKey(Var.TWITTER_OAUTH_CONSUMER_KEY)
-                .setOAuthConsumerSecret(Var.TWITTER_OAUTH_CONSUMER_SECRET)
 
-                      .setOAuthAccessToken(Var.TWITTER_ACCESS_TOKEN)
-                      .setOAuthAccessTokenSecret(Var.TWITTER_ACCESS_TOKEN_SECRET)
-                .setHttpConnectionTimeout(100000);
-
-
-        userTwitter = new TwitterFactory(cb.build()).getInstance();
-        //userTwitter = null;
+        userTwitter = new TwitterFactory().getInstance();
         session = new TwitterSession(context);
-        progressDialog = new ProgressDialog(context);
-        progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         httpOauthConsumer = new CommonsHttpOAuthConsumer(Var.TWITTER_OAUTH_CONSUMER_KEY, Var.TWITTER_OAUTH_CONSUMER_SECRET);
         httpOauthProvider = new DefaultOAuthProvider(TWITTER_REQUEST_URL, TWITTER_ACCESS_TOKEN_URL, TWITTER_AUTHORIZE_URL);
@@ -148,7 +138,11 @@ public final class TwitterUtil {
         return session.getUsername();
     }
 
-    public void authorize() {
+    public void authorize(Context context) {
+        actContext = context;
+        progressDialog = new ProgressDialog(actContext);
+        progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         progressDialog.setMessage("Initializing ...");
         progressDialog.show();
 
@@ -238,33 +232,8 @@ public final class TwitterUtil {
             }
         };
 
-        new TwitterDialog(context, url, listener).show();
+        new TwitterDialog(actContext, url, listener).show();
     }
-
-
-    ////      Application authentication        ////
-    /*public String getBearerToken() {
-
-        if(bearerToken != null) return bearerToken;
-
-        try {
-            HttpPost httppost = new HttpPost(TWITTER_BEARER_TOKEN_URL);
-
-            String authorization = "Basic " + Base64.encodeToString((Var.TWITTER_OAUTH_CONSUMER_KEY + ":" + Var.TWITTER_OAUTH_CONSUMER_SECRET).getBytes(), Base64.NO_WRAP);
-            httppost.setHeader("Authorization", authorization);
-            httppost.setHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8");
-            httppost.setEntity(new StringEntity("grant_type=client_credentials"));
-
-            JSONObject root = new JSONObject(Var.HTTPPost(httppost));
-            if(Var.isJsonString(root, "access_token")) bearerToken = root.getString("access_token");
-        } catch (Exception e) {
-            Log.e("loadTwitterToken", "onPost Error:" + e.getMessage());
-        }
-
-
-        return bearerToken;
-    }*/
-
 
     private Handler handler = new Handler() {
         @Override

@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.v4.app.NotificationCompat;
 
 import com.edaviessmith.consumecontent.ContentActivity;
@@ -15,6 +16,7 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.UserORM;
+import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
@@ -31,6 +33,7 @@ public class MediaFeedActivityService extends IntentService {
     private List<Integer> updatedMediaFeedIds;
     private ActionDispatch actionDispatch;
     List<YoutubeFeed> youtubeFeeds;
+    ImageLoader imageLoader;
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
 
@@ -75,6 +78,7 @@ public class MediaFeedActivityService extends IntentService {
 
         int notificationId = intent.getIntExtra(Var.NOTIFY_NOTIFICATION_ID, -1);
 
+        imageLoader = new ImageLoader(this);
         Var.setNextAlarm(this, new NotificationList(this)); //Set next Alarm
 
         youtubeFeeds = MediaFeedORM.getYoutubeFeedsByNotificationId(this, notificationId); //run in sync
@@ -111,9 +115,13 @@ public class MediaFeedActivityService extends IntentService {
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setContentTitle(title)
                     .setContentText(text)
-                    .setContentIntent(PendingIntent.getActivity(this, users.get(0).getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                    .setContentIntent(PendingIntent.getActivity(this, users.get(0).getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setSmallIcon(R.drawable.ic_launcher);
 
-             builder.setSmallIcon(R.drawable.ic_launcher);
+            if(Var.isEmpty(users.get(0).getThumbnail())) {
+                Bitmap icon = imageLoader.getBitmap(users.get(0).getThumbnail());
+                if(icon != null) builder.setLargeIcon(icon);
+            }
 
             //Next 3 members as sub-icons
             for(int i = 1; i < users.size() && i<= 3; i++) {
@@ -124,7 +132,10 @@ public class MediaFeedActivityService extends IntentService {
                 //in.putExtra(Constants.PREF_MEMBER, user.id);
 
                 //TODO reason to save icon as
-                builder.addAction(R.drawable.ic_launcher, user.getName(), PendingIntent.getActivity(this, user.getId(), in, PendingIntent.FLAG_UPDATE_CURRENT));
+                NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_youtube_white, user.getName(), PendingIntent.getActivity(this, user.getId(), in, PendingIntent.FLAG_UPDATE_CURRENT));
+
+                builder.addAction(action);
+
             }
 
             android.app.Notification notification = builder.build();

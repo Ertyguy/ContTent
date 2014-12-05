@@ -67,6 +67,7 @@ public class DataService extends Service {
         //selectedUser = 1;
 
         imageLoader = new ImageLoader(this);
+
         app = (App) getApplication();
 
         tpe.submit(new Runnable() {

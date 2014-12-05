@@ -28,7 +28,7 @@
             <ImageView
                 android:id="@+id/title_iv"
                 android:layout_width="40dp"
-                android:layout_height="14dp"
+                android:layout_height="18dp"
                 android:scaleType="fitEnd"
                 android:layout_marginRight="8dp"
                 android:layout_marginEnd="8dp"
@@ -40,6 +40,8 @@
                 android:layout_height="wrap_content"
                 android:text="Lindsay Jones @IAmLindsayJones"
                 android:id="@+id/title_tv"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:textColor="@color/gray_accent"
                 android:textSize="14sp"/>
 

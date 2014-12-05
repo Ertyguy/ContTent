@@ -89,6 +89,7 @@ public class GroupORM {
             while (!cursor.isAfterLast()) {
                 Group group = cursorToGroup(cursor);
 
+                Log.e(DB.STRIP, group.toString());
                 group.setUsers(UserORM.getUsersByGroupId(context, group.getId(), null));
 
                 groupList.put(group.getId(), group);

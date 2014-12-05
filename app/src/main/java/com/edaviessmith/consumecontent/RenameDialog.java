@@ -9,6 +9,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
 
@@ -21,12 +22,14 @@ public class RenameDialog extends Dialog implements View.OnClickListener {
     ImageView thumbnail_iv;
     View cancel_tv, set_tv;
     String thumbnail;
+    MediaFeed mediaFeed;
 
 
 
-    public RenameDialog(AddActivity activity, EditText name_edt, String thumbnail) {
+    public RenameDialog(AddActivity activity, MediaFeed mediaFeed, EditText name_edt, String thumbnail) {
         super(activity);
         this.act = activity;
+        this.mediaFeed = mediaFeed;
         this.name_edt = name_edt;
         this.thumbnail = thumbnail;
 
@@ -71,8 +74,8 @@ public class RenameDialog extends Dialog implements View.OnClickListener {
     public void onClick(View v) {
 
         if(set_tv == v) {
-            name_edt.setText(rename_edt.getText().toString());
 
+            act.rename(mediaFeed, rename_edt.getText().toString());
             dismiss();
         }
 

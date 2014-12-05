@@ -11,8 +11,6 @@ import java.util.List;
 public class TwitterFeed extends MediaFeed {
 
     private final static String TAG = "TwitterFeed";
-
-    public String displayName;
     public int nextPageToken = -1;
 
     public TwitterFeed() {
@@ -31,18 +29,17 @@ public class TwitterFeed extends MediaFeed {
     }
 
 
-    public TwitterFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type, int notificationId, long lastUpdate) {
+    public TwitterFeed(String name, String thumbnail, String channelHandle, String feedId, int type, String displayName){
+        super(name, thumbnail, channelHandle, feedId, type);
+        setDisplayName(displayName);
+    }
+
+    public TwitterFeed(int id, int sort, String name, String thumbnail, String channelHandle, String displayName,String feedId, int type, int notificationId, long lastUpdate) {
         super(id, sort, name, thumbnail, channelHandle, feedId, type, notificationId, lastUpdate);
+        setDisplayName(displayName);
     }
 
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
 
     public int getNextPageToken() {
         return nextPageToken;
@@ -104,6 +101,17 @@ public class TwitterFeed extends MediaFeed {
         }
 
         return newer <= DB.PAGE_SIZE;
+    }
+
+    @Override
+    public String toString() {
+        return "\tput("+(getSort())+", new TwitterFeed(\""
+                + getName() + '"' +
+                ", \"" + getThumbnail() + '"' +
+                ", \"" + getChannelHandle() + '"' +
+                ", \"" + getFeedId() + '\"' +
+                ", " + getType() +
+                ", \"" + getDisplayName() + '\"' +"));";
     }
 
 }

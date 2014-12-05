@@ -128,7 +128,7 @@ public class Var {
     public static final int DATE_MONTH = 3; //Divide by individual month
     public static final String[] DAYS = {"Today", "Yesterday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
     public static final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-
+    public static final String[] MONTHSSHORT = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
     public static int SCROLL_OFFSET = 5; //Number of items before next request
 
@@ -536,7 +536,6 @@ public class Var {
         if (alarm.getType() == Var.ALARM_AT) {
             Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             c.setTimeInMillis(alarm.getTime());
-            int hourOfDay = c.get(Calendar.HOUR_OF_DAY);
 
             return "At " + Var.getTimeText(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
         }
@@ -593,6 +592,12 @@ public class Var {
         int days = time.get(Calendar.DAY_OF_YEAR) - 1;
         int hours = time.get(Calendar.HOUR_OF_DAY);
         int minutes = time.get(Calendar.MINUTE);
+
+        if(days > 2) {
+            Calendar day  = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            day.setTimeInMillis(date);
+            return MONTHSSHORT[day.get(Calendar.MONTH)] + " "+day.get(Calendar.DAY_OF_MONTH);
+        }
 
         if (days > 0) return days + "d";
         if (hours > 0) return hours + "h" ;

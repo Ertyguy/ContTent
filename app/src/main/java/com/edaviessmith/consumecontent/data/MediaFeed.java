@@ -10,6 +10,7 @@ public class MediaFeed {
     private String name;
     private String thumbnail;
     private String channelHandle;
+    private String displayName;
     private String feedId;
     private int type;
 
@@ -43,6 +44,14 @@ public class MediaFeed {
         this.items = new ArrayList();
 
     }*/
+
+    public MediaFeed(String name, String thumbnail, String channelHandle, String feedId, int type) {
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.channelHandle = channelHandle;
+        this.feedId = feedId;
+        this.type = type;
+    }
 
     public MediaFeed(int id, int sort, String name, String thumbnail, String channelHandle, String feedId, int type, int notificationId, long lastUpdate) {
         this.id = id;
@@ -102,6 +111,14 @@ public class MediaFeed {
 
     public void setChannelHandle(String channelHandle) {
         this.channelHandle = channelHandle;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public int getType() {

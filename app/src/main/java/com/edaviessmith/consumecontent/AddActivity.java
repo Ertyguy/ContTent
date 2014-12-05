@@ -191,12 +191,12 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         userThumbnail_iv = (ImageView) header.findViewById(R.id.user_thumbnail_iv);
         userThumbnail_pb = (ProgressBar) header.findViewById(R.id.user_thumbnail_pb);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
-        userName_edt.setOnClickListener(new View.OnClickListener() {
+        /*userName_edt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new RenameDialog(AddActivity.this, userName_edt, editUser.getThumbnail());
             }
-        });
+        });*/
         groups_v = header.findViewById(R.id.groups_v);
 
         search_fab = (Fab) header.findViewById(R.id.search_fab);
@@ -306,7 +306,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             search_rl.setVisibility(View.GONE);
             search_edt.getText().clear();
 
-            action_fab.setVisibility((editUser.getMediaFeed().size() > 0) ? View.VISIBLE: View.GONE);
+            action_fab.setVisibility((mediaFeeds.size() > 0) ? View.VISIBLE: View.GONE);
             search_lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             youtubeChannelSearch.clear();
             twitterFeedSearch.clear();
@@ -542,7 +542,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(v == search_v) toggleSearch(SEARCH_NONE);
         if(v == searchTwitterLogin_tv) {
             binder.getTwitter().resetAccessToken();
-            if (!binder.getTwitter().hasAccessToken()) binder.getTwitter().authorize();
+            if (!binder.getTwitter().hasAccessToken()) binder.getTwitter().authorize(this);
             //Hide the signin
             searchTwitter_v.setVisibility(View.GONE);
             searchDiv_v.setVisibility(View.GONE);
@@ -550,7 +550,9 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(v == clearSearch_iv) search_edt.getText().clear();
     }
 
-
+    public void rename(MediaFeed mediaFeed, String rename) {
+        mediaFeed.setName(rename);
+    }
 
     public void onScrollStateChanged(AbsListView view, int scrollState) {
        dismissSearch();
@@ -836,7 +838,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             holder.name_edt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new RenameDialog(AddActivity.this, holder.name_edt, feed.getThumbnail());
+                    new RenameDialog(AddActivity.this, feed, holder.name_edt, feed.getThumbnail());
                 }
             });
 
@@ -918,10 +920,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
             if(convertView == null) {
                 convertView = inflater.inflate((getItemViewType(position) == 0 ? R.layout.item_youtube_search: R.layout.item_twitter_search), parent, false);
-                holder = new ViewHolder();
-                holder.image_iv = (ImageView) convertView.findViewById(R.id.thumbnail_iv);
-                holder.name_tv = (TextView) convertView.findViewById(R.id.name_tv);
-                holder.screenName_tv = (TextView) convertView.findViewById(R.id.screen_name_tv);
+                holder = new ViewHolder(convertView);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -941,7 +940,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                 if (feed.getThumbnail() != null)  binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
 
                 holder.name_tv.setText(feed.getDisplayName());
-                holder.screenName_tv.setText(feed.getName());
+                holder.screenName_tv.setText(feed.getChannelHandle());
             }
 
             if(searchMode == SEARCH_YT_CHANNEL) {
@@ -959,6 +958,12 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             ImageView image_iv;
             TextView name_tv;
             TextView screenName_tv;
+
+            ViewHolder(View convertView) {
+                image_iv = (ImageView) convertView.findViewById(R.id.thumbnail_iv);
+                name_tv = (TextView) convertView.findViewById(R.id.name_tv);
+                screenName_tv = (TextView) convertView.findViewById(R.id.screen_name_tv);
+            }
         }
     }
 
@@ -1002,6 +1007,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                         for (twitter4j.User u : users) {
                             TwitterFeed feed = new TwitterFeed(String.valueOf(u.getId()));
                             feed.setDisplayName(u.getName());
+                            //feed.setName("@" + u.getScreenName());
                             feed.setChannelHandle("@" + u.getScreenName());
                             feed.setThumbnail(u.getProfileImageURL().replace("_normal", "_bigger"));
 
@@ -1009,55 +1015,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                         }
 
                         searchBusy = false;
-                    } /*else if(jsonTokenStream != null) {
-
-                        //  Log error and clear the adapter
-                        Object json = new JSONTokener(jsonTokenStream).nextValue();
-                        if (json instanceof JSONObject) {
-                            if (Var.isJsonArray(((JSONObject) json), "errors")) {
-                                JSONArray errors = ((JSONObject) json).getJSONArray("errors");
-                                if (errors.length() > 0) {
-                                    Log.d(TAG, jsonTokenStream);
-
-                                    if (Var.isJsonString(errors.getJSONObject(0), "message")) {
-                                        String message = errors.getJSONObject(0).getString("message");
-                                        int code = errors.getJSONObject(0).getInt("code");
-
-                                        searchMessage_tv.setVisibility(View.VISIBLE);
-                                        if (code == 88)
-                                            searchMessage_tv.setText(R.string.rate_limit_error);
-                                        if (code == 34)
-                                            searchMessage_tv.setText(R.string.page_does_not_exist_error);
-                                        else searchMessage_tv.setText(message);
-
-
-                                    }
-                                }
-                            }
-                        } else if (json instanceof JSONArray) {
-
-                            if (!binder.getTwitter().hasAccessToken()) {
-
-                                JSONArray results = new JSONArray(jsonTokenStream);
-                                for (int i = 0; i < results.length(); i++) {
-                                    JSONObject item = results.getJSONObject(i);
-
-                                    if (Var.isJsonString(item, "id")) {
-
-                                        TwitterFeed feed = new TwitterFeed(item.getString("id"));
-                                        if (Var.isJsonString(item, "name"))
-                                            feed.setDisplayName(item.getString("name"));
-                                        if (Var.isJsonString(item, "screen_name"))
-                                            feed.setChannelHandle("@" + item.getString("screen_name"));
-                                        if (Var.isJsonString(item, "profile_image_url"))
-                                            feed.setThumbnail(item.getString("profile_image_url").replace("_normal", "_bigger"));
-
-                                        twitterFeedSearch.add(feed);
-                                    }
-                                }
-                            }
-                        }
-                    }*/
+                    }
                     searchAdapter.notifyDataSetChanged();
                 } catch (Exception e) {
                     Log.e("Tweet", "Error retrieving JSON stream" + e.getMessage());
