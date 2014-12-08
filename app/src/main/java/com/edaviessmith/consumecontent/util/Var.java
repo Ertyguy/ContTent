@@ -117,7 +117,7 @@ public class Var {
     static SimpleDateFormat length = new SimpleDateFormat("mm:ss", Locale.getDefault());
     static SimpleDateFormat lengthHour = new SimpleDateFormat("k:mm:ss", Locale.getDefault());
     public static DateFormat stringDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", new Locale("US"));
-    public static DateFormat simpleDate = new SimpleDateFormat("MMM dd k:mm a", Locale.getDefault());
+    public static DateFormat simpleDate = new SimpleDateFormat("MMM dd h:mm a", Locale.getDefault());
 
     public static final Long HOUR_MILLI = 3600000L;
     public static final Long MINUTE_MILLI = 60000L;
@@ -338,6 +338,9 @@ public class Var {
                     }
                 }
 
+                //TODO debug to hardcode alarm in 1 minute
+                //nextAlarm = 1 * Var.MINUTE_MILLI;
+
                 Log.d(TAG, "AlarmManager current Alarm: " + (nextAlarmPref / Var.MINUTE_MILLI) + ", next: " + ((nextAlarm + now) / Var.MINUTE_MILLI));
                 if (nextAlarm > 0L && (((nextAlarm + now) / Var.MINUTE_MILLI) != (nextAlarmPref / Var.MINUTE_MILLI))) {
                     intent.putExtra(Var.NOTIFY_NOTIFICATION_ID, notificationId);
@@ -367,7 +370,7 @@ public class Var {
 
     public static String getNextNotificationTime(List<Notification> notifications, Notification scheduleNotification) {
 
-        Alarm nextAlarm = null; //for debug log
+        Alarm nextAlarm = null;
         Calendar nextAlarmTime = null;
 
         for(Notification notification: notifications) {
@@ -388,7 +391,7 @@ public class Var {
 
     public static String getNextNotificationAlarm(Notification notification, Notification scheduleNotification) {
 
-        Alarm nextAlarm = null; //for debug log
+        Alarm nextAlarm = null;
         Calendar nextAlarmTime = null;
 
         for(Alarm alarm: notification.getAlarms()){

@@ -1,8 +1,6 @@
 package com.edaviessmith.consumecontent.data;
 
 
-import android.util.Log;
-
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.util.Var;
 
@@ -58,15 +56,15 @@ public class YoutubeFeed extends MediaFeed {
      */
     public boolean addItems(List<YoutubeItem> youtubeItems) {
 
-        int newer = 0;
+        int newer = -1;
+        int older = 0;
         if(getItems() == null || getItems().size() == 0) setItems(youtubeItems); //Nothing in list yet
         else if(youtubeItems.size() > 0) {
-
+            newer = 0;
             int itemIndex = 0; //Index of older items (iterate to reduce checks)
-            int older;
 
             for(; newer < youtubeItems.size(); newer++) {
-                Log.d(TAG, "newer check break "+(youtubeItems.get(newer).getDate() <= getItems().get(0).getDate()) + ": "+youtubeItems.get(newer).getTitle());
+                //Log.d(TAG, "newer check break "+newer+" - "+(youtubeItems.get(newer).getDate() <= getItems().get(0).getDate()) + ": "+youtubeItems.get(newer).getTitle());
                 if(youtubeItems.get(newer).getDate() <= getItems().get(0).getDate()) break;     // Number of youtubeItems that are newer
             }
 
@@ -75,7 +73,7 @@ public class YoutubeFeed extends MediaFeed {
                 for(; itemIndex < getItems().size(); itemIndex ++) {
                     if(itemIndex == getItems().size() - 1) break olderLoop;
                     if (youtubeItems.get(older).getDate() >= getItems().get(itemIndex).getDate()) {
-                        //Log.d(TAG, "oolder check break "+older);
+                        //Log.d(TAG, "older check break "+older);
                         break;
                     }
                 }
@@ -93,7 +91,7 @@ public class YoutubeFeed extends MediaFeed {
                 if(i < newer) youtubeItems.get(i).setStatus(Var.STATUS_NEW);
 
             if(newer > 0) {
-                Log.d(TAG, "newer " + (newer) + youtubeItems.size());
+                //Log.d(TAG, "newer " + (newer) + youtubeItems.size());
 
                 getItems().addAll(0, youtubeItems.subList(0, newer)); // Prepend newer youtubeItems
             }
@@ -105,7 +103,8 @@ public class YoutubeFeed extends MediaFeed {
         } else {
             return false; //youtubeItem list is empty
         }
-
+        //Log.d(TAG, "set Items finished "+getId()+" - "+newer + " to "+older);
+        //return (newer > 0 ) &&
         return newer <= DB.PAGE_SIZE;
     }
 

@@ -53,7 +53,7 @@ public class MediaFeedORM {
                 if(Var.isTypeYoutube(type)) mediaFeeds.put(id, (YoutubeFeed) cursorToMediaFeed(cursor, type, false));
                 if(type == Var.TYPE_TWITTER) mediaFeeds.put(id, (TwitterFeed) cursorToMediaFeed(cursor, type, false));
                 else mediaFeeds.put(id, (MediaFeed) cursorToMediaFeed(cursor, type, false));
-                Log.e(DB.STRIP, mediaFeeds.get(id).toString());
+                //Log.e(DB.STRIP, mediaFeeds.get(id).toString());
                 cursor.moveToNext();
             }
             Log.i(TAG, "MediaFeeds loaded successfully "+mediaFeeds.size());
@@ -183,7 +183,7 @@ public class MediaFeedORM {
             mediaFeed.setId((int) database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false)));
         }
 
-        Log.d(TAG, "saveMediaFeed "+mediaFeed.getId() + ", "+mediaFeed.getSort());
+       // Log.d(TAG, "saveMediaFeed "+mediaFeed.getId() + ", "+mediaFeed.getSort());
         return mediaFeed;
     }
 

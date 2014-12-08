@@ -32,12 +32,12 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     // Returns the fragment to display for that page
     @Override
     public Fragment getItem(int position) {
-        MediaFeed mediaFeed = act.binder.getUser().getMediaFeedSort(position);
+        MediaFeed mediaFeed = user.getMediaFeedSort(position);
         int type = mediaFeed.getType();
         if(Var.isTypeYoutube(type)) {
-            return YoutubeFragment.newInstance(act.binder.getSelectedUser(), mediaFeed.getId());
+            return YoutubeFragment.newInstance(user.getId(), mediaFeed.getId());
         } else if(type == Var.TYPE_TWITTER) {
-            return TwitterFragment.newInstance(act.binder.getSelectedUser(), mediaFeed.getId());
+            return TwitterFragment.newInstance(user.getId(), mediaFeed.getId());
         }
         return PlaceholderFragment.newInstance(position, "Placeholder (nothing to see here)");
     }

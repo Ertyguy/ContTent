@@ -27,6 +27,7 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
+import com.squareup.picasso.Picasso;
 
 
 public class NavigationDrawerFragment extends ActionFragment implements View.OnClickListener{
@@ -49,7 +50,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 	//private boolean mFromSavedInstanceState;
 	//private boolean mUserLearnedDrawer;
     private Fab actionFab;
-    private View notification_v, settings_v, groups_v;
+    private View notification_v, settings_v, groups_v, footer;
 
     public ListAdapter adapter;
 
@@ -179,6 +180,10 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 			}
 		});
 
+        footer = inflater.inflate(R.layout.item_list_footer, null, false);
+
+        mDrawerListView.addFooterView(footer, null, false);
+
         groups_v = v.findViewById(R.id.groups_v);
         groups_v.setOnClickListener(this);
 
@@ -254,7 +259,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 	        
 	        final User user = getItem(position);
 	        holder.name_tv.setText(user.getName());
-            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
+            Picasso.with(context).load(user.getThumbnail()).into(holder.thumbnail_iv);
 
             holder.edit_iv.setVisibility(user.equals(act.binder.getUser())? View.VISIBLE: View.GONE);
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {

@@ -163,6 +163,12 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         updateData();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(binder != null)
+            Var.setNextAlarm(this, binder.getNotificationList());
+    }
 
 
     public void startVideo(YoutubeItem youtubeItem) {
@@ -311,7 +317,9 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         // update the main content by replacing fragments
 
         if(binder != null && (contentState != Var.LIST_USERS ||  binder.getUser() == null || binder.getUser().getSort() != position)) {
+
             binder.setSelectedUser(position);
+            Log.d(TAG, "onNavigationDrawerItemSelected "+ position + " - "+binder.getUser().getSort());
             toggleState(Var.LIST_USERS);
         }
 

@@ -89,7 +89,7 @@ public class GroupORM {
             while (!cursor.isAfterLast()) {
                 Group group = cursorToGroup(cursor);
 
-                Log.e(DB.STRIP, group.toString());
+                //Log.e(DB.STRIP, group.toString());
                 group.setUsers(UserORM.getUsersByGroupId(context, group.getId(), null));
 
                 groupList.put(group.getId(), group);
@@ -194,11 +194,8 @@ public class GroupORM {
                 group.setId((int) database.insert(DB.TABLE_GROUP, null, groupToContentValues(group, false)));
             }
 
-            group.setUsers(UserORM.saveUsers(database, group.getUsers(), group.getRemoved(), group.getId()));
+            UserORM.saveUsers(database, group.getUsers(), group.getRemoved(), group.getId());
             group.clearRemoved();
-            //user.setMediaFeed(MediaFeedORM.saveMediaFeeds(database, user.getCastMediaFeed(), user.getRemoved(), user.getId()));
-
-
 
             database.setTransactionSuccessful();
         }catch (Exception e) {

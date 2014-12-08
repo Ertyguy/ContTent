@@ -20,6 +20,8 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 
 public class YoutubeFragment extends ActionFragment {
@@ -60,8 +62,6 @@ public class YoutubeFragment extends ActionFragment {
             @Override
             public void updatedMediaFeed(int mediaFeedId, int feedState) {
                 super.updatedMediaFeed(mediaFeedId, feedState);
-
-                Log.d(TAG, "updatedUserMediaFeed "+ mediaFeedId + "-"+feedState);
                 if (isFragmentOpen(userId, mediaFeedId)) {
 
                     if(feedState == Var.FEED_WAITING || feedState == Var.FEED_END) {
@@ -100,12 +100,6 @@ public class YoutubeFragment extends ActionFragment {
         };
     }
 
-    private boolean isFragmentOpen(int userId, int mediaFeedId) {
-
-        return (getBinder() != null && getBinder().containsUser(userId) &&
-                getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId) != null && this.mediaFeedId == mediaFeedId);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         act = (ContentActivity) getActivity();
@@ -113,7 +107,7 @@ public class YoutubeFragment extends ActionFragment {
         mediaFeedId = getArguments() != null ? getArguments().getInt("mediaFeedId") : -1;
 
         View view = inflater.inflate(R.layout.fragment_youtube, container, false);
-        view.setId(userId);
+        view.setId(mediaFeedId);
 
         feed_rv = (RecyclerView) view.findViewById(R.id.list);
         linearLayoutManager = new LinearLayoutManager(act);
@@ -161,9 +155,16 @@ public class YoutubeFragment extends ActionFragment {
     public void onStart() {
         super.onStart();
 
-        if(getBinder() != null) getBinder().fetchItemsByMediaFeedId(getFeed().getId());
+        if(getBinder() != null) {
+            getBinder().fetchItemsByMediaFeedId(getFeed().getId());
+        }
     }
 
+
+    private boolean isFragmentOpen(int userId, int mediaFeedId) {
+        return (getBinder() != null && getBinder().getUser().equals(getBinder().getUser(userId)) &&
+                getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId) != null && this.mediaFeedId == mediaFeedId);
+    }
 
 
     private YoutubeFeed getFeed() {
@@ -218,7 +219,7 @@ public class YoutubeFragment extends ActionFragment {
             if(itemPosition < getItemCount() - 1)  act.startVideo(getFeed().getItems().get(itemPosition));
             else if(feedState == Var.FEED_WARNING || feedState == Var.FEED_OFFLINE || feedState == Var.FEED_END) {
                 setFeedState(Var.FEED_LOADING);
-                new YoutubeFeedAsyncTask(act, getFeed(),userId, actionDispatch).execute(getFeed().getNextPageToken());
+                new YoutubeFeedAsyncTask(act, getFeed(), userId, actionDispatch).execute(getFeed().getNextPageToken());
 
             }
 
@@ -228,10 +229,19 @@ public class YoutubeFragment extends ActionFragment {
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
             if (viewHolder instanceof ViewHolderItem) {
 
-                ViewHolderItem holder = (ViewHolderItem) viewHolder;
+                final ViewHolderItem holder = (ViewHolderItem) viewHolder;
                 YoutubeItem item = getFeed().getItems().get(i);
 
-                getBinder().getImageLoader().DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
+                Picasso.with(act).load(item.getImageMed()).into(holder.thumbnail_iv,
+                        new Callback.EmptyCallback() {
+                            @Override public void onSuccess() {
+                                holder.thumbnail_pb.setVisibility(View.GONE);
+                            }
+                            @Override
+                            public void onError() {
+                                holder.thumbnail_pb.setVisibility(View.GONE);
+                            }
+                        });
                 holder.title_tv.setText(item.getTitle());
                 holder.length_tv.setText(item.getDuration());
 

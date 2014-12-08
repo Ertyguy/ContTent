@@ -19,6 +19,7 @@ import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class DB extends SQLiteOpenHelper {
@@ -54,7 +55,7 @@ public class DB extends SQLiteOpenHelper {
         final Group mindcrackGroup = new Group(0, "Mindcrack", "https://yt3.ggpht.com/-9QlCRBfW1nI/AAAAAAAAAAI/AAAAAAAAAAA/O3hR1mPFSDw/s100-c-k-no/photo.jpg", true);
         final Group roosterTeethGroup = new Group(1, "Rooster Teeth", "https://lh6.googleusercontent.com/-hddEYyXVeZM/AAAAAAAAAAI/AAAAAAAAAAA/ghwEL1-FHdE/photo.jpg", true);
 
-        mindcrackGroup.setUsers(new SparseArray<User>() {{
+        mindcrackGroup.setUsers(new LinkedHashMap<Integer, User>() {{
                 put(0, new User("Adlingtont", "https://lh4.googleusercontent.com/-6DIByMHfFbw/AAAAAAAAAAI/AAAAAAAAAAA/GMmF_KtKbtQ/photo.jpg", new SparseArray<MediaFeed>() {{
                     put(0, new YoutubeFeed("Uploads", "https://i.ytimg.com/vi/ecGJWrXgBGM/default.jpg", "UCfhM3yJ8a_sAJj0qOKb40gw", "UUfhM3yJ8a_sAJj0qOKb40gw", 0));
                     put(1, new YoutubeFeed("Liked videos", "https://i.ytimg.com/vi/xc4J9kUPdk8/default.jpg", "UCfhM3yJ8a_sAJj0qOKb40gw", "LLfhM3yJ8a_sAJj0qOKb40gw", 0));
@@ -308,7 +309,7 @@ public class DB extends SQLiteOpenHelper {
 
             }});
 
-            roosterTeethGroup.setUsers(new SparseArray<User>() {{
+            roosterTeethGroup.setUsers(new LinkedHashMap<Integer, User>() {{
                     put(0, new User("Rooster Teeth", "https://lh6.googleusercontent.com/-hddEYyXVeZM/AAAAAAAAAAI/AAAAAAAAAAA/ghwEL1-FHdE/photo.jpg", new SparseArray<MediaFeed>() {{
                         put(0, new YoutubeFeed("Uploads", "https://i.ytimg.com/vi/x3DQhsELdG0/default.jpg", "UCzH3iADRIq1IJlIXjfNgTpA", "UUzH3iADRIq1IJlIXjfNgTpA", 0));
                         put(1, new YoutubeFeed("Liked videos", "https://i.ytimg.com/vi/5W2f2MumEng/default.jpg", "UCzH3iADRIq1IJlIXjfNgTpA", "LLzH3iADRIq1IJlIXjfNgTpA", 0));

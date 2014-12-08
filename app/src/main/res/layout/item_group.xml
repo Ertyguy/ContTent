@@ -77,7 +77,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/watching_count_v"
             android:background="@drawable/selector_accent"
-            android:layout_below="@+id/icon_v"
+            android:layout_below="@+id/user_count_tv"
             android:layout_toRightOf="@+id/icon_v"
             android:layout_toEndOf="@+id/icon_v">
 

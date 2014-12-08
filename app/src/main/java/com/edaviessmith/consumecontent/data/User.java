@@ -29,8 +29,16 @@ public class User extends Content{
         this.mediaFeed = mediaFeed;
     }
 
+    //TODO need to include sort
+    @Deprecated
     public User(String name, String thumbnail, SparseArray mediaFeed, List<Group> groups) {
         super(name, thumbnail);
+        this.mediaFeed = mediaFeed;
+        this.groups = groups;
+    }
+
+    public User(String name, String thumbnail, int sort, SparseArray mediaFeed, List<Group> groups) {
+        super(sort, name, thumbnail);
         this.mediaFeed = mediaFeed;
         this.groups = groups;
     }
@@ -90,6 +98,7 @@ public class User extends Content{
                 "put("+getSort()+" new User(" +
                   "\"" + getName() + '\"' +
                 ", \"" + getThumbnail() + '\"' +
+                ", " + getSort() +
                 ", new SparseArray<YoutubeFeed>(){{";
         }
 

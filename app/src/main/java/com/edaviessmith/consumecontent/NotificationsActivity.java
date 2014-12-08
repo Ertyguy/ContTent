@@ -2,7 +2,6 @@ package com.edaviessmith.consumecontent;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
@@ -23,19 +22,19 @@ import android.widget.ToggleButton;
 import com.edaviessmith.consumecontent.data.Alarm;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.db.NotificationORM;
-import com.edaviessmith.consumecontent.data.NotificationList;
+import com.edaviessmith.consumecontent.service.ActionActivity;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 
 import java.util.List;
 
 
-public class NotificationsActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class NotificationsActivity extends ActionActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
     private static final String TAG = "NotificationsActivity";
 
     Toolbar toolbar;
     //List<Notification> notifications;
-    NotificationList notificationList;
+    //NotificationList notificationList;
     Notification editNotification;
     ListView notification_lv, alarm_lv;
     NotificationAdapter notificationAdapter;
@@ -64,7 +63,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         getSupportActionBar().setHomeButtonEnabled(true);
 
 
-        notificationList = new NotificationList(this);
+        //notificationList = new NotificationList(this);
         editNotification = new Notification();
 
         isAllNotificationsEnabled = Var.getBoolPreference(this, Var.PREF_ALL_NOTIFICATIONS);
@@ -153,7 +152,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        editNotification = new Notification(notificationList.getNotifications().get(position - 1));
+        editNotification = new Notification(binder.getNotificationList().getNotifications().get(position - 1));
         toggleList(ALARMS_LIST);
     }
 
@@ -167,12 +166,12 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
         @Override
         public int getCount() {
-            return notificationList.getNotifications().size();
+            return binder.getNotificationList().getNotifications().size();
         }
 
         @Override
         public Notification getItem(int position) {
-            return notificationList.getNotifications().get(position);
+            return binder.getNotificationList().getNotifications().get(position);
         }
 
         @Override
@@ -196,7 +195,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             Notification notification = getItem(position);
 
             holder.name_tv.setText(notification.getName());
-            holder.nextAlarm_tv.setText(Var.getNextNotificationAlarm(notification, notificationList.getScheduleNotification()));
+            holder.nextAlarm_tv.setText(Var.getNextNotificationAlarm(notification, binder.getNotificationList().getScheduleNotification()));
 
             return convertView;
 
@@ -295,7 +294,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
                         notifyDataSetChanged();
                     } else {
                         days.set(day, (days.get(day) == 1 ? 0 : 1));   //Toggle opposite
-                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, notificationList.getScheduleNotification()) : "disabled");
+                        holder.nextAlarm_tv.setText(alarm.isEnabled() ? Var.getNextAlarmTimeText(alarm, binder.getNotificationList().getScheduleNotification()) : "disabled");
                     }
 
                 }
@@ -313,11 +312,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
             holder.enabled_sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, notificationList.getScheduleNotification()): "disabled");
+                    holder.nextAlarm_tv.setText(isChecked? Var.getNextAlarmTimeText(alarm, binder.getNotificationList().getScheduleNotification()): "disabled");
                 }
             });
 
-            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, notificationList.getScheduleNotification()): "disabled");
+            holder.nextAlarm_tv.setText(alarm.isEnabled()? Var.getNextAlarmTimeText(alarm, binder.getNotificationList().getScheduleNotification()): "disabled");
 
 
             holder.delete_iv.setOnClickListener(new View.OnClickListener() {
@@ -385,7 +384,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
     @Override
     protected void onPause() {
         super.onPause();
-        Var.setNextAlarm(this, notificationList);
+        Var.setNextAlarm(this, binder.getNotificationList());
     }
 
     @Override
@@ -423,11 +422,11 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
 
 
             if(editNotification.getType() == Var.NOTIFICATION_ALARM){
-                if(notificationList.getNotification(editNotification.getId()) != null)
-                     notificationList.getNotifications().set(notificationList.getNotifications().indexOf(notificationList.getNotification(editNotification.getId())), editNotification);
-                else notificationList.getNotifications().add(editNotification);
+                if(binder.getNotificationList().getNotification(editNotification.getId()) != null)
+                    binder.getNotificationList().getNotifications().set(binder.getNotificationList().getNotifications().indexOf(binder.getNotificationList().getNotification(editNotification.getId())), editNotification);
+                else binder.getNotificationList().getNotifications().add(editNotification);
             }
-            if(editNotification.getType() == Var.NOTIFICATION_SCHEDULE) notificationList.setScheduleNotification(new Notification(editNotification));
+            if(editNotification.getType() == Var.NOTIFICATION_SCHEDULE) binder.getNotificationList().setScheduleNotification(new Notification(editNotification));
 
             alarmAdapter.notifyDataSetChanged();
 
@@ -465,7 +464,7 @@ public class NotificationsActivity extends ActionBarActivity implements View.OnC
         }
 
         if(schedule_v == v) {
-            editNotification = new Notification(notificationList.getScheduleNotification());
+            editNotification = new Notification(binder.getNotificationList().getScheduleNotification());
             toggleList(ALARMS_LIST);
         }
 

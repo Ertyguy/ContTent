@@ -6,12 +6,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.User;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class UserORM {
@@ -127,22 +127,22 @@ public class UserORM {
     }
 
 
-    public static SparseArray<User> getUsersByGroupId(Context context, int groupId, List<Group> groups) {
+    public static LinkedHashMap<Integer, User> getUsersByGroupId(Context context, int groupId, List<Group> groups) {
         DB databaseHelper = new DB(context);
-        SparseArray<User> users = new SparseArray<User>();
+        LinkedHashMap<Integer, User> users = new LinkedHashMap<Integer, User>();
         SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         database.beginTransaction();
         try {
 
             Cursor cursor = database.rawQuery("SELECT U.* FROM "+DB.TABLE_USER+" U INNER JOIN "+DB.TABLE_GROUP_USER+" GU " +
-                    "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId, null);
+                    "ON U."+DB.COL_ID+" = GU."+DB.COL_USER+" WHERE GU."+DB.COL_GROUP+" = "+groupId +" ORDER BY U."+ DB.ORDER_BY_SORT, null);
 
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
                     User user = cursorToUser(cursor);
-                    Log.e(DB.STRIP, user.toString());
+                    //Log.e(DB.STRIP, user.toString());
                     if(groups != null) user.setGroups(GroupORM.getUserGroups(database, user.getId(), groups));
                     else user.setGroups(GroupORM.getUserGroups(database, user.getId()));
                     user.setMediaFeed(MediaFeedORM.getMediaFeeds(database, user.getId()));
@@ -231,22 +231,23 @@ public class UserORM {
         return user;
     }
 
-    public static SparseArray<User> saveUsers(SQLiteDatabase database, SparseArray<User> users, SparseArray<User> removed, int groupId) {
+    public static  void saveUsers(SQLiteDatabase database, LinkedHashMap<Integer, User> users, List<User> removed, int groupId) {
         if(removed != null) {
-            //for (MediaFeed removedMediaFeed : removedMediaFeeds) {
-            for(int i=0; i< removed.size(); i++) {
-                if(GroupUserORM.romoveUserFromGroup(database, removed.valueAt(i).getId(), groupId)) {
-                    //User has no groups so remove the user
-                    removeUser(database, removed.valueAt(i));
+            for(User removedUser: removed) {
+                if(GroupUserORM.romoveUserFromGroup(database, removedUser.getId(), groupId)) {
+                    removeUser(database, removedUser); //User has no groups so remove the user
                 }
             }
         }
-        SparseArray<User> userSparseArray = new SparseArray<User>();    //
-        for(int i=0; i< users.size(); i++) {
-            User user = saveUser(database, users.valueAt(i), i);
+        saveUsers(database, users);
+       /* LinkedHashMap<Integer, User> userSparseArray = new  LinkedHashMap<Integer, User>();
+        int i=0;
+        for(User user: users.values()) {
+        //for(int i=0; i< users.size(); i++) {
+            saveUser(database, user);
             userSparseArray.put(user.getId(), user);
-        }
-        return userSparseArray;
+        }*/
+        //return userSparseArray;
     }
 
     private static void removeUser(SQLiteDatabase database, User user) {
@@ -260,15 +261,15 @@ public class UserORM {
     }
 
 
-    public static void saveUsers(SQLiteDatabase database, SparseArray<User> users) {
-        for(int i=0; i< users.size(); i++) {
-            saveUser(database, users.valueAt(i), i);
+    public static void saveUsers(SQLiteDatabase database, LinkedHashMap<Integer, User> users) {
+        //for(int i=0; i< users.size(); i++) {
+        for(User user: users.values()) {
+            saveUser(database, user);
         }
     }
 
-    public static User saveUser(SQLiteDatabase database, User user, int sort) {
+    public static User saveUser(SQLiteDatabase database, User user) {
 
-        user.setSort(sort);
         if(DB.isValid(user.getId())) {
             database.update(DB.TABLE_USER, userToContentValues(user, false), DB.COL_ID + " = " + user.getId(), null);
         } else {

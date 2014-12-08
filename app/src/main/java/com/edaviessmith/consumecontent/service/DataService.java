@@ -19,12 +19,12 @@ import com.edaviessmith.consumecontent.db.TwitterItemORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 import com.edaviessmith.consumecontent.util.App;
-import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,13 +39,11 @@ public class DataService extends Service {
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
     App app;
-    ImageLoader imageLoader;
+    //ImageLoader imageLoader;
     TwitterUtil twitter;
 
     public SparseArray<Group> groups;
-    
-
-    public SparseArray<User> users; //todo possible just use current group
+    public LinkedHashMap<Integer, User> users; //todo possible just use current group
 
     private List<User> userList = new ArrayList<User>();
     private List<Group> groupList = new ArrayList<Group>();
@@ -66,7 +64,7 @@ public class DataService extends Service {
         //selectedGroup = 1;
         //selectedUser = 1;
 
-        imageLoader = new ImageLoader(this);
+        //imageLoader = new ImageLoader(this);
 
         app = (App) getApplication();
 
@@ -150,11 +148,16 @@ public class DataService extends Service {
         }
 
         public User getUser(int userId) {
-            return users.get(userId);
+            return (users != null && users.containsKey(userId)) ? users.get(userId): null;
+        }
+
+        public User getUserBySort(int sortId) {
+            for(User u: users.values()) if(u.getSort() == sortId) return u;
+            return null;
         }
 
         public boolean containsUser(int userId) {
-            return users.get(userId) != null;
+            return users.containsKey(userId);
         }
 
         public Group getGroup() {
@@ -163,9 +166,7 @@ public class DataService extends Service {
 
         private void updateUserList() {
             userList.clear();
-            for(int i=0; i< users.size(); i++) {
-                userList.add(users.valueAt(i));
-            }
+            userList.addAll(users.values());
         }
 
         private void updateGroupList() {
@@ -280,7 +281,7 @@ public class DataService extends Service {
 
 
         public void setSelectedUser(int index) {
-            selectedUser = users.valueAt(index).getId();
+            selectedUser = userList.get(index).getId();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -305,9 +306,9 @@ public class DataService extends Service {
         }
 
 
-        public ImageLoader getImageLoader() {
+        /*public ImageLoader getImageLoader() {
             return imageLoader;
-        }
+        }*/
 
         public App getApp() {
             return app;
@@ -360,6 +361,7 @@ public class DataService extends Service {
                 }
             });
         }
+
     }
 
 

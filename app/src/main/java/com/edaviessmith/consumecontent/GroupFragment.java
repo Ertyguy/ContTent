@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.util.SparseBooleanArray;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,7 +19,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -34,6 +32,8 @@ import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,8 +109,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         selectedUsers = new ArrayList<User>();
 
         View header = inflater.inflate(R.layout.header_group_edit, null, false);
-        footer = inflater.inflate(R.layout.item_list_divider, null, false);
-        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
+        footer = inflater.inflate(R.layout.item_list_footer, null, false);
 
         groups_rv = (RecyclerView) view.findViewById(R.id.groups_rv);
         linearLayoutManager = new LinearLayoutManager(act);
@@ -244,14 +243,21 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
 
             visible_sw.setChecked(editGroup.isVisible());
-            getBinder().getImageLoader().DisplayImage(editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb, false);
+            Picasso.with(act).load(editGroup.getThumbnail()).into(groupThumbnail_iv,
+                    new Callback.EmptyCallback() {
+                        @Override public void onSuccess() {
+                            groupThumbnail_pb.setVisibility(View.GONE);
+                        }
+                        @Override
+                        public void onError() {
+                            groupThumbnail_pb.setVisibility(View.GONE);
+                        }
+                    });
 
             groupName_edt.setText(editGroup.getName());
 
             users.clear();
-            for(int i=0; i< editGroup.getUsers().size(); i++) {
-                users.add( editGroup.getUsers().valueAt(i));
-            }
+            users.addAll(editGroup.getUsers().values());
 
             editGroupAdapter.notifyDataSetChanged();
         }
@@ -397,17 +403,26 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
             if (viewHolder instanceof ViewHolderItem) {
 
-                ViewHolderItem holder = (ViewHolderItem) viewHolder;
+                final ViewHolderItem holder = (ViewHolderItem) viewHolder;
 
                 Group item = groupList.get(i);
 
 
-                getBinder().getImageLoader().DisplayImage(item.getThumbnail(), holder.icon_iv, holder.icon_pb, false);
+                Picasso.with(act).load(item.getThumbnail()).into(holder.icon_iv,
+                        new Callback.EmptyCallback() {
+                            @Override public void onSuccess() {
+                                holder.icon_pb.setVisibility(View.GONE);
+                            }
+                            @Override
+                            public void onError() {
+                                holder.icon_pb.setVisibility(View.GONE);
+                            }
+                        });
                 holder.name_tv.setText(item.getName());
                 holder.userCount_tv.setText(item.getUsers().size() + " users");
 
                 int watchingCount = 0;
-                for (int u = 0; u < item.getUsers().size(); u++) {
+                /*for (int u = 0; u < item.getUsers().size(); u++) {
                     User user = item.getUsers().valueAt(u);
                     for (int m = 0; m < user.getCastMediaFeed().size(); m++) {
                         if (DB.isValid(user.getCastMediaFeed().valueAt(m).getNotificationId())) {
@@ -415,8 +430,16 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                             break;
                         }
                     }
-                }
+                }*/
 
+                for (User user: item.getUsers().values()) {
+                    for (int m = 0; m < user.getCastMediaFeed().size(); m++) {
+                        if (DB.isValid(user.getCastMediaFeed().valueAt(m).getNotificationId())) {
+                            watchingCount++;
+                            break;
+                        }
+                    }
+                }
 
                 holder.editIcon_iv.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
                 holder.watchingCount_v.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
@@ -499,7 +522,16 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             final ViewHolder holder = (ViewHolder) convertView.getTag();
             final User user = getItem(position);
 
-            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv, holder.thumbnail_pb);
+            Picasso.with(act).load(user.getThumbnail()).into(holder.thumbnail_iv,
+                    new Callback.EmptyCallback() {
+                        @Override public void onSuccess() {
+                            holder.thumbnail_pb.setVisibility(View.GONE);
+                        }
+                        @Override
+                        public void onError() {
+                            holder.thumbnail_pb.setVisibility(View.GONE);
+                        }
+                    });
             holder.name_tv.setText(user.getName());
 
             List<Notification> userNotifications = new ArrayList<Notification>();

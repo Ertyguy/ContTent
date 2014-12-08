@@ -24,6 +24,7 @@ public class MediaFeedFragment extends ActionFragment {
     private ContentActivity act;
     private User user;
     ViewPager viewPager;
+    boolean setupRun;
 
 
     public static MediaFeedFragment newInstance() {
@@ -54,38 +55,54 @@ public class MediaFeedFragment extends ActionFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_media_feed, container, false);
         act = (ContentActivity) getActivity();
-        user = getBinder().getUser();
 
         viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
         slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
 
-        adapterViewPager = new PagerAdapter(act, user);
-        viewPager.setAdapter(adapterViewPager);
-
-        slidingTabLayout.setViewPager(viewPager);
-        slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
-            @Override
-            public int getIndicatorColor(int position) {
-                int type = (user.getMediaFeedSort(position)).getType();
-                if(Var.isTypeYoutube(type)) {
-                    return act.getResources().getColor(R.color.red_youtube);
-                }else if(type == Var.TYPE_TWITTER) {
-                    return act.getResources().getColor(R.color.blue_twitter);
-                }
-
-                return act.getResources().getColor(R.color.accent);
-            }
-
-            @Override
-            public int getDividerColor(int position) {
-                return 0;
-            }
-        });
-
+        if(getBinder() != null) {
+            setupUser.run();
+            setupRun = true;
+        }
 
         return view;
     }
 
+
+    @Override
+    protected void onBind() {
+        super.onBind();
+        if(!setupRun) setupUser.run();
+    }
+
+    Runnable setupUser = new Runnable() {
+        @Override
+        public void run() {
+            user = getBinder().getUser();
+
+            adapterViewPager = new PagerAdapter(act, user);
+            viewPager.setAdapter(adapterViewPager);
+
+            slidingTabLayout.setViewPager(viewPager);
+            slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+                @Override
+                public int getIndicatorColor(int position) {
+                    int type = (user.getMediaFeedSort(position)).getType();
+                    if(Var.isTypeYoutube(type)) {
+                        return act.getResources().getColor(R.color.red_youtube);
+                    }else if(type == Var.TYPE_TWITTER) {
+                        return act.getResources().getColor(R.color.blue_twitter);
+                    }
+
+                    return act.getResources().getColor(R.color.accent);
+                }
+
+                @Override
+                public int getDividerColor(int position) {
+                    return 0;
+                }
+            });
+        }
+    };
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

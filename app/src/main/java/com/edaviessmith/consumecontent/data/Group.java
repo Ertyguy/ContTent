@@ -1,16 +1,16 @@
 package com.edaviessmith.consumecontent.data;
 
 
-import android.util.SparseArray;
-
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class Group extends Content {
 
     private boolean isVisible;
 
-    private SparseArray<User> users;
-    SparseArray<User> removed;
+    private LinkedHashMap<Integer, User> users;
+    List<User> removed;
 
 
     public Group () { }
@@ -18,7 +18,7 @@ public class Group extends Content {
     public Group (String name, boolean isVisible) {
         setName(name);
         setVisible(isVisible);
-        users = new SparseArray<User>();
+        users = new LinkedHashMap<Integer, User>();
     }
 
     public Group(int sort, String name, String thumbnail, boolean isVisible) {
@@ -45,16 +45,16 @@ public class Group extends Content {
         this.isVisible = isVisible;
     }
 
-    public SparseArray<User> getUsers() {
+    public LinkedHashMap<Integer, User> getUsers() {
         return users;
     }
 
-    public void setUsers(SparseArray<User> users) {
+    public void setUsers(LinkedHashMap<Integer, User> users) {
         this.users = users;
     }
 
 
-    public SparseArray<User> getRemoved() {
+    public List<User> getRemoved() {
         return removed;
     }
 
@@ -64,12 +64,13 @@ public class Group extends Content {
 
     //Utility method to update users and set removed users
     public void setUserList(List<User> newUsers) {
-        removed = getUsers().clone();
-        SparseArray<User> us = new SparseArray<User>();
-        for(int i=0; i < newUsers.size(); i++) {
-            removed.remove(newUsers.get(i).getId());
-            us.put(i, newUsers.get(i));        //Places user in order of sort not by ID
-
+        removed = new ArrayList<User>(getUsers().values());
+        LinkedHashMap<Integer, User> us = new LinkedHashMap<Integer, User>();
+        int i = 0;
+        for(User user : newUsers) { //Places user in order of sort not by ID
+            removed.remove(user);
+            user.setSort(i++);
+            us.put(user.getId(), user);
         }
         setUsers(us);
     }

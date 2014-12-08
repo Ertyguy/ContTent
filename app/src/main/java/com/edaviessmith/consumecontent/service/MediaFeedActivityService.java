@@ -116,7 +116,7 @@ public class MediaFeedActivityService extends IntentService {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setContentTitle(title)
                     .setContentText(text)
                     .setContentIntent(PendingIntent.getActivity(this, users.get(0).getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setSmallIcon(R.drawable.ic_launcher);
+                    .setSmallIcon(R.drawable.ic_notification);
 
             if(Var.isEmpty(users.get(0).getThumbnail())) {
                 Bitmap icon = imageLoader.getBitmap(users.get(0).getThumbnail());

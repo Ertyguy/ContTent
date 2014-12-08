@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.util.Var;
+import com.squareup.picasso.Picasso;
 
 
 public class RenameDialog extends Dialog implements View.OnClickListener {
@@ -57,7 +58,7 @@ public class RenameDialog extends Dialog implements View.OnClickListener {
         thumbnail_iv = (ImageView) findViewById(R.id.thumbnail_iv);
         thumbnail_iv.setVisibility(Var.isEmpty(thumbnail)? View.GONE: View.VISIBLE);
         if(!Var.isEmpty(thumbnail)) {
-            act.binder.getImageLoader().DisplayImage(thumbnail, thumbnail_iv);
+            Picasso.with(act).load(thumbnail).into(thumbnail_iv);
         }
 
         set_tv = findViewById(R.id.set_tv);
