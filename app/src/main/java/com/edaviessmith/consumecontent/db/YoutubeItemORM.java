@@ -53,7 +53,7 @@ public class YoutubeItemORM {
                     cursor.moveToNext();
                 }
             }
-            Log.i(TAG, "YoutubeItems loaded successfully " +youtubeItems.size());
+            Log.i(TAG, "YoutubeItems loaded successfully "+mediaFeedId+": " +youtubeItems.size());
             database.setTransactionSuccessful();
 
         }catch (Exception e) {

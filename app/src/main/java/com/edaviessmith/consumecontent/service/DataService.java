@@ -11,7 +11,9 @@ import android.util.SparseArray;
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.NotificationList;
+import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.User;
+import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.db.GroupORM;
 import com.edaviessmith.consumecontent.db.MediaFeedORM;
@@ -19,6 +21,7 @@ import com.edaviessmith.consumecontent.db.TwitterItemORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.db.YoutubeItemORM;
 import com.edaviessmith.consumecontent.util.App;
+import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.TwitterUtil;
 import com.edaviessmith.consumecontent.util.Var;
@@ -39,7 +42,8 @@ public class DataService extends Service {
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
     App app;
-    //ImageLoader imageLoader;
+    ImageLoader imageLoader;
+
     TwitterUtil twitter;
 
     public SparseArray<Group> groups;
@@ -64,7 +68,7 @@ public class DataService extends Service {
         //selectedGroup = 1;
         //selectedUser = 1;
 
-        //imageLoader = new ImageLoader(this);
+        imageLoader = new ImageLoader(this);
 
         app = (App) getApplication();
 
@@ -123,10 +127,12 @@ public class DataService extends Service {
 
         public void addListener(ActionDispatch actionDispatch) {
             if (actionDispatch != null) actionDispatches.add(actionDispatch);
+            Log.d(TAG, "addListener "+actionDispatches.size());
         }
 
         public void removeListener(ActionDispatch actionDispatch) {
             actionDispatches.remove(actionDispatch);
+            Log.d(TAG, "removeListener "+actionDispatches.size());
         }
 
 
@@ -252,9 +258,9 @@ public class DataService extends Service {
 
                         if(mediaFeed != null) {
                             if(Var.isTypeYoutube(mediaFeed.getType()))
-                                mediaFeed.setItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
+                                ((YoutubeFeed)mediaFeed).addItems(YoutubeItemORM.getYoutubeItems(DataService.this, mediaFeedId));
                             if(mediaFeed.getType() == Var.TYPE_TWITTER)
-                                mediaFeed.setItems(TwitterItemORM.getTwitterItems(DataService.this, mediaFeedId));
+                                ((TwitterFeed)mediaFeed).addItems(TwitterItemORM.getTwitterItems(DataService.this, mediaFeedId));
                         }
                     } catch (Exception e) {e.printStackTrace(); }
 
@@ -306,9 +312,9 @@ public class DataService extends Service {
         }
 
 
-        /*public ImageLoader getImageLoader() {
+        public ImageLoader getImageLoader() {
             return imageLoader;
-        }*/
+        }
 
         public App getApp() {
             return app;

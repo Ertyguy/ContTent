@@ -1,8 +1,9 @@
 package com.edaviessmith.consumecontent.view;
 
-import android.support.v4.app.Fragment;
 
-import com.edaviessmith.consumecontent.ContentActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+
 import com.edaviessmith.consumecontent.PlaceholderFragment;
 import com.edaviessmith.consumecontent.TwitterFragment;
 import com.edaviessmith.consumecontent.YoutubeFragment;
@@ -14,11 +15,9 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
 
     private static String TAG = "PagerAdapter";
     User user;
-    ContentActivity act;
 
-    public PagerAdapter(ContentActivity act, User user) {
-        super(act.getSupportFragmentManager());
-        this.act = act;
+    public PagerAdapter(FragmentManager childManager, User user) {
+        super(childManager);
         this.user = user;
     }
 
@@ -48,7 +47,7 @@ public class PagerAdapter extends FragmentStateCachePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
 
-        if(position < user.getMediaFeed().size())  return act.binder.getUser().getMediaFeedSort(position).getName();
+        if(position < user.getMediaFeed().size())  return user.getMediaFeedSort(position).getName();
 
         return "Placeholder (nothing to see here)";
 

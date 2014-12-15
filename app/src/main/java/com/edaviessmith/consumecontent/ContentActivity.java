@@ -60,7 +60,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             public void updatedUsers() {
                 super.updatedUsers();
 
-                navigationDrawerFragment.selectItem(binder.getUser().getSort());
+                navigationDrawerFragment.selectItem(binder.getUser().getSort(), true);
 
                 openUsers();
             }

@@ -20,8 +20,6 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 
 public class YoutubeFragment extends ActionFragment {
@@ -65,24 +63,25 @@ public class YoutubeFragment extends ActionFragment {
                 if (isFragmentOpen(userId, mediaFeedId)) {
 
                     if(feedState == Var.FEED_WAITING || feedState == Var.FEED_END) {
-                        if (swipeRefreshLayout.isRefreshing())
+                        if (swipeRefreshLayout!= null && swipeRefreshLayout.isRefreshing())
                             swipeRefreshLayout.setRefreshing(false);
 
                         if (!Var.isRecent(getFeed().getLastUpdate()) && feedState != Var.FEED_END && getFeed().getNextPageToken() == null) {//getFeed().getItems().size() == 0) {  //No local items so
                             Log.d(TAG, "getNextPage AsyncTask "+ getFeed().getNextPageToken());
                             feedState = Var.FEED_LOADING;
-                            new YoutubeFeedAsyncTask(act, getFeed(), userId, actionDispatch).execute(getFeed().getNextPageToken());
+                            new YoutubeFeedAsyncTask(activity, getFeed(), userId, actionDispatch).execute(getFeed().getNextPageToken());
                         }
                     }
 
                     setFeedState(feedState);
-
-                    act.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            itemAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    if(itemAdapter != null) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                itemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
 
 
                 }
@@ -134,7 +133,6 @@ public class YoutubeFragment extends ActionFragment {
                 super.onScrollStateChanged(recyclerView, newState);
             }
 
-            //@SuppressLint("NewApi")
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -160,9 +158,23 @@ public class YoutubeFragment extends ActionFragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        cleanFragment();
+    }
+
+    public void cleanFragment() {
+        /*act = null;
+        feed_rv = null;
+        itemAdapter = null;
+        linearLayoutManager = null;
+        swipeRefreshLayout = null;*/
+        Log.d(TAG, "cleaning up view");
+    }
 
     private boolean isFragmentOpen(int userId, int mediaFeedId) {
-        return (getBinder() != null && getBinder().getUser().equals(getBinder().getUser(userId)) &&
+        return (isAdded() && getBinder() != null && getBinder().getUser().getId() == userId &&
                 getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId) != null && this.mediaFeedId == mediaFeedId);
     }
 
@@ -171,10 +183,10 @@ public class YoutubeFragment extends ActionFragment {
         return (YoutubeFeed) getBinder().getUser(userId).getCastMediaFeed().get(mediaFeedId);
     }
 
-
     public void setFeedState(int feedState) {
         this.feedState = feedState;
     }
+
 
     public class YoutubeItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener{
 
@@ -230,9 +242,13 @@ public class YoutubeFragment extends ActionFragment {
             if (viewHolder instanceof ViewHolderItem) {
 
                 final ViewHolderItem holder = (ViewHolderItem) viewHolder;
+                Log.d(TAG, "onBindViewHolder "+i);
                 YoutubeItem item = getFeed().getItems().get(i);
 
-                Picasso.with(act).load(item.getImageMed()).into(holder.thumbnail_iv,
+                getBinder().getImageLoader().DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
+
+                //getBinder().getPicasso().load(item.getImageMed()).into(holder.thumbnail_iv
+                /*,
                         new Callback.EmptyCallback() {
                             @Override public void onSuccess() {
                                 holder.thumbnail_pb.setVisibility(View.GONE);
@@ -241,7 +257,7 @@ public class YoutubeFragment extends ActionFragment {
                             public void onError() {
                                 holder.thumbnail_pb.setVisibility(View.GONE);
                             }
-                        });
+                        }*///);
                 holder.title_tv.setText(item.getTitle());
                 holder.length_tv.setText(item.getDuration());
 
@@ -305,7 +321,7 @@ public class YoutubeFragment extends ActionFragment {
 
         @Override
         public int getItemCount() {
-            return (getBinder() == null  || getFeed() == null || getFeed().getItems() == null) ? 1 : getFeed().getItems().size() + 1;
+            return (getBinder() == null || getFeed() == null || getFeed().getItems() == null) ? 1 : getFeed().getItems().size() + 1;
         }
 
 

@@ -17,8 +17,6 @@ import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.util.Var;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -137,16 +135,7 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
 
             Group group = getItem(position);
             holder.name_tv.setText(group.getName());
-            Picasso.with(act).load(group.getThumbnail()).into(holder.icon_iv,
-                    new Callback.EmptyCallback() {
-                        @Override public void onSuccess() {
-                            holder.icon_pb.setVisibility(View.GONE);
-                        }
-                        @Override
-                        public void onError() {
-                            holder.icon_pb.setVisibility(View.GONE);
-                        }
-                    });
+            act.binder.getImageLoader().DisplayImage(group.getThumbnail(), holder.icon_iv, holder.icon_pb);
 
             return convertView;
 

@@ -32,8 +32,6 @@ import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -243,16 +241,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
 
             visible_sw.setChecked(editGroup.isVisible());
-            Picasso.with(act).load(editGroup.getThumbnail()).into(groupThumbnail_iv,
-                    new Callback.EmptyCallback() {
-                        @Override public void onSuccess() {
-                            groupThumbnail_pb.setVisibility(View.GONE);
-                        }
-                        @Override
-                        public void onError() {
-                            groupThumbnail_pb.setVisibility(View.GONE);
-                        }
-                    });
+            getBinder().getImageLoader().DisplayImage(editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb);
 
             groupName_edt.setText(editGroup.getName());
 
@@ -407,30 +396,12 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
                 Group item = groupList.get(i);
 
+                getBinder().getImageLoader().DisplayImage(item.getThumbnail(), holder.icon_iv, holder.icon_pb);
 
-                Picasso.with(act).load(item.getThumbnail()).into(holder.icon_iv,
-                        new Callback.EmptyCallback() {
-                            @Override public void onSuccess() {
-                                holder.icon_pb.setVisibility(View.GONE);
-                            }
-                            @Override
-                            public void onError() {
-                                holder.icon_pb.setVisibility(View.GONE);
-                            }
-                        });
                 holder.name_tv.setText(item.getName());
                 holder.userCount_tv.setText(item.getUsers().size() + " users");
 
                 int watchingCount = 0;
-                /*for (int u = 0; u < item.getUsers().size(); u++) {
-                    User user = item.getUsers().valueAt(u);
-                    for (int m = 0; m < user.getCastMediaFeed().size(); m++) {
-                        if (DB.isValid(user.getCastMediaFeed().valueAt(m).getNotificationId())) {
-                            watchingCount++;
-                            break;
-                        }
-                    }
-                }*/
 
                 for (User user: item.getUsers().values()) {
                     for (int m = 0; m < user.getCastMediaFeed().size(); m++) {
@@ -522,16 +493,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             final ViewHolder holder = (ViewHolder) convertView.getTag();
             final User user = getItem(position);
 
-            Picasso.with(act).load(user.getThumbnail()).into(holder.thumbnail_iv,
-                    new Callback.EmptyCallback() {
-                        @Override public void onSuccess() {
-                            holder.thumbnail_pb.setVisibility(View.GONE);
-                        }
-                        @Override
-                        public void onError() {
-                            holder.thumbnail_pb.setVisibility(View.GONE);
-                        }
-                    });
+            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv, holder.thumbnail_pb);
             holder.name_tv.setText(user.getName());
 
             List<Notification> userNotifications = new ArrayList<Notification>();

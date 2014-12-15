@@ -166,7 +166,7 @@ public class NotificationsActivity extends ActionActivity implements View.OnClic
 
         @Override
         public int getCount() {
-            return binder.getNotificationList().getNotifications().size();
+            return binder!= null ? binder.getNotificationList().getNotifications().size() : 0;
         }
 
         @Override

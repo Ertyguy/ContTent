@@ -24,8 +24,6 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.TwitterFeedAsyncTask;
 import com.edaviessmith.consumecontent.util.Var;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -243,16 +241,7 @@ public class TwitterFragment extends ActionFragment {
 
                 holder.thumbnail_v.setVisibility(!Var.isEmpty(item.getImageHigh())? View.VISIBLE: View.GONE);
                 if(!Var.isEmpty(item.getImageHigh())) {
-                    Picasso.with(act).load(item.getImageHigh()).into(holder.thumbnail_iv,
-                            new Callback.EmptyCallback() {
-                                @Override public void onSuccess() {
-                                    holder.thumbnail_pb.setVisibility(View.GONE);
-                                }
-                                @Override
-                                public void onError() {
-                                    holder.thumbnail_pb.setVisibility(View.GONE);
-                                }
-                            });
+                    getBinder().getImageLoader().DisplayImage(item.getImageHigh(), holder.thumbnail_iv, holder.thumbnail_pb);
                 }
                 //Regex and highlight @
                 String text = item.getDescription();
@@ -290,7 +279,7 @@ public class TwitterFragment extends ActionFragment {
                 }
 
                 if (!Var.isEmpty(item.getTweetThumbnail())) {
-                    Picasso.with(act).load(item.getTweetThumbnail()).into(holder.user_iv);
+                    getBinder().getImageLoader().DisplayImage(item.getTweetThumbnail(), holder.user_iv);
                 }
 
                 if (getItemViewType(i) == TYPE_DIV) {

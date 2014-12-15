@@ -20,6 +20,7 @@ import com.edaviessmith.consumecontent.view.SlidingTabLayout;
 public class MediaFeedFragment extends ActionFragment {
 
     public FragmentStateCachePagerAdapter adapterViewPager;
+    //public PagerAdapter adapterViewPager;
     public SlidingTabLayout slidingTabLayout;
     private ContentActivity act;
     private User user;
@@ -79,7 +80,8 @@ public class MediaFeedFragment extends ActionFragment {
         public void run() {
             user = getBinder().getUser();
 
-            adapterViewPager = new PagerAdapter(act, user);
+
+            adapterViewPager = new PagerAdapter(getChildFragmentManager(), user);
             viewPager.setAdapter(adapterViewPager);
 
             slidingTabLayout.setViewPager(viewPager);
@@ -95,6 +97,8 @@ public class MediaFeedFragment extends ActionFragment {
 
                     return act.getResources().getColor(R.color.accent);
                 }
+
+
 
                 @Override
                 public int getDividerColor(int position) {
@@ -114,6 +118,12 @@ public class MediaFeedFragment extends ActionFragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        cleanFragment();
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         //Call methods in activity when the fragment has been loaded
@@ -122,6 +132,28 @@ public class MediaFeedFragment extends ActionFragment {
 
     }
 
+    @Override
+    public void cleanFragment() {
+        super.cleanFragment();
 
+        if(viewPager != null) {
+            for (int i = 0; i < viewPager.getChildCount(); i++) {
+                ActionFragment frag = adapterViewPager.getRegisteredFragment(i);
+                if (frag != null) {
+                    frag.cleanFragment();
+                }
+            }
+        }
+
+
+        adapterViewPager = null;
+        slidingTabLayout = null;
+        act = null;
+        user = null;
+        viewPager = null;
+        Log.d(TAG, "cleaning up view");
+
+
+    }
 
 }

@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,7 +28,6 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
-import com.squareup.picasso.Picasso;
 
 
 public class NavigationDrawerFragment extends ActionFragment implements View.OnClickListener{
@@ -110,7 +110,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
                 if (!isAdded()) {
                     return;
                 }
-                getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+                //getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
             @Override
@@ -181,6 +181,7 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 		});
 
         footer = inflater.inflate(R.layout.item_list_footer, null, false);
+        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 64)));
 
         mDrawerListView.addFooterView(footer, null, false);
 
@@ -259,7 +260,8 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 	        
 	        final User user = getItem(position);
 	        holder.name_tv.setText(user.getName());
-            Picasso.with(context).load(user.getThumbnail()).into(holder.thumbnail_iv);
+            holder.thumbnail_iv.setImageResource(R.drawable.ic_person_grey600_36dp);
+            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
 
             holder.edit_iv.setVisibility(user.equals(act.binder.getUser())? View.VISIBLE: View.GONE);
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {
@@ -296,9 +298,13 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
     }
 
     public void selectItem(int position) {
+        selectItem(position, false);
+    }
+    public void selectItem(int position, boolean scroll) {
 		mCurrentSelectedPosition = position;
 		if (mDrawerListView != null) {
 			mDrawerListView.setItemChecked(position, true);
+            if(scroll) mDrawerListView.smoothScrollToPosition(position);
 		}
 		if (drawerLayout != null) {
 			drawerLayout.closeDrawer(mFragmentContainerView);

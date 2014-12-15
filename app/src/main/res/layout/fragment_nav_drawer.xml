@@ -26,10 +26,11 @@
 
             <ImageView
                 android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_height="30dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_group_grey600_36dp"
                 android:contentDescription="@string/groups"
+                android:layout_gravity="center_vertical"
                 android:layout_marginRight="20dp"
                 android:layout_marginEnd="20dp" />
 
@@ -38,8 +39,9 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:textColor="@color/dark_gray"
-                android:textSize="20sp"
+                android:textColor="@drawable/selector_accent_text_gray"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 android:text="@string/groups"/>
 
             <ImageView
@@ -76,10 +78,12 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginEnd="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
                 android:contentDescription="@string/notifications"
                 android:src="@drawable/ic_alarm_grey600_36dp" />
 
@@ -87,6 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
+                android:textColor="@drawable/selector_accent_text_gray"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:text="@string/notifications"/>
@@ -106,10 +111,12 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginEnd="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
                 android:contentDescription="@string/settings"
                 android:src="@drawable/ic_settings_grey600_36dp" />
 
@@ -119,6 +126,7 @@
                 android:gravity="center_vertical"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:textColor="@drawable/selector_accent_text_gray"
                 android:text="@string/settings"/>
 
         </LinearLayout>

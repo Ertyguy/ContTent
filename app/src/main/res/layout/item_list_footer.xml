@@ -3,7 +3,6 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
-    android:paddingBottom="48dp"
     android:background="@color/gray">
 
     <View style="@style/divider"/>
@@ -15,8 +14,9 @@
         android:paddingTop="35dp" />
 
     <View style="@style/divider"/>
-
     <View style="@style/shadow_bottom"/>
+
+    <View android:layout_height="48dp" android:layout_width="match_parent"/>
 
 
 

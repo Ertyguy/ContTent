@@ -170,7 +170,12 @@ public class ImageLoader {
         	} catch (IOException e) {
         	    Log.e(TAG, e.getMessage(),e);
         	    return null;
-        	}
+        	} catch (Throwable ex) {
+                ex.printStackTrace();
+                if (ex instanceof OutOfMemoryError)
+                    clearCache();
+                return null;
+            }
     	}
         return bitmap;
     }
