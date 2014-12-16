@@ -6,6 +6,8 @@
     <color name="accent">#FB8C00</color>
 
     <color name="gray">#ffe6e6e6</color>
+    <color name="gray_div">#1a000000</color>
+
 
     <color name="background">#ffffffff</color>
     <!-- Used for text -->
@@ -22,5 +24,5 @@
     <drawable name="accent">#8D6E63</drawable>
     <drawable name="white">#ffffffff</drawable>
     <drawable name="light_gray">#ffd4d4d4</drawable>
-    <drawable name="gray">#ffababab</drawable>
+    <drawable name="gray">#ffe6e6e6</drawable>
 </resources>

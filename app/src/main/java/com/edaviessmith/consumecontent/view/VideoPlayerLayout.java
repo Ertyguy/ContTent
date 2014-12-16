@@ -95,9 +95,6 @@ public class VideoPlayerLayout extends RelativeLayout {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig){
-
-        //dragOffset = (header_v.getTop() == player_v.getTop() ? 0: 1);
-
         postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -106,7 +103,6 @@ public class VideoPlayerLayout extends RelativeLayout {
                 Log.d(TAG, "configuration changed");
             }
         }, 50);
-
 
     }
 

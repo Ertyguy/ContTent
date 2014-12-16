@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,8 @@ public class MediaFeedFragment extends ActionFragment {
         act = (ContentActivity) getActivity();
 
         viewPager = (ViewPager) view.findViewById(R.id.vp_pager);
+        viewPager.setPageMargin(Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 15));
+        viewPager.setPageMarginDrawable(R.drawable.gray);
         slidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
 
         if(getBinder() != null) {

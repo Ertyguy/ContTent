@@ -538,8 +538,14 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                 finish();
             }
         }
-        if(v == youtube_ll) toggleSearch(SEARCH_YOUTUBE);
-        if(v == twitter_ll) toggleSearch(SEARCH_TWITTER);
+        if(v == youtube_ll) {
+            clearFeedSelection(-1);
+            toggleSearch(SEARCH_YOUTUBE);
+        }
+        if(v == twitter_ll) {
+            clearFeedSelection(-1);
+            toggleSearch(SEARCH_TWITTER);
+        }
         if(v == search_v) toggleSearch(SEARCH_NONE);
         if(v == searchTwitterLogin_tv) {
             binder.getTwitter().resetAccessToken();

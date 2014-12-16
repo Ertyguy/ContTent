@@ -15,7 +15,6 @@ abstract public class ActionFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         activity = (ActionActivity) getActivity();
-
     }
 
 

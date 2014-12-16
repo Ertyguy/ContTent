@@ -320,7 +320,7 @@ public class TwitterFragment extends ActionFragment {
                             R.drawable.ic_warning_amber_36dp);
 
                     if(feedState == Var.FEED_END)   footer.warning_tv.setText("No more videos found");
-                    if(feedState == Var.FEED_WARNING) footer.warning_tv.setText("Could not connect to Youtube");
+                    if(feedState == Var.FEED_WARNING) footer.warning_tv.setText("Could not connect to Twitter");
                     if(feedState == Var.FEED_OFFLINE) footer.warning_tv.setText("No Internet connection");
                 }
 

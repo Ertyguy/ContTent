@@ -242,22 +242,9 @@ public class YoutubeFragment extends ActionFragment {
             if (viewHolder instanceof ViewHolderItem) {
 
                 final ViewHolderItem holder = (ViewHolderItem) viewHolder;
-                Log.d(TAG, "onBindViewHolder "+i);
                 YoutubeItem item = getFeed().getItems().get(i);
 
                 getBinder().getImageLoader().DisplayImage(item.getImageMed(), holder.thumbnail_iv, holder.thumbnail_pb);
-
-                //getBinder().getPicasso().load(item.getImageMed()).into(holder.thumbnail_iv
-                /*,
-                        new Callback.EmptyCallback() {
-                            @Override public void onSuccess() {
-                                holder.thumbnail_pb.setVisibility(View.GONE);
-                            }
-                            @Override
-                            public void onError() {
-                                holder.thumbnail_pb.setVisibility(View.GONE);
-                            }
-                        }*///);
                 holder.title_tv.setText(item.getTitle());
                 holder.length_tv.setText(item.getDuration());
 
