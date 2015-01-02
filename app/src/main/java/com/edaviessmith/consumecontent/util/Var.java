@@ -111,7 +111,6 @@ public class Var {
     static public final String NOTIFY_ACTION = "notify_action";
     static public final String NOTIFY_NOTIFICATION_ID = "notification_id";
     public static final String INTENT_USER_ID = "user_id";
-    public static final String INTENT_FILTER = "com.edaviessmith.consumecontent.broadcast";
 
     //Time Variables
     static SimpleDateFormat length = new SimpleDateFormat("mm:ss", Locale.getDefault());

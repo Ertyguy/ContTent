@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -7,6 +7,7 @@ import android.util.Log;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
+import com.edaviessmith.consumecontent.util.Var;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -19,6 +19,7 @@ import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -480,6 +481,8 @@ public class DB extends SQLiteOpenHelper {
     static final String COL_SORT = "sort";
     static final String COL_NAME = "name";
     static final String COL_THUMBNAIL = "thumbnail";
+    static final String COL_THUMB = "thumb";
+    static final String COL_THUMBNAILS = "thumbnails";
     static final String COL_VISIBILITY = "visibility";
 
     static final String COL_TYPE = "type";
@@ -532,7 +535,7 @@ public class DB extends SQLiteOpenHelper {
     public static String integerListToString(List<Integer> integerList) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < integerList.size(); i++)
-            sb.append((i == 0 ? "" : strSeparator) + integerList.get(i));
+            sb.append((i == 0 ? "" : strSeparator)).append(integerList.get(i));
 
         return sb.toString();
     }
@@ -542,6 +545,18 @@ public class DB extends SQLiteOpenHelper {
         List<Integer> integerList = new ArrayList<Integer>();
         for (String a : arr) integerList.add(Integer.decode(a));
         return integerList;
+    }
+
+    public static String stringListToString(List<String> integerList) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < integerList.size(); i++)
+            sb.append((i == 0 ? "" : strSeparator)).append(integerList.get(i));
+
+        return sb.toString();
+    }
+
+    public static ArrayList<String> stringToStringList(String str) {
+        return new ArrayList<String>(Arrays.asList(str.split(strSeparator)));
     }
 
 

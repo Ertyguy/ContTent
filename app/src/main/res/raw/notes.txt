@@ -1,0 +1,18 @@
+//TODO://
+
+Set default notification
+
+Check for Twitter notifications
+
+Add status to youtube items (new, seen, watch later)
+Add video option in navbar when playing (watch later)
+
+
+
+Add groups:
+The Yogscast
+Gamegrumps
+
+//FIXME://
+
+ImageLoader has to detect when an image is not available and update the reference (User has changed profile picture)

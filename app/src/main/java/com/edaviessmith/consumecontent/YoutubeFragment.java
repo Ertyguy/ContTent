@@ -19,7 +19,7 @@ import com.edaviessmith.consumecontent.data.YoutubeItem;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
 import com.edaviessmith.consumecontent.util.Var;
-import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
+import com.edaviessmith.consumecontent.service.YoutubeFeedAsyncTask;
 
 
 public class YoutubeFragment extends ActionFragment {
@@ -32,7 +32,6 @@ public class YoutubeFragment extends ActionFragment {
     private YoutubeItemAdapter itemAdapter;
     private LinearLayoutManager linearLayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
-
 
 
     public static YoutubeFragment newInstance(int userId, int mediaFeedId) {

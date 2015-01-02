@@ -18,7 +18,6 @@ import com.edaviessmith.consumecontent.db.MediaFeedORM;
 import com.edaviessmith.consumecontent.db.UserORM;
 import com.edaviessmith.consumecontent.util.ImageLoader;
 import com.edaviessmith.consumecontent.util.Var;
-import com.edaviessmith.consumecontent.util.YoutubeFeedAsyncTask;
 
 import java.util.ArrayList;
 import java.util.List;

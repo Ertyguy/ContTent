@@ -228,33 +228,14 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         }
     }
 
-/*
-	public void restoreActionBar() {
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-		actionBar.setTitle(actionBarTitle);
-	}*/
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		/*if (!navigationDrawerFragment.isDrawerOpen()) {
-			// Only show items in the action bar relevant to this screen if the drawer is not showing. Otherwise, let the drawer decide what to show in the action bar.
-			getMenuInflater().inflate(R.menu.content, menu);
-			restoreActionBar();
-			return true;
-		}*/
-        //getMenuInflater().inflate(R.menu.content, menu);
-
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will automatically handle clicks on the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-		Log.d(TAG, "onOptionsItemSelected");
-        int id = item.getItemId();
-		if (id == android.R.id.home) {
+		if (item.getItemId() == android.R.id.home) {
             if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
                 groupFragment.toggleState(GroupFragment.GROUPS_LIST);
             } else {
@@ -284,7 +265,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         }
 
         super.onBackPressed();
-
     }
 
 
@@ -315,11 +295,11 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
-
-        if(binder != null && (contentState != Var.LIST_USERS ||  binder.getUser() == null || binder.getUser().getSort() != position)) {
-
-            binder.setSelectedUser(position);
+        Log.d(TAG, "onNavigationDrawerItemSelected "+position);
+        if(binder != null){// && (contentState != Var.LIST_USERS ||  binder.getUser() == null || binder.getUser().getSort() != position)) {
             Log.d(TAG, "onNavigationDrawerItemSelected "+ position + " - "+binder.getUser().getSort());
+            binder.setSelectedUser(position);
+
             toggleState(Var.LIST_USERS);
         }
 

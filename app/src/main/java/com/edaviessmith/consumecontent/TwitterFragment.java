@@ -22,7 +22,7 @@ import com.edaviessmith.consumecontent.data.TwitterItem;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
-import com.edaviessmith.consumecontent.util.TwitterFeedAsyncTask;
+import com.edaviessmith.consumecontent.service.TwitterFeedAsyncTask;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;

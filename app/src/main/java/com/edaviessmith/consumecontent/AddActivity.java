@@ -116,9 +116,10 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         else editUser = new User();
 
         for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
-            mediaFeeds.add( editUser.getMediaFeedSort(i));
+            mediaFeeds.add(editUser.getMediaFeedSort(i));
         }
 
+        footer.setVisibility(editUser.getCastMediaFeed().size() == 0? View.GONE: View.VISIBLE);
 
         userName_edt.setText(editUser.getName());
         getSupportActionBar().setTitle((!Var.isEmpty(editUser.getName())? "Edit "+editUser.getName(): "Add User"));
@@ -166,9 +167,9 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
         View header = getLayoutInflater().inflate(R.layout.header_add, null, false);
         View searchHeader = getLayoutInflater().inflate(R.layout.header_search_user, null, false);
-        footer = getLayoutInflater().inflate(R.layout.item_list_divider, null, false);
-        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 48)));
-        footer.setVisibility(View.GONE);
+        footer = getLayoutInflater().inflate(R.layout.item_list_footer, null, false);
+        footer.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, Var.getPixels(TypedValue.COMPLEX_UNIT_DIP, 88)));
+        //footer.setVisibility(View.GONE);
 
         feedAdapter = new FeedAdapter(this, mediaFeeds);
         feed_lv = (DragSortListView) findViewById(R.id.feed_lv);
@@ -458,7 +459,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             userPictureThumbnails.add(thumbnail);
 
             if (Var.isEmpty(editUser.getThumbnail())) {
-                editUser.setThumbnail(userPictureThumbnails.get(0));
+                //editUser.getThumbnails().add(userPictureThumbnails.get(0));
                 binder.getImageLoader().DisplayImage(userPictureThumbnails.get(0), userThumbnail_iv);
             }
 
@@ -497,8 +498,16 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(groups_v == v) {
             new GroupDialog(this, groups, editUser.getGroups());
         }
+
         if(userThumbnail_v == v) {
 
+            List<String> thumbnails = new ArrayList<String>(editUser.getThumbnails());
+
+            for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
+                thumbnails.add(editUser.getCastMediaFeed().valueAt(i).getThumbnail());
+            }
+
+            new ThumbnailDialog(this, thumbnails);
         }
 
         if(v == search_fab) {
@@ -513,7 +522,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                     if(checked.valueAt(i)) {
                         YoutubeFeed youtubeFeed = (YoutubeFeed) search_lv.getItemAtPosition(checked.keyAt(i));
                         youtubeFeed.setChannelHandle(searchChannel.getFeedId());
-                        addThumbnail(youtubeFeed.getThumbnail());
+                        editUser.getThumbnails().add(userPictureThumbnails.get(0));
                         mediaFeeds.add(youtubeFeed);
                     }
                 }
@@ -604,6 +613,14 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
     public void setGroups(List<Group> groups) {
         editUser.setGroups(groups);
+    }
+
+    public void setThumbnail(String thumbnail) {
+        if(!editUser.getThumbnails().contains(thumbnail)) {
+            editUser.getThumbnails().add(thumbnail);
+        }
+        editUser.setThumb(editUser.getThumbnails().indexOf(thumbnail));
+        binder.getImageLoader().DisplayImage(thumbnail, userThumbnail_iv);
     }
 
 

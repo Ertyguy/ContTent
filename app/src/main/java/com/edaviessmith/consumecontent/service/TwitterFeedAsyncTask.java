@@ -1,4 +1,4 @@
-package com.edaviessmith.consumecontent.util;
+package com.edaviessmith.consumecontent.service;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -8,6 +8,8 @@ import com.edaviessmith.consumecontent.data.TwitterFeed;
 import com.edaviessmith.consumecontent.data.TwitterItem;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
+import com.edaviessmith.consumecontent.util.TwitterUtil;
+import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.ArrayList;
 import java.util.Collections;

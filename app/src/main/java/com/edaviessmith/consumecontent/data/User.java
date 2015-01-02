@@ -2,15 +2,18 @@ package com.edaviessmith.consumecontent.data;
 
 import android.util.SparseArray;
 
+import com.edaviessmith.consumecontent.db.DB;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class User extends Content{
 
 
-	public SparseArray mediaFeed; //Id should be the sort value
+	private SparseArray mediaFeed;
     private List<Group> groups;
 
+    //private List<String> thumbnails;
     private SparseArray<MediaFeed> removed;
 
 
@@ -20,14 +23,10 @@ public class User extends Content{
 
     }
 
-    public User(int id, int sort, String name, String thumbnail) {
-        super(id, sort, name, thumbnail);
+    public User(int id, int sort, String name, int thumb, String thumbnail) {
+        super(id, sort, name, thumb, thumbnail);
     }
 
-    public User(int id, int sort, String name, String thumbnail, SparseArray mediaFeed) {
-        super(id, sort, name, thumbnail);
-        this.mediaFeed = mediaFeed;
-    }
 
     //TODO need to include sort
     @Deprecated
@@ -37,8 +36,8 @@ public class User extends Content{
         this.groups = groups;
     }
 
-    public User(String name, String thumbnail, int sort, SparseArray mediaFeed, List<Group> groups) {
-        super(sort, name, thumbnail);
+    public User(String name, int thumb, String thumbnails, int sort, SparseArray mediaFeed, List<Group> groups) {
+        super(sort, name, thumb, thumbnails);
         this.mediaFeed = mediaFeed;
         this.groups = groups;
     }
@@ -58,7 +57,6 @@ public class User extends Content{
     public void setMediaFeed(SparseArray mediaFeed) {
         this.mediaFeed = mediaFeed;
     }
-
 
     public MediaFeed getMediaFeedSort(int sort) {
         for(int i=0; i < mediaFeed.size(); i++) {
@@ -92,12 +90,15 @@ public class User extends Content{
         setMediaFeed(feeds);
     }
 
+
+
     @Override
     public String toString() {
         return "}}, new ArrayList<Group>() {{add(groupName); }})); \n\n" +
                 "put("+getSort()+" new User(" +
-                  "\"" + getName() + '\"' +
-                ", \"" + getThumbnail() + '\"' +
+                "\"" + getName() + '\"' +
+                ", " + getThumb() +
+                ", \"" + DB.stringListToString(getThumbnails()) + '\"' +
                 ", " + getSort() +
                 ", new SparseArray<YoutubeFeed>(){{";
         }

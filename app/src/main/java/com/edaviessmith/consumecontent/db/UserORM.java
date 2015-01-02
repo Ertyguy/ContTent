@@ -21,7 +21,8 @@ public class UserORM {
             DB.COL_ID 	 + " INTEGER PRIMARY KEY AUTOINCREMENT, "+
             DB.COL_SORT             + " INTEGER, " +
             DB.COL_NAME   	        + " TEXT, " +
-            DB.COL_THUMBNAIL 	    + " TEXT " + ");";
+            DB.COL_THUMB 	        + " INTEGER, " +
+            DB.COL_THUMBNAILS 	    + " TEXT " +");";
 
     public static String SQL_DROP_TABLE = "DROP TABLE IF EXISTS " + DB.TABLE_USER;
 
@@ -240,14 +241,6 @@ public class UserORM {
             }
         }
         saveUsers(database, users);
-       /* LinkedHashMap<Integer, User> userSparseArray = new  LinkedHashMap<Integer, User>();
-        int i=0;
-        for(User user: users.values()) {
-        //for(int i=0; i< users.size(); i++) {
-            saveUser(database, user);
-            userSparseArray.put(user.getId(), user);
-        }*/
-        //return userSparseArray;
     }
 
     private static void removeUser(SQLiteDatabase database, User user) {
@@ -288,7 +281,8 @@ public class UserORM {
         if(includeId) values.put(DB.COL_ID, user.getId());
         values.put(DB.COL_SORT, user.getSort());
         values.put(DB.COL_NAME, user.getName());
-        values.put(DB.COL_THUMBNAIL, user.getThumbnail());
+        values.put(DB.COL_THUMB, user.getThumb());
+        values.put(DB.COL_THUMBNAILS, DB.stringListToString(user.getThumbnails()));
         return values;
     }
 
@@ -296,7 +290,8 @@ public class UserORM {
         return new User(cursor.getInt(cursor.getColumnIndex(DB.COL_ID)),
                          cursor.getInt(cursor.getColumnIndex(DB.COL_SORT)),
                          cursor.getString(cursor.getColumnIndex(DB.COL_NAME)),
-                         cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAIL)));
+                         cursor.getInt(cursor.getColumnIndex(DB.COL_THUMB)),
+                         cursor.getString(cursor.getColumnIndex(DB.COL_THUMBNAILS)));
     }
 
 
