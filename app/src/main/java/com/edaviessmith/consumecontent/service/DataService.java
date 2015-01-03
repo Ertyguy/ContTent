@@ -334,7 +334,16 @@ public class DataService extends Service {
                 }
             });
 
+        }
 
+        public void saveMediaFeed(final int userId, final int mediaFeedId) {
+
+            tpe.submit(new Runnable() {
+                @Override
+                public void run() {
+                    MediaFeedORM.saveMediaFeed(DataService.this, ((MediaFeed) getUser(userId).getMediaFeed().get(mediaFeedId)), userId);
+                }
+            });
 
         }
 

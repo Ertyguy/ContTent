@@ -118,8 +118,12 @@ public class MediaFeedActivityService extends IntentService {
                     .setSmallIcon(R.drawable.ic_notification);
 
             if(Var.isEmpty(users.get(0).getThumbnail())) {
-                Bitmap icon = imageLoader.getBitmap(users.get(0).getThumbnail());
-                if(icon != null) builder.setLargeIcon(icon);
+                try {
+                    Bitmap icon = imageLoader.getBitmap(users.get(0).getThumbnail());
+                    if (icon != null) builder.setLargeIcon(icon);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                }
             }
 
             //Next 3 members as sub-icons

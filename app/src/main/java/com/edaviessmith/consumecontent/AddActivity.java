@@ -34,6 +34,7 @@ import com.edaviessmith.consumecontent.data.YoutubeChannel;
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.service.ActionActivity;
+import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
@@ -625,10 +626,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
 
     private class SearchYoutubeTask extends AsyncTask<String, Void, String> {
-
         String response;
         boolean isNew;
-
 
         @Override
         protected String doInBackground(String... search) {
@@ -637,7 +636,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
                 //TODO check the internet connection here
 
-                String url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" + URLEncoder.encode(search[0], "UTF-8") + "&maxResults=" + maxResults
+                String url = "https://www.googleapis.com/youtube/v3/search?part=snippet"+"&q=" + URLEncoder.encode(search[0], "UTF-8") + "&maxResults=" + maxResults
                         + "&type=channel&fields=items(id%2Csnippet)%2CnextPageToken&key=" + Var.DEVELOPER_KEY;
                 if(pageToken != null && !pageToken.isEmpty()) url += "&pageToken=" + pageToken;
                 else isNew = true;
@@ -855,8 +854,18 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             final ViewHolder holder = (ViewHolder) convertView.getTag();
             final MediaFeed feed = getItem(position);
 
-            holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
-            if(feed.getThumbnail() != null) binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
+            if(searchMode == SEARCH_TWITTER) {
+                holder.image_iv.setImageResource(R.drawable.ic_twitter_icon);
+            } else {
+                holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
+            }
+
+            if(feed.getThumbnail() != null) {
+
+                Listener l = Var.getThumbnailListener(binder, feed, holder.image_iv, editUser.getId());
+                binder.getImageLoader().DisplayImage(l, feed.getThumbnail(), holder.image_iv, null, true);
+
+            }
             holder.name_edt.setText(feed.getName());
 
             holder.name_edt.setOnClickListener(new View.OnClickListener() {

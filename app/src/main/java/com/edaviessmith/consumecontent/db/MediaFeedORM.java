@@ -187,6 +187,32 @@ public class MediaFeedORM {
         return mediaFeed;
     }
 
+    public static MediaFeed saveMediaFeed(Context context, MediaFeed mediaFeed, int userId) {
+        DB databaseHelper = new DB(context);
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+
+        database.beginTransaction();
+        try {
+
+            if(DB.isValid(mediaFeed.getId())) {
+                database.update(DB.TABLE_MEDIA_FEED, mediaFeedToContentValues(mediaFeed, userId, false), DB.COL_ID + " = " + mediaFeed.getId(), null);
+            } else {
+                mediaFeed.setId((int) database.insert(DB.TABLE_MEDIA_FEED, null, mediaFeedToContentValues(mediaFeed, userId, false)));
+            }
+
+            database.setTransactionSuccessful();
+            Log.e(TAG, "saveMediaFeed");
+        }catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+            database.close();
+        }
+
+        return mediaFeed;
+    }
+
+
     public static void removeMediaFeed(SQLiteDatabase database, MediaFeed mediaFeed) {
 
         if(DB.isValid(mediaFeed.getId())) {

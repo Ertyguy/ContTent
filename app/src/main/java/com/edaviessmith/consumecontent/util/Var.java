@@ -12,11 +12,14 @@ import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.widget.ImageView;
 
 import com.edaviessmith.consumecontent.data.Alarm;
+import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.NotificationList;
 import com.edaviessmith.consumecontent.service.AlarmBroadcastReceiver;
+import com.edaviessmith.consumecontent.service.DataService;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -40,6 +44,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import twitter4j.ResponseList;
+import twitter4j.User;
 
 public class Var {
     static final String TAG = "Var";
@@ -131,6 +138,8 @@ public class Var {
 
     public static int SCROLL_OFFSET = 5; //Number of items before next request
 
+    //URLS
+    //TODO: add commonly used urls here to cleanup the code
 
     //Util functions
     public static int getPixels(int unit, float size) {
@@ -677,5 +686,80 @@ public class Var {
         return (now.getTimeInMillis() - (Var.MINUTE_MILLI * 20) < lastUpdate);
     }
 
+
+    //Listener to update a feed thumbnail reference if while making the request the image is not found
+    public static Listener getThumbnailListener(final DataService.ServiceBinder binder, final MediaFeed feed, final ImageView image_iv, final int userId) {
+        return new Listener() {
+            @Override
+            public void onComplete(String value) {
+
+            }
+
+            @Override
+            public void onError(String value) {
+
+                try {
+                    if(Var.isTypeYoutube(feed.getType())) {
+
+                        String req = null;
+                        if(feed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
+                            String playlistUrl = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + URLEncoder.encode(feed.getFeedId(), "UTF-8") + "&fields=items(id%2Csnippet)&key=" + Var.DEVELOPER_KEY;
+                            req = Var.HTTPGet(playlistUrl);
+                        } else if(feed.getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
+                            //TODO this call has not been tested (need to manually curropt some YT thumbnails to test)
+                            String activityUrl = "https://www.googleapis.com/youtube/v3/activities?part=snippet&fields=items(id%2Csnippet)&channelId=" + URLEncoder.encode(feed.getChannelHandle(), "UTF-8") + "&maxResults=20&key=" + Var.DEVELOPER_KEY;
+                            req = Var.HTTPGet(activityUrl);
+                        }
+
+                        JSONObject play = new JSONObject(req);
+                        if (Var.isJsonArray(play, "items")) {
+                            JSONArray items = play.getJSONArray("items");
+                            if(items.length() > 0) {
+                                JSONObject item = items.getJSONObject(0);
+
+                                if(Var.isJsonString(item, "id")) {
+                                    if (Var.isJsonObject(item, "snippet")) {
+                                        JSONObject snippet = item.getJSONObject("snippet");
+                                        if (Var.isJsonObject(snippet, "thumbnails")) {              //Feed Thumbnail
+                                            JSONObject thumbnails = snippet.getJSONObject("thumbnails");
+                                            if (Var.isJsonObject(thumbnails, "default")) {
+                                                JSONObject def = thumbnails.getJSONObject("default");
+                                                if (Var.isJsonString(def, "url")) {
+                                                    feed.setThumbnail(def.getString("url"));
+                                                    binder.getImageLoader().DisplayImage(feed.getThumbnail(), image_iv);
+                                                    binder.saveMediaFeed(userId, feed.getId());
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
+
+                        }
+                    }
+
+                    if(feed.getType() == Var.TYPE_TWITTER) {
+
+                        ResponseList<User> users = binder.getTwitter().getAppTwitter().lookupUsers(new long[]{Long.parseLong(feed.getFeedId())});
+
+                        if(users != null) {
+                            twitter4j.User u = users.get(0);
+                            String thumb = u.getProfileImageURL().replace("_normal", "_bigger");
+                            if(!thumb.equals(feed.getThumbnail())) {
+                                feed.setThumbnail(thumb);
+                                binder.getImageLoader().DisplayImage(feed.getThumbnail(), image_iv);
+                                binder.saveMediaFeed(userId, feed.getId());
+                            }
+                        }
+
+                    }
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+    }
 
 }

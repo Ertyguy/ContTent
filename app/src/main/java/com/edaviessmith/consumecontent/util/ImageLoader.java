@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -38,13 +39,7 @@ public class ImageLoader {
     }
 
     public void DisplayImage(String url, ImageView imageView) {
-        imageViews.put(imageView, url);
-        Bitmap bitmap = memoryCache.get(url);
-        if(bitmap != null)
-            imageView.setImageBitmap(bitmap);
-        else {
-            queuePhoto(url, imageView);
-        }
+        DisplayImage(url, imageView, null, true);
     }
 
     public void DisplayImage(String url, ImageView imageView, ProgressBar progressBar) {
@@ -56,39 +51,45 @@ public class ImageLoader {
         Bitmap bitmap = memoryCache.get(url);
         if (bitmap != null){
             imageView.setImageBitmap(bitmap);
-            progressBar.setVisibility(View.GONE);
+            if(progressBar != null) progressBar.setVisibility(View.GONE);
         } else {
-            progressBar.setVisibility(View.VISIBLE);
+            if(progressBar != null) progressBar.setVisibility(View.VISIBLE);
             if(hideImage) imageView.setImageResource(android.R.color.transparent);
-            queuePhoto(url, imageView, progressBar);
 
+            PhotoToLoad p = new PhotoToLoad(url, imageView, progressBar);
+            executorService.submit(new PhotosLoader(p));
+        }
+    }
+
+    public void DisplayImage(Listener listener, String url, ImageView imageView, ProgressBar progressBar, boolean hideImage) {
+        imageViews.put(imageView, url);
+        Bitmap bitmap = memoryCache.get(url);
+        if (bitmap != null){
+            imageView.setImageBitmap(bitmap);
+            if(progressBar != null) progressBar.setVisibility(View.GONE);
+        } else {
+            if(progressBar != null) progressBar.setVisibility(View.VISIBLE);
+            if(hideImage) imageView.setImageResource(android.R.color.transparent);
+
+            PhotoToLoad p = new PhotoToLoad(url, imageView, progressBar);
+            executorService.submit(new PhotosLoader(p, listener));
         }
     }
          
-    private void queuePhoto(String url, ImageView imageView)
-    {
-        PhotoToLoad p = new PhotoToLoad(url, imageView);
-        executorService.submit(new PhotosLoader(p));
-    }
-    private void queuePhoto(String url, ImageView imageView, ProgressBar progressBar)
-    {
-        PhotoToLoad p = new PhotoToLoad(url, imageView, progressBar);
-        executorService.submit(new PhotosLoader(p));
-    }
+
      
-    public Bitmap getBitmap(String url)
-    {
+    public Bitmap getBitmap(String url) throws FileNotFoundException {
         File f = fileCache.getFile(url);
          
         //from SD cache
         Bitmap b = decodeFile(f);
-        if(b!=null)  return b;
+        if(b != null) return b;
          
         //from web
         try {
-            Bitmap bitmap = null;
+            Bitmap bitmap;
             URL imageUrl = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
             conn.setConnectTimeout(30000);
             conn.setReadTimeout(30000);
             conn.setInstanceFollowRedirects(true);
@@ -97,21 +98,25 @@ public class ImageLoader {
 
             try {
                 byte[] bytes = new byte[buffer_size];
-                for(;;) {
-                    int count=is.read(bytes, 0, buffer_size);
-                    if(count == -1)
+                for (; ; ) {
+                    int count = is.read(bytes, 0, buffer_size);
+                    if (count == -1)
                         break;
                     os.write(bytes, 0, count);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            catch(Exception e){  e.printStackTrace();}
 
             os.close();
             is.close();
             bitmap = decodeFile(f);
             return bitmap;
+        } catch (FileNotFoundException ex) {
+            throw ex;   //Throw exception when the file cannot be found
         } catch (Throwable ex){
-           //ex.printStackTrace();
+
+           ex.printStackTrace();
            if(ex instanceof OutOfMemoryError)
                memoryCache.clear();
            return null;
@@ -187,10 +192,6 @@ public class ImageLoader {
         public ImageView imageView;
         public ProgressBar progressBar;
 
-        public PhotoToLoad(String u, ImageView i){
-            url = u; 
-            imageView = i;
-        }
         public PhotoToLoad(String u, ImageView i, ProgressBar p){
             url = u;
             imageView = i;
@@ -200,19 +201,32 @@ public class ImageLoader {
      
     class PhotosLoader implements Runnable {
         PhotoToLoad photoToLoad;
+        Listener listener;
+
         PhotosLoader(PhotoToLoad photoToLoad){
             this.photoToLoad = photoToLoad;
+        }
+
+        PhotosLoader(PhotoToLoad photoToLoad, Listener listener){
+            this.photoToLoad = photoToLoad;
+            this.listener = listener;
         }
          
         @Override
         public void run() {
             if(imageViewReused(photoToLoad))  return;
-            Bitmap bmp = getBitmap(photoToLoad.url);
+            Bitmap bmp = null;
+            try {
+                bmp = getBitmap(photoToLoad.url);
+            } catch(FileNotFoundException ex) {
+                //TODO: Update the db record
+                listener.onError("");
+            }
             if(bmp == null) return;
             memoryCache.put(photoToLoad.url, bmp);
             if(imageViewReused(photoToLoad)) return;
             BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad);
-            Activity a = (Activity)photoToLoad.imageView.getContext();
+            Activity a = (Activity) photoToLoad.imageView.getContext();
             a.runOnUiThread(bd);
         }
     }

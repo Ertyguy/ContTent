@@ -8,6 +8,7 @@ Add status to youtube items (new, seen, watch later)
 Add video option in navbar when playing (watch later)
 
 
+Style day of the week button
 
 Add groups:
 The Yogscast
