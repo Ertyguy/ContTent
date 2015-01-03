@@ -1,19 +1,54 @@
 //TODO://
 
+
+////CRITICAL PATH//
+Fix Notifications
+
+Edit Groups
+    Thumbnail picker
+    Add Group
+    Add member
+
+Add groups:
+    The Yogscast
+    Gamegrumps
+    Team Crafted
+    markiplier + friends (Yamimash, Bob/muyskerm, Wade/LordMinion777, JackSepticEye, Tiny Box Tim)
+    pewdiepie + friends (vanossGaming, SeaNanners Gaming)  http://pewdiepie.wikia.com/wiki/PewDiePie
+    Machinema (theSw1tcher, happyhour)
+
+    Vevo
+    CinemaSins
+    Epic Rap Battle
+    Comedy (comedyCentral, Mojo)
+
+Ads banner
+Style day of the week button
+
+Change icon images to selectors
+
+Implement notifications and settings to work
+
+////NICE TO HAVE//
+
 Set default notification
-
 Check for Twitter notifications
-
 Add status to youtube items (new, seen, watch later)
+
+Create Watch Later and Favorite List (act as groups)
+Add history as well
+
+
+////BACK BURNER//
+
 Add video option in navbar when playing (watch later)
 
 
-Style day of the week button
-
-Add groups:
-The Yogscast
-Gamegrumps
 
 //FIXME://
 
+(not tested with no internet connection)
 ImageLoader has to detect when an image is not available and update the reference (User has changed profile picture)
+Feed (done)
+User (not tested)
+Group  (not tested)

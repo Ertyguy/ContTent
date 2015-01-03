@@ -128,7 +128,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(DB.isValid(editUser.getId())) {
             action_fab.setDrawable(getResources().getDrawable(R.drawable.ic_action_accept));
 
-            binder.getImageLoader().DisplayImage(editUser.getThumbnail(), userThumbnail_iv, userThumbnail_pb);
+            Listener l = Var.getUserThumbnailListener(binder, editUser, userThumbnail_iv);
+            binder.getImageLoader().DisplayImage(l, editUser.getThumbnail(), userThumbnail_iv, userThumbnail_pb);
 
             addThumbnail(editUser.getThumbnail());
             for(int i=0; i<editUser.getMediaFeed().size(); i++)
@@ -861,10 +862,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             }
 
             if(feed.getThumbnail() != null) {
-
                 Listener l = Var.getThumbnailListener(binder, feed, holder.image_iv, editUser.getId());
-                binder.getImageLoader().DisplayImage(l, feed.getThumbnail(), holder.image_iv, null, true);
-
+                binder.getImageLoader().DisplayImage(l, feed.getThumbnail(), holder.image_iv);
             }
             holder.name_edt.setText(feed.getName());
 
@@ -964,7 +963,10 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             if(searchMode == SEARCH_YOUTUBE) {
                 YoutubeChannel feed = (YoutubeChannel) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
-                if (feed.getThumbnail() != null) binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
+                if (feed.getThumbnail() != null) {
+                    Listener l = Var.getThumbnailListener(binder, feed, holder.image_iv, editUser.getId());
+                    binder.getImageLoader().DisplayImage(l, feed.getThumbnail(), holder.image_iv);
+                }
 
                 holder.name_tv.setText(feed.getName());
             }
@@ -972,7 +974,10 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             if(searchMode == SEARCH_TWITTER) {
                 TwitterFeed feed = (TwitterFeed) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_twitter_icon);
-                if (feed.getThumbnail() != null) binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
+                if (feed.getThumbnail() != null) {
+                    Listener l = Var.getThumbnailListener(binder, feed, holder.image_iv, editUser.getId());
+                    binder.getImageLoader().DisplayImage(l, feed.getThumbnail(), holder.image_iv);
+                }
 
                 holder.name_tv.setText(feed.getDisplayName());
                 holder.screenName_tv.setText(feed.getChannelHandle());
@@ -981,7 +986,10 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             if(searchMode == SEARCH_YT_CHANNEL) {
                 YoutubeFeed feed = (YoutubeFeed) getItem(position);
                 holder.image_iv.setImageResource(R.drawable.ic_youtube_icon);
-                if (feed.getThumbnail() != null) binder.getImageLoader().DisplayImage(feed.getThumbnail(), holder.image_iv);
+                if (feed.getThumbnail() != null){
+                    Listener l = Var.getThumbnailListener(binder, feed, holder.image_iv, editUser.getId());
+                    binder.getImageLoader().DisplayImage(l, feed.getThumbnail(), holder.image_iv);
+                }
 
                 holder.name_tv.setText(feed.getName());
             }

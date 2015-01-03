@@ -42,8 +42,16 @@ public class ImageLoader {
         DisplayImage(url, imageView, null, true);
     }
 
+    public void DisplayImage(Listener l, String url, ImageView imageView) {
+        DisplayImage(l, url, imageView, null, true);
+    }
+
     public void DisplayImage(String url, ImageView imageView, ProgressBar progressBar) {
         DisplayImage(url, imageView, progressBar, true);
+    }
+
+    public void DisplayImage(Listener l, String url, ImageView imageView, ProgressBar progressBar) {
+        DisplayImage(l, url, imageView, progressBar, true);
     }
 
     public void DisplayImage(String url, ImageView imageView, ProgressBar progressBar, boolean hideImage) {

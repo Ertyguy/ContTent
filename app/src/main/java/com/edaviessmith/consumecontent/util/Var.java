@@ -15,6 +15,7 @@ import android.util.TypedValue;
 import android.widget.ImageView;
 
 import com.edaviessmith.consumecontent.data.Alarm;
+import com.edaviessmith.consumecontent.data.Group;
 import com.edaviessmith.consumecontent.data.MediaFeed;
 import com.edaviessmith.consumecontent.data.Notification;
 import com.edaviessmith.consumecontent.data.NotificationList;
@@ -697,69 +698,172 @@ public class Var {
 
             @Override
             public void onError(String value) {
+                updateMediaFeedThumbnail(binder, feed, image_iv, userId);
+            }
+        };
+    }
 
-                try {
-                    if(Var.isTypeYoutube(feed.getType())) {
+    //Listener to update a user thumbnail reference if while making the request the image is not found
+    public static Listener getUserThumbnailListener(final DataService.ServiceBinder binder, final com.edaviessmith.consumecontent.data.User user, final ImageView image_iv) {
+        return new Listener() {
+            @Override
+            public void onComplete(String value) {
 
-                        String req = null;
-                        if(feed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
-                            String playlistUrl = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + URLEncoder.encode(feed.getFeedId(), "UTF-8") + "&fields=items(id%2Csnippet)&key=" + Var.DEVELOPER_KEY;
-                            req = Var.HTTPGet(playlistUrl);
-                        } else if(feed.getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
-                            //TODO this call has not been tested (need to manually curropt some YT thumbnails to test)
-                            String activityUrl = "https://www.googleapis.com/youtube/v3/activities?part=snippet&fields=items(id%2Csnippet)&channelId=" + URLEncoder.encode(feed.getChannelHandle(), "UTF-8") + "&maxResults=20&key=" + Var.DEVELOPER_KEY;
-                            req = Var.HTTPGet(activityUrl);
-                        }
+            }
 
-                        JSONObject play = new JSONObject(req);
-                        if (Var.isJsonArray(play, "items")) {
-                            JSONArray items = play.getJSONArray("items");
-                            if(items.length() > 0) {
-                                JSONObject item = items.getJSONObject(0);
+            @Override
+            public void onError(String value) {
+                updateUserThumbnail(binder, user, image_iv);
+            }
+        };
+    }
 
-                                if(Var.isJsonString(item, "id")) {
-                                    if (Var.isJsonObject(item, "snippet")) {
-                                        JSONObject snippet = item.getJSONObject("snippet");
-                                        if (Var.isJsonObject(snippet, "thumbnails")) {              //Feed Thumbnail
-                                            JSONObject thumbnails = snippet.getJSONObject("thumbnails");
-                                            if (Var.isJsonObject(thumbnails, "default")) {
-                                                JSONObject def = thumbnails.getJSONObject("default");
-                                                if (Var.isJsonString(def, "url")) {
-                                                    feed.setThumbnail(def.getString("url"));
-                                                    binder.getImageLoader().DisplayImage(feed.getThumbnail(), image_iv);
-                                                    binder.saveMediaFeed(userId, feed.getId());
-                                                }
-                                            }
-                                        }
-                                    }
+    //Listener to update a group thumbnail reference if while making the request the image is not found
+    public static Listener getGroupThumbnailListener(final DataService.ServiceBinder binder, final Group group, final ImageView image_iv) {
+        return new Listener() {
+            @Override
+            public void onComplete(String value) {
 
-                                }
-                            }
+            }
 
+            @Override
+            public void onError(String value) {
+                boolean thumbSet = false;
+                String channelId = null;
+                for(com.edaviessmith.consumecontent.data.User user: group.getUsers().values()) {
+
+                    for(String thumbnail: user.getThumbnails()) {
+                        if(thumbnail.equals(group.getThumbnail())) {
+                            String thumb = updateUserThumbnail(binder, user, image_iv);
+
+                            group.setThumbnail(thumb);
+                            binder.saveGroup(group);
                         }
                     }
-
-                    if(feed.getType() == Var.TYPE_TWITTER) {
-
-                        ResponseList<User> users = binder.getTwitter().getAppTwitter().lookupUsers(new long[]{Long.parseLong(feed.getFeedId())});
-
-                        if(users != null) {
-                            twitter4j.User u = users.get(0);
-                            String thumb = u.getProfileImageURL().replace("_normal", "_bigger");
-                            if(!thumb.equals(feed.getThumbnail())) {
-                                feed.setThumbnail(thumb);
-                                binder.getImageLoader().DisplayImage(feed.getThumbnail(), image_iv);
-                                binder.saveMediaFeed(userId, feed.getId());
-                            }
-                        }
-
-                    }
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
                 }
             }
         };
+    }
+
+
+    private static String updateUserThumbnail(final DataService.ServiceBinder binder, final com.edaviessmith.consumecontent.data.User user, final ImageView image_iv) {
+        String channelId = null;
+        for(int i=0; i< user.getCastMediaFeed().size(); i++) {
+            if(channelId == null && Var.isTypeYoutube(user.getCastMediaFeed().valueAt(i).getType())) channelId = user.getCastMediaFeed().valueAt(i).getChannelHandle();
+            if(user.getThumbnail().equals(user.getCastMediaFeed().valueAt(i).getThumbnail())) {
+                String thumbnail = updateMediaFeedThumbnail(binder, user.getCastMediaFeed().valueAt(i), image_iv, user.getId());
+
+                if(!user.getThumbnails().contains(user.getCastMediaFeed().valueAt(i).getThumbnail())) {
+                    user.getThumbnails().add(thumbnail);
+                    user.setThumb(user.getThumbnails().indexOf(thumbnail));
+                } else {
+                    int index = user.getThumbnails().indexOf(user.getCastMediaFeed().valueAt(i).getThumbnail());
+                    user.getThumbnails().set(index, thumbnail);
+                    user.setThumb(index);
+                }
+
+                binder.saveUser(user);
+                return thumbnail;
+            }
+        }
+        //Grab the channel from the first youtube playlist
+        if(!Var.isEmpty(channelId)) {
+            String channelUrl = "https://www.googleapis.com/youtube/v3/channels?part=snippet&id=" + channelId + "&&fields=items&key=" + Var.DEVELOPER_KEY;
+            String req = Var.HTTPGet(channelUrl);
+
+            try {
+                JSONObject play = new JSONObject(req);
+                if (Var.isJsonArray(play, "items")) {
+                    JSONArray items = play.getJSONArray("items");
+                    if (items.length() > 0) {
+                        JSONObject item = items.getJSONObject(0);
+
+                        if (Var.isJsonObject(item, "snippet")) {
+                            JSONObject snippet = item.getJSONObject("snippet");
+                            if (Var.isJsonObject(snippet, "thumbnails")) {              //Feed Thumbnail
+                                JSONObject thumbnails = snippet.getJSONObject("thumbnails");
+                                if (Var.isJsonObject(thumbnails, "default")) {
+                                    JSONObject def = thumbnails.getJSONObject("default");
+                                    if (Var.isJsonString(def, "url")) {
+                                        String thumb = def.getString("url");
+
+                                        user.getThumbnails().set(user.getThumb(), thumb);
+                                        binder.getImageLoader().DisplayImage(thumb, image_iv);
+                                        binder.saveUser(user);
+                                        return thumb;
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+
+    private static String updateMediaFeedThumbnail(final DataService.ServiceBinder binder, final MediaFeed feed, final ImageView image_iv, final int userId) {
+        try {
+            if(Var.isTypeYoutube(feed.getType())) {
+
+                String req = null;
+                if(feed.getType() == Var.TYPE_YOUTUBE_PLAYLIST) {
+                    String playlistUrl = "https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=" + URLEncoder.encode(feed.getFeedId(), "UTF-8") + "&fields=items(id%2Csnippet)&key=" + Var.DEVELOPER_KEY;
+                    req = Var.HTTPGet(playlistUrl);
+                } else if(feed.getType() == Var.TYPE_YOUTUBE_ACTIVTY) {
+                    //TODO this call has not been tested (need to manually corrupt some YT thumbnails to test)
+                    String activityUrl = "https://www.googleapis.com/youtube/v3/activities?part=snippet&fields=items(id%2Csnippet)&channelId=" + URLEncoder.encode(feed.getChannelHandle(), "UTF-8") + "&maxResults=20&key=" + Var.DEVELOPER_KEY;
+                    req = Var.HTTPGet(activityUrl);
+                }
+
+                JSONObject play = new JSONObject(req);
+                if (Var.isJsonArray(play, "items")) {
+                    JSONArray items = play.getJSONArray("items");
+                    if(items.length() > 0) {
+                        JSONObject item = items.getJSONObject(0);
+
+                        if (Var.isJsonObject(item, "snippet")) {
+                            JSONObject snippet = item.getJSONObject("snippet");
+                            if (Var.isJsonObject(snippet, "thumbnails")) {              //Feed Thumbnail
+                                JSONObject thumbnails = snippet.getJSONObject("thumbnails");
+                                if (Var.isJsonObject(thumbnails, "default")) {
+                                    JSONObject def = thumbnails.getJSONObject("default");
+                                    if (Var.isJsonString(def, "url")) {
+                                        feed.setThumbnail(def.getString("url"));
+                                        binder.getImageLoader().DisplayImage(feed.getThumbnail(), image_iv);
+                                        binder.saveMediaFeed(userId, feed.getId());
+                                        return def.getString("url");
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            if(feed.getType() == Var.TYPE_TWITTER) {
+                ResponseList<User> users = binder.getTwitter().getAppTwitter().lookupUsers(new long[]{Long.parseLong(feed.getFeedId())});
+                if(users != null) {
+                    twitter4j.User u = users.get(0);
+                    String thumb = u.getProfileImageURL().replace("_normal", "_bigger");
+                    if(!thumb.equals(feed.getThumbnail())) {
+                        feed.setThumbnail(thumb);
+                        binder.getImageLoader().DisplayImage(feed.getThumbnail(), image_iv);
+                        binder.saveMediaFeed(userId, feed.getId());
+                        return thumb;
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
 }

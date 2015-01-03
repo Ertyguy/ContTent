@@ -28,6 +28,7 @@ import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.db.DB;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
+import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 import com.mobeta.android.dslv.DragSortController;
@@ -241,7 +242,10 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
 
             visible_sw.setChecked(editGroup.isVisible());
-            getBinder().getImageLoader().DisplayImage(editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb);
+
+            Listener l = Var.getGroupThumbnailListener(getBinder(), editGroup,groupThumbnail_iv);
+            getBinder().getImageLoader().DisplayImage(l, editGroup.getThumbnail(), groupThumbnail_iv,groupThumbnail_pb);
+
 
             groupName_edt.setText(editGroup.getName());
 
@@ -396,7 +400,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
                 Group item = groupList.get(i);
 
-                getBinder().getImageLoader().DisplayImage(item.getThumbnail(), holder.icon_iv, holder.icon_pb);
+                Listener l = Var.getGroupThumbnailListener(getBinder(), item, holder.icon_iv);
+                getBinder().getImageLoader().DisplayImage(l, item.getThumbnail(), holder.icon_iv, holder.icon_pb);
+
 
                 holder.name_tv.setText(item.getName());
                 holder.userCount_tv.setText(item.getUsers().size() + " users");
@@ -493,7 +499,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             final ViewHolder holder = (ViewHolder) convertView.getTag();
             final User user = getItem(position);
 
-            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv, holder.thumbnail_pb);
+            Listener l = Var.getUserThumbnailListener(getBinder(), user, holder.thumbnail_iv);
+            getBinder().getImageLoader().DisplayImage(l, user.getThumbnail(), holder.thumbnail_iv, holder.thumbnail_pb);
+
             holder.name_tv.setText(user.getName());
 
             List<Notification> userNotifications = new ArrayList<Notification>();

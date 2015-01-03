@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.edaviessmith.consumecontent.data.Group;
+import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.Var;
 
 import java.util.List;
@@ -135,7 +136,9 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
 
             Group group = getItem(position);
             holder.name_tv.setText(group.getName());
-            act.binder.getImageLoader().DisplayImage(group.getThumbnail(), holder.icon_iv, holder.icon_pb);
+
+            Listener l = Var.getGroupThumbnailListener(act.binder, group, holder.icon_iv);
+            act.binder.getImageLoader().DisplayImage(l, group.getThumbnail(), holder.icon_iv, holder.icon_pb);
 
             return convertView;
 

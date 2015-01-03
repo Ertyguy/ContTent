@@ -26,6 +26,7 @@ import android.widget.TextView;
 import com.edaviessmith.consumecontent.data.User;
 import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.service.ActionFragment;
+import com.edaviessmith.consumecontent.util.Listener;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.Fab;
 
@@ -261,7 +262,11 @@ public class NavigationDrawerFragment extends ActionFragment implements View.OnC
 	        final User user = getItem(position);
 	        holder.name_tv.setText(user.getName());
             holder.thumbnail_iv.setImageResource(R.drawable.ic_person_grey600_36dp);
-            getBinder().getImageLoader().DisplayImage(user.getThumbnail(), holder.thumbnail_iv);
+
+            Listener l = Var.getUserThumbnailListener(getBinder(), user, holder.thumbnail_iv);
+            getBinder().getImageLoader().DisplayImage(l, user.getThumbnail(), holder.thumbnail_iv);
+
+
 
             holder.edit_iv.setVisibility(user.equals(act.binder.getUser())? View.VISIBLE: View.GONE);
             holder.edit_iv.setOnClickListener(new View.OnClickListener() {
