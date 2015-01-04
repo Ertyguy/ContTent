@@ -27,7 +27,10 @@ Style day of the week button
 
 Change icon images to selectors
 
-Implement notifications and settings to work
+Implement notifications and settings options to work
+
+Try to play the video again on a counter
+
 
 ////NICE TO HAVE//
 
@@ -45,10 +48,13 @@ Add video option in navbar when playing (watch later)
 
 
 
-//FIXME://
+////FIXME://
 
+Renaming on the draggable listview does not work on the header
+
+////NEED TO DO A THOROUGH TEST//
 (not tested with no internet connection)
 ImageLoader has to detect when an image is not available and update the reference (User has changed profile picture)
-Feed (done)
-User (not tested)
-Group  (not tested)
+    Feed (done)
+    User (not tested)
+    Group  (not tested)

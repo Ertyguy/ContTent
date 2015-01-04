@@ -195,12 +195,12 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         userThumbnail_iv = (ImageView) header.findViewById(R.id.user_thumbnail_iv);
         userThumbnail_pb = (ProgressBar) header.findViewById(R.id.user_thumbnail_pb);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
-        /*userName_edt.setOnClickListener(new View.OnClickListener() {
+        userName_edt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new RenameDialog(AddActivity.this, userName_edt, editUser.getThumbnail());
+                new RenameDialog(AddActivity.this, editUser, userName_edt, editUser.getThumbnail());
             }
-        });*/
+        });
         groups_v = header.findViewById(R.id.groups_v);
 
         search_fab = (Fab) header.findViewById(R.id.search_fab);
@@ -572,6 +572,10 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         mediaFeed.setName(rename);
     }
 
+    public void rename(String rename) {
+        editUser.setName(rename);
+    }
+
     public void onScrollStateChanged(AbsListView view, int scrollState) {
        dismissSearch();
     }
@@ -624,6 +628,8 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         editUser.setThumb(editUser.getThumbnails().indexOf(thumbnail));
         binder.getImageLoader().DisplayImage(thumbnail, userThumbnail_iv);
     }
+
+
 
 
     private class SearchYoutubeTask extends AsyncTask<String, Void, String> {

@@ -52,6 +52,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             public void binderReady() {
                 super.binderReady();
 
+
+                //FIXME Throws nullpointer when pausing and resuming app
                 if(mediaFeedFragment != null) mediaFeedFragment.adapterViewPager.notifyDataSetChanged();
                 Log.d(TAG, "binderReady");
             }

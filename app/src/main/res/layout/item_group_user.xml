@@ -20,18 +20,18 @@
         <RelativeLayout
             android:id="@+id/thumbnail_v"
             android:layout_width="50dp"
-            android:layout_height="45dp"
+            android:layout_height="50dp"
             android:layout_marginRight="10dp"
             android:layout_marginEnd="10dp">
 
 
-            <ImageView
+            <com.edaviessmith.consumecontent.view.RoundedImageView
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                    android:id="@+id/thumbnail_iv"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_group_grey600_36dp"/>
+                android:id="@+id/thumbnail_iv"
+                android:scaleType="fitCenter"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_group_grey600_36dp"/>
 
                 <ProgressBar
                     style="?android:attr/android:progressBarStyle"

@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -32,7 +33,7 @@ public class RoundedImageView extends ImageView {
 
         Drawable drawable = getDrawable();
 
-        if (drawable == null) {
+        if (drawable == null || drawable instanceof ColorDrawable) {
             return;
         }
 

@@ -43,6 +43,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     public static final int GROUPS_LIST = 0;
     public static final int GROUPS_ALL  = 1;
     public static final int GROUP_EDIT  = 2;
+    public static final int GROUP_EDIT_OPTIONS = 3;
 
     public ContentActivity act;
     private RecyclerView groups_rv;
@@ -51,8 +52,8 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     public EditGroupAdapter editGroupAdapter;
     private DragSortListView group_lv;
     private DragSortController dragSortController;
-    private View userGroup_v, groupThumbnail_v, visible_v, footer;
-    private Fab save_fab;
+    private View userGroup_v, groupThumbnail_v, visible_v, footer, newUser_ll, existingUser_ll;
+    private Fab add_fab, save_fab, addUser_fab;
     private SwitchCompat visible_sw;
     private ImageView groupThumbnail_iv;
     private EditText groupName_edt;
@@ -131,9 +132,19 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         visible_v.setOnClickListener(this);
         visible_sw = (SwitchCompat) header.findViewById(R.id.visible_sw);
 
+        addUser_fab = (Fab) header.findViewById(R.id.add_user_fab);
+        addUser_fab.setOnClickListener(this);
+        newUser_ll = header.findViewById(R.id.new_user_ll);
+        newUser_ll.setOnClickListener(this);
+        existingUser_ll = header.findViewById(R.id.existing_user_ll);
+        existingUser_ll.setOnClickListener(this);
 
+        add_fab = (Fab) view.findViewById(R.id.add_fab);
+        add_fab.setOnClickListener(this);
         save_fab = (Fab) view.findViewById(R.id.save_fab);
         save_fab.setOnClickListener(this);
+
+
 
 
 
@@ -208,7 +219,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
                 return vis;
             }
 
-            if (groupState == GROUPS_ALL || groupState == GROUP_EDIT)
+            if (groupState == GROUPS_ALL || isGroupEdit(groupState))
                 return getBinder().getGroups();
         }
         return null;
@@ -226,7 +237,11 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         act.actionEdit.setVisibility((groupState == GROUPS_LIST || groupState == GROUPS_ALL) ? View.VISIBLE: View.GONE);
         act.toggleEditActions(false);
 
-        userGroup_v.setVisibility(groupState == GROUP_EDIT? View.VISIBLE: View.GONE);
+        userGroup_v.setVisibility(isGroupEdit(groupState)? View.VISIBLE: View.GONE);
+        add_fab.setVisibility(groupState == GROUPS_ALL? View.VISIBLE: View.GONE);
+
+        newUser_ll.setVisibility(groupState == GROUP_EDIT_OPTIONS? View.VISIBLE: View.GONE);
+        existingUser_ll.setVisibility(groupState == GROUP_EDIT_OPTIONS? View.VISIBLE: View.GONE);
 
         if(groupState == GROUPS_LIST){
             act.getSupportActionBar().setTitle("Groups");
@@ -238,10 +253,14 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             act.actionEdit.setImageResource(R.drawable.ic_check_white_24dp);
             groupAdapter.notifyDataSetChanged();
         }
-        if(groupState == GROUP_EDIT){
+        if(isGroupEdit(groupState)){
             act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
 
             visible_sw.setChecked(editGroup.isVisible());
+
+            addUser_fab.setDrawable(getResources().getDrawable(groupState == GROUP_EDIT_OPTIONS
+                    ? R.drawable.ic_close_white_36dp
+                    : R.drawable.ic_add_white_18dp));
 
             Listener l = Var.getGroupThumbnailListener(getBinder(), editGroup,groupThumbnail_iv);
             getBinder().getImageLoader().DisplayImage(l, editGroup.getThumbnail(), groupThumbnail_iv,groupThumbnail_pb);
@@ -255,6 +274,10 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             editGroupAdapter.notifyDataSetChanged();
         }
 
+    }
+
+    private boolean isGroupEdit(int state) {
+        return state == GROUP_EDIT || state == GROUP_EDIT_OPTIONS;
     }
 
     @Override
@@ -280,9 +303,23 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             visible_sw.setChecked(editGroup.isVisible());
         }
 
+        if(addUser_fab == v) {
+            toggleState(groupState == GROUP_EDIT? GROUP_EDIT_OPTIONS: GROUP_EDIT);
+        }
+
+        if(add_fab == v) {
+            //TODO create a new editGroup
+        }
+
+        if(newUser_ll == v) {
+            //TODO open activity with result to re-open the group after it's done
+        }
+
+        if(existingUser_ll == v) {
+            //TODO open Dialog
+        }
+
         if(save_fab == v) {
-
-
             editGroup.setName(groupName_edt.getText().toString().trim());
             editGroup.setVisible(visible_sw.isChecked());
             editGroup.setUserList(users);
