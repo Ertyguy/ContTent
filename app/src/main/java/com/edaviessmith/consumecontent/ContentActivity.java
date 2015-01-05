@@ -42,7 +42,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     View actionDelete, actionNotification;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
-    public int contentState = -1;
+    //public int contentState = -1;
 
     public ContentActivity() {
 
@@ -54,7 +54,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
 
                 //FIXME Throws nullpointer when pausing and resuming app
-                if(mediaFeedFragment != null) mediaFeedFragment.adapterViewPager.notifyDataSetChanged();
+                if(mediaFeedFragment != null && mediaFeedFragment.adapterViewPager != null) mediaFeedFragment.adapterViewPager.notifyDataSetChanged();
                 Log.d(TAG, "binderReady");
             }
 
@@ -89,7 +89,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
                 openUsers();
 
                 //TODO not updating
-                if(contentState == Var.LIST_USERS && userId == binder.getSelectedUser()) {
+                if(binder.getState() == Var.LIST_USERS && userId == binder.getSelectedUser()) {
 
                 } else {
 
@@ -161,7 +161,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         super.onBind();
         navigationDrawerFragment.setUp();
 
-        toggleState(Var.LIST_USERS);
+
+        toggleState(binder.getState());
         updateData();
     }
 
@@ -238,8 +239,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
-            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
-                groupFragment.toggleState(GroupFragment.GROUPS_LIST);
+            if(groupFragment != null && binder.getGroupState() != Var.GROUPS_LIST) {
+                groupFragment.toggleState(Var.GROUPS_LIST);
             } else {
                 toggleState(Var.LIST_USERS);
             }
@@ -256,9 +257,9 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             return;
         }
 
-        if(contentState != Var.LIST_USERS) {
-            if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
-                groupFragment.toggleState(GroupFragment.GROUPS_LIST);
+        if(binder.getState() != Var.LIST_USERS) {
+            if(groupFragment != null && binder.getGroupState() != Var.GROUPS_LIST) {
+                groupFragment.toggleState(Var.GROUPS_LIST);
                 return;
             } else if(DB.isValid(binder.getSelectedGroup()) && DB.isValid(binder.getSelectedUser())) {
                 openUsers();
@@ -271,24 +272,20 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
 
     public void toggleState(int state) {
-        this.contentState = state;
+        binder.setState(DB.isValid(binder.getSelectedUser())? state: Var.LIST_GROUPS);
+        Log.d(TAG, "toggleState " + binder.getState());
 
-        if(!DB.isValid(binder.getSelectedUser())) contentState = Var.LIST_GROUPS;
-        Log.d(TAG, "toggleState "+contentState);
-
-        actionEdit.setVisibility(contentState == Var.LIST_GROUPS ? View.VISIBLE: View.GONE);
+        actionEdit.setVisibility(binder.getState() == Var.LIST_GROUPS ? View.VISIBLE: View.GONE);
 
         toggleEditActions(false);
-
-        //TODO nav drawer should have an update call (only when users has changed)
     }
 
     public void updateData() {
-        if (contentState == Var.LIST_USERS) {
+        if (binder.getState() == Var.LIST_USERS) {
             binder.fetchUsers();
         }
 
-        if (contentState == Var.LIST_GROUPS) {
+        if (binder.getState() == Var.LIST_GROUPS) {
             binder.fetchGroups();
         }
     }
@@ -358,10 +355,10 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         Log.d(TAG, "toggleNavDrawerIndicator " + show);
         boolean validGroupUser = DB.isValid(binder.getSelectedGroup()) && DB.isValid(binder.getSelectedUser());
         //The order matters
-        if(!show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
+        if(!show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(!show && validGroupUser);
         getSupportActionBar().setHomeButtonEnabled(!show && validGroupUser);
-        if(show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(show);
+        if(show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
 
 
         navigationDrawerFragment.drawerLayout.setDrawerLockMode(show ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -371,8 +368,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
     public void homeNavDrawerIndicatorClick() {
 
-        if(groupFragment != null && groupFragment.groupState != GroupFragment.GROUPS_LIST) {
-            groupFragment.toggleState(GroupFragment.GROUPS_LIST);
+        if(groupFragment != null && binder.getGroupState() != Var.GROUPS_LIST) {
+            groupFragment.toggleState(Var.GROUPS_LIST);
         } else {
             openUsers();
         }

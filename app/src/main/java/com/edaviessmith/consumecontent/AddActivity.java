@@ -116,6 +116,9 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(DB.isValid(userId)) editUser = binder.getUser(userId);
         else editUser = new User();
 
+        int groupId = getIntent().getIntExtra(Var.INTENT_GROUP_ID, -1);
+        if(DB.isValid(groupId) && editUser.getGroups().contains(binder.getGroup(groupId))) editUser.getGroups().add(binder.getGroup(groupId));
+
         for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
             mediaFeeds.add(editUser.getMediaFeedSort(i));
         }

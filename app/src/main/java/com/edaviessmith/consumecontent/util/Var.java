@@ -94,8 +94,14 @@ public class Var {
     public static final int FEED_OFFLINE = 3;
     public static final int FEED_END = 4;
 
+    //Fragment states
     public static final int LIST_USERS  = 0;
     public static final int LIST_GROUPS = 1;
+
+    public static final int GROUPS_LIST = 0;
+    public static final int GROUPS_ALL  = 1;
+    public static final int GROUP_EDIT  = 2;
+    public static final int GROUP_EDIT_OPTIONS = 3;
 
 
     //Handler (currently not used)
@@ -119,6 +125,7 @@ public class Var {
     static public final String NOTIFY_ACTION = "notify_action";
     static public final String NOTIFY_NOTIFICATION_ID = "notification_id";
     public static final String INTENT_USER_ID = "user_id";
+    public static final String INTENT_GROUP_ID = "group_id";
 
     //Time Variables
     static SimpleDateFormat length = new SimpleDateFormat("mm:ss", Locale.getDefault());

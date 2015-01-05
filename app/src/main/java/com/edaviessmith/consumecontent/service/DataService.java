@@ -53,6 +53,8 @@ public class DataService extends Service {
     private List<Group> groupList = new ArrayList<Group>();
 
     int selectedGroup, selectedUser;
+    int contentState = Var.LIST_USERS;
+    int groupState = -1, editGroupId;
 
     public NotificationList notificationList;
 
@@ -69,7 +71,6 @@ public class DataService extends Service {
         //selectedUser = 1;
 
         imageLoader = new ImageLoader(this);
-
         app = (App) getApplication();
 
         tpe.submit(new Runnable() {
@@ -170,6 +171,10 @@ public class DataService extends Service {
             return groups.get(selectedGroup);
         }
 
+        public Group getGroup(int groupId) {
+            return groups.get(groupId);
+        }
+
         private void updateUserList() {
             userList.clear();
             userList.addAll(users.values());
@@ -194,7 +199,6 @@ public class DataService extends Service {
         }
 
         public void fetchUsers() {
-
             Log.d(TAG, "fetchUsers "+selectedGroup);
 
             tpe.submit(new Runnable() {
@@ -325,19 +329,16 @@ public class DataService extends Service {
         }
 
         public void saveMediaFeedItems(final int userId, final int mediaFeedId) {
-
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
                     MediaFeedORM.saveMediaFeedItems(DataService.this, ((MediaFeed) getUser(userId).getMediaFeed().get(mediaFeedId)));
-                    //MediaFeedORM.saveYoutubeFeedItems(DataService.this, (YoutubeFeed) getUser(userId).getMediaFeed().get(mediaFeedId));
                 }
             });
 
         }
 
         public void saveMediaFeed(final int userId, final int mediaFeedId) {
-
             tpe.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -377,6 +378,29 @@ public class DataService extends Service {
             });
         }
 
+        public int getState() {
+            return contentState;
+        }
+
+        public void setState(int state) {
+            contentState = state;
+        }
+
+        public int getGroupState() {
+            return groupState;
+        }
+
+        public void setGroupState(int state) {
+            groupState = state;
+        }
+
+        public int getEditGroupId() {
+            return editGroupId;
+        }
+
+        public void setEditGroupId(int groupId) {
+            editGroupId = groupId;
+        }
     }
 
 
