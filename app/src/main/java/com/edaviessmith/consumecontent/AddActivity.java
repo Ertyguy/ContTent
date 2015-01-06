@@ -94,7 +94,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
     ProgressBar userThumbnail_pb;
 
     int twitterPage, searchMode = SEARCH_NONE;
-    String search, pageToken;
+    String search, pageToken, newGroupName;
     boolean searchBusy;
 
 
@@ -116,8 +116,6 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         if(DB.isValid(userId)) editUser = binder.getUser(userId);
         else editUser = new User();
 
-        int groupId = getIntent().getIntExtra(Var.INTENT_GROUP_ID, -1);
-        if(DB.isValid(groupId) && editUser.getGroups().contains(binder.getGroup(groupId))) editUser.getGroups().add(binder.getGroup(groupId));
 
         for(int i=0; i< editUser.getCastMediaFeed().size(); i++) {
             mediaFeeds.add(editUser.getMediaFeedSort(i));
@@ -142,7 +140,16 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         } else {
             toggleSearch(SEARCH_OPTIONS);
 
-            editUser.getGroups().add(binder.getGroup());
+            int groupId = getIntent().getIntExtra(Var.INTENT_GROUP_ID, -1);
+            if(DB.isValid(groupId)) editUser.getGroups().add(binder.getGroup(groupId));
+            else {
+                String groupName = getIntent().getStringExtra(Var.INTENT_GROUP_NAME);
+
+                if(!Var.isEmpty(groupName)) {
+                    newGroupName = groupName;
+                }
+                editUser.getGroups().add(binder.getGroup());
+            }
         }
     }
 
@@ -501,7 +508,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         }
 
         if(groups_v == v) {
-            new GroupDialog(this, groups, editUser.getGroups());
+            new GroupDialog(this, groups, editUser.getGroups(), newGroupName);
         }
 
         if(userThumbnail_v == v) {
@@ -539,15 +546,15 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
             }
             else if(searchMode == SEARCH_NONE) {
 
-                //TODO make sure save is working
                 editUser.setName(userName_edt.getText().toString().trim());
                 editUser.addMediaFeed(mediaFeeds);
 
-                //editUser.setThumbnail((String) userPicture_sp.getSelectedItem());//TODO set thumbnail
-
-
-                binder.saveUser(editUser);
-
+                //Sent from a new group
+                if(binder.getEditGroup() != null && !Var.isEmpty(newGroupName)) {
+                    binder.setEditUser(editUser);
+                } else {
+                    binder.saveUser(editUser);
+                }
 
                 finish();
             }

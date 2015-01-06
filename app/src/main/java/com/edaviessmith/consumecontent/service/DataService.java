@@ -54,7 +54,11 @@ public class DataService extends Service {
 
     int selectedGroup, selectedUser;
     int contentState = Var.LIST_USERS;
-    int groupState = -1, editGroupId;
+    int groupState = -1;
+
+    //Placeholders to keep data while moving around
+    Group editGroup;
+    User editUser;
 
     public NotificationList notificationList;
 
@@ -394,13 +398,23 @@ public class DataService extends Service {
             groupState = state;
         }
 
-        public int getEditGroupId() {
-            return editGroupId;
+        public Group getEditGroup() {
+            return editGroup;
         }
 
-        public void setEditGroupId(int groupId) {
-            editGroupId = groupId;
+        public void setEditGroup(Group group) {
+            editGroup = group;
         }
+
+        public void setEditUser(User user) {
+            editUser = user;
+        }
+
+        public User getEditUser() {
+            return editUser;
+        }
+
+
     }
 
 

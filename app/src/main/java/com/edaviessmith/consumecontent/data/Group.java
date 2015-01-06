@@ -13,7 +13,9 @@ public class Group extends Content {
     List<User> removed;
 
 
-    public Group () { }
+    public Group () {
+        users = new LinkedHashMap<Integer, User>();
+    }
 
     public Group (String name, boolean isVisible) {
         setName(name);

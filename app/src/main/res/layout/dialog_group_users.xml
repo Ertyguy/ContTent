@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/title_ll"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/back_iv"
+            android:src="@drawable/ic_chevron_left_grey600_36dp"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/dark_gray"
+            android:text="@string/set_groups_for_user"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:id="@+id/title_tv" />
+
+    </LinearLayout>
+
+    <View style="@style/divider" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp">
+
+        <View style="@style/shadow_bottom" android:layout_alignTop="@+id/group_lv" />
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/group_lv"/>
+
+        <View style="@style/shadow_top" android:layout_alignBottom="@+id/group_lv"/>
+
+    </RelativeLayout>
+
+    <View style="@style/divider" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_marginTop="-60dp"
+        android:layout_height="60dp"
+        android:weightSum="2">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/cancel"
+            android:textColor="@color/dark_gray"
+            android:textSize="16sp"
+            android:background="@drawable/selector_accent"
+            android:id="@+id/cancel_tv"
+            android:gravity="center"
+            android:layout_weight="1" />
+
+        <View style="@style/divider_vertical"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Add Users"
+            android:textColor="@color/dark_gray"
+            android:background="@drawable/selector_accent"
+            android:textSize="16sp"
+            android:id="@+id/set_tv"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:visibility="invisible" />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

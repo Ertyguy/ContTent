@@ -31,15 +31,20 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
     List<Group> groups, userGroups;
     GroupAdapter groupAdapter;
     View cancel_tv, set_tv;
+    Group newGroup;
+    int offset;
 
 
 
-    public GroupDialog(AddActivity activity,  List<Group> groups,  List<Group> userGroups) {
+    public GroupDialog(AddActivity activity,  List<Group> groups,  List<Group> userGroups, String newGroupName) {
         super(activity);
         this.act = activity;
         this.groups = groups;
         this.userGroups = userGroups;
-
+        if(!Var.isEmpty(newGroupName)) {
+            this.newGroup = new Group(newGroupName, true);
+            offset = 1;
+        }
         init();
     }
 
@@ -64,8 +69,8 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
         group_lv.setAdapter(groupAdapter);
 
 
-        for (int i = 0; i < group_lv.getCount(); i++){
-            group_lv.setItemChecked(i, userGroups.contains(groups.get(i))); //Unselect all options
+        for (int i = 0; i < group_lv.getCount() - offset; i++){
+            group_lv.setItemChecked(i, (i == 0 && offset == 1) || (offset == 0 && userGroups.contains(groups.get(i)))); //Unselect all options
         }
 
         set_tv = findViewById(R.id.set_tv);
@@ -111,12 +116,13 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
 
         @Override
         public int getCount() {
-            return groups.size();
+            return groups.size() + (newGroup == null? 0:1);
         }
 
         @Override
         public Group getItem(int position) {
-            return groups.get(position);
+            if(position == 0 && offset == 1) return newGroup;
+            return groups.get(position - offset);
         }
 
         @Override
@@ -137,8 +143,11 @@ public class GroupDialog extends Dialog implements View.OnClickListener {
             Group group = getItem(position);
             holder.name_tv.setText(group.getName());
 
-            Listener l = Var.getGroupThumbnailListener(act.binder, group, holder.icon_iv);
-            act.binder.getImageLoader().DisplayImage(l, group.getThumbnail(), holder.icon_iv, holder.icon_pb);
+            holder.icon_iv.setImageResource(R.drawable.ic_group_grey600_36dp);
+            if(!Var.isEmpty(group.getThumbnail())) {
+                Listener l = Var.getGroupThumbnailListener(act.binder, group, holder.icon_iv);
+                act.binder.getImageLoader().DisplayImage(l, group.getThumbnail(), holder.icon_iv, holder.icon_pb);
+            }
 
             return convertView;
 

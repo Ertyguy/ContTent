@@ -57,7 +57,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     private ProgressBar groupThumbnail_pb;
 
     private List<Group> groupList;
-    private Group editGroup;
+    //private Group editGroup;
     private List<User> users, selectedUsers;
 
 
@@ -97,7 +97,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         View view = inflater.inflate(R.layout.fragment_group, container, false);
         act = (ContentActivity) getActivity();
 
-        editGroup = new Group();
+        //editGroup = new Group();
         users = new ArrayList<User>();
         selectedUsers = new ArrayList<User>();
 
@@ -157,7 +157,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         group_lv.setDragEnabled(dragEnabled);
         group_lv.setOnItemClickListener(this);
 
-        toggleState(DB.isValid(getBinder().getGroupState()) ? getBinder().getGroupState(): Var.GROUPS_LIST);
+        int s = DB.isValid(getBinder().getGroupState()) ? getBinder().getGroupState(): Var.GROUPS_LIST;
+        Log.d(TAG,"onCreateView state: "+s);
+        toggleState(s);
 
         return view;
     }
@@ -217,7 +219,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
 
     public void toggleState(int groupState) {
-        boolean changed = (getBinder().getGroupState() != groupState);
+        boolean changed = true;//(getBinder().getGroupState() != groupState);
         getBinder().setGroupState(groupState);
 
         if(changed) {
@@ -244,24 +246,31 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             groupAdapter.notifyDataSetChanged();
         }
         if(isGroupEdit(groupState)){
-            if(!DB.isValid(editGroup.getId()) && DB.isValid(getBinder().getEditGroupId())) editGroup = getBinder().getGroup(getBinder().getEditGroupId());
+            if(getBinder().getEditUser() != null) { //Add user from binder then remove
+                getBinder().getEditGroup().getUsers().put(getBinder().getEditUser().getId(), getBinder().getEditUser());
+                users.add(getBinder().getEditUser());
+                getBinder().setEditUser(null);
+            }
+            //if(!DB.isValid(getBinder().getEditGroup().getId()) && DB.isValid(getBinder().getEditGroupId())) editGroup = getBinder().getGroup(getBinder().getEditGroupId());
 
-            act.getSupportActionBar().setTitle(DB.isValid(editGroup.getId())? "Edit Group": "New Group");
+            act.getSupportActionBar().setTitle(DB.isValid(getBinder().getEditGroup().getId())? "Edit Group": "New Group");
 
-            visible_sw.setChecked(editGroup.isVisible());
+            visible_sw.setChecked(getBinder().getEditGroup().isVisible());
 
             addUser_fab.setDrawable(getResources().getDrawable(groupState == Var.GROUP_EDIT_OPTIONS
                     ? R.drawable.ic_close_white_36dp
                     : R.drawable.ic_add_white_18dp));
 
-            Listener l = Var.getGroupThumbnailListener(getBinder(), editGroup,groupThumbnail_iv);
-            getBinder().getImageLoader().DisplayImage(l, editGroup.getThumbnail(), groupThumbnail_iv, groupThumbnail_pb);
+            if(!Var.isEmpty(getBinder().getEditGroup().getThumbnail())) {
+                Listener l = Var.getGroupThumbnailListener(getBinder(), getBinder().getEditGroup(), groupThumbnail_iv);
+                getBinder().getImageLoader().DisplayImage(l, getBinder().getEditGroup().getThumbnail(), groupThumbnail_iv, groupThumbnail_pb);
+            }
 
-
-            groupName_edt.setText(editGroup.getName());
+            groupName_edt.setText(getBinder().getEditGroup().getName());
 
             users.clear();
-            users.addAll(editGroup.getUsers().values());
+            users.addAll(getBinder().getEditGroup().getUsers().values());
+
 
             editGroupAdapter.notifyDataSetChanged();
         }
@@ -291,8 +300,8 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         }
 
         if(visible_v == v) {
-            editGroup.setVisible(!editGroup.isVisible());
-            visible_sw.setChecked(editGroup.isVisible());
+            getBinder().getEditGroup().setVisible(!getBinder().getEditGroup().isVisible());
+            visible_sw.setChecked(getBinder().getEditGroup().isVisible());
         }
 
         if(addUser_fab == v) {
@@ -300,25 +309,28 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         }
 
         if(add_fab == v) {
-            //TODO create a new editGroup
+            getBinder().setEditGroup(new Group());
+            //TODO i don't think this will work
+            toggleState(Var.GROUP_EDIT_OPTIONS);
         }
 
         if(newUser_ll == v) {
             //TODO open activity with result to re-open the group after it's done
             Intent i = new Intent(act, AddActivity.class);
-            i.putExtra(Var.INTENT_GROUP_ID, editGroup.getId());
+            if(DB.isValid(getBinder().getEditGroup().getId())) i.putExtra(Var.INTENT_GROUP_ID, getBinder().getEditGroup().getId());
+            else i.putExtra(Var.INTENT_GROUP_NAME, Var.isEmpty(groupName_edt.getText().toString()) ? "New Group" : groupName_edt.getText().toString());
             startActivity(i);
         }
 
         if(existingUser_ll == v) {
-            //TODO open Dialog
+            new GroupUserDialog(this, getGroups(), users);
         }
 
         if(save_fab == v) {
-            editGroup.setName(groupName_edt.getText().toString().trim());
-            editGroup.setVisible(visible_sw.isChecked());
-            editGroup.setUserList(users);
-            getBinder().saveGroup(editGroup);
+            getBinder().getEditGroup().setName(groupName_edt.getText().toString().trim());
+            getBinder().getEditGroup().setVisible(visible_sw.isChecked());
+            getBinder().getEditGroup().setUserList(users);
+            getBinder().saveGroup(getBinder().getEditGroup());
             //editUser.setName(userName_edt.getText().toString().trim());
             //editUser.addMediaFeed(mediaFeeds);
 
@@ -382,6 +394,19 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     }
 
 
+    public void addUsers(List<User> addUsers) {
+        for(User u: addUsers) {
+            if(!users.contains(u)) {
+                users.add(u);
+                //TODO when leaving and coming back new users can be lost
+            }
+        }
+        editGroupAdapter.notifyDataSetChanged();
+
+        toggleState(Var.GROUP_EDIT);
+    }
+
+
     public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener {
 
         private Context context;
@@ -416,8 +441,8 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             }
 
             if(getBinder().getGroupState() == Var.GROUPS_ALL) {
-                editGroup = new Group(groupList.get(itemPosition));
-                getBinder().setEditGroupId(editGroup.getId());
+                getBinder().setEditGroup(new Group(groupList.get(itemPosition)));
+                //getBinder().setEditGroupId(getBinder().getEditGroup().getId());
                 toggleState(Var.GROUP_EDIT);
 
             }

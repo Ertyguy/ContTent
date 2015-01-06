@@ -97,7 +97,7 @@ public class Var {
     //Fragment states
     public static final int LIST_USERS  = 0;
     public static final int LIST_GROUPS = 1;
-
+    //Group Fragment States
     public static final int GROUPS_LIST = 0;
     public static final int GROUPS_ALL  = 1;
     public static final int GROUP_EDIT  = 2;
@@ -126,6 +126,7 @@ public class Var {
     static public final String NOTIFY_NOTIFICATION_ID = "notification_id";
     public static final String INTENT_USER_ID = "user_id";
     public static final String INTENT_GROUP_ID = "group_id";
+    public static final String INTENT_GROUP_NAME = "group_name";
 
     //Time Variables
     static SimpleDateFormat length = new SimpleDateFormat("mm:ss", Locale.getDefault());

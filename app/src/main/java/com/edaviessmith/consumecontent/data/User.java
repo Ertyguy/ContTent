@@ -18,6 +18,7 @@ public class User extends Content{
 
 
     public User () {
+        super();
         mediaFeed = new SparseArray();
         groups = new ArrayList<Group>();
 

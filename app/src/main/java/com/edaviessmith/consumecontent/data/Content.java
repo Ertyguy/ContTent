@@ -15,7 +15,9 @@ public class Content {
     private List<String> thumbnails;
     private String thumbnail;       //Used for groups
 
-    public Content() { }
+    public Content() {
+        this.thumbnails = new ArrayList<String>();
+    }
 
     public Content(int id, int sort, String name,int thumb, String thumbnails) {
         this.id = id;
@@ -77,7 +79,7 @@ public class Content {
     }
 
     public String getThumbnail() {
-        return Var.isEmpty(thumbnail)? thumbnails.get(thumb): thumbnail;
+        return Var.isEmpty(thumbnail)? (thumbnails.size() > 0? thumbnails.get(thumb): null): thumbnail;
     }
 
     public void setThumbnail(String thumbnail) {

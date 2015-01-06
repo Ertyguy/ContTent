@@ -5,11 +5,32 @@
 Fix Notifications
 
 Edit Groups
-    Thumbnail picker
+    Thumbnail picker (User thumbnail list [possibly include channels)
     Add Group
     Add member
+        New member (Activity transitions) [new group in group dialog)
+        Existing Member (group dialog that becomes member dialog)
 
-Add groups:
+
+
+//Styling
+Style day of the week button
+Change icon images to selectors
+Make all text that can change into selectors
+Bottom margin to dialogs to prevent overflow height
+
+//Implement
+Ads banner
+Try to play the video again on a counter to overcome pausing while resizing issue
+Hide video when editing groups (blocks controls)
+
+Implement notifications and settings options to work
+    //New settings
+    Screen Orientation
+    Confirm when exiting
+    Remove ads options (research)
+
+//Add groups:
     The Yogscast
     Gamegrumps
     Team Crafted
@@ -22,22 +43,25 @@ Add groups:
     Epic Rap Battle
     Comedy (comedyCentral, Mojo)
 
-Ads banner
-Style day of the week button
+////FIXME: Critical Path
 
-Change icon images to selectors
+Renaming on the draggable ListView does not work on the header (AddActivity)
 
-Implement notifications and settings options to work
+(not tested with no internet connection) / Need to do a thourough test
+ImageLoader has to detect when an image is not available and update the reference (User has changed profile picture)
+    Feed (done)
+    User (not tested)
+    Group  (not tested)
 
-Try to play the video again on a counter
 
 
 ////NICE TO HAVE//
 
+Status header on MediaFeed ListView
 Set default notification
 Check for Twitter notifications
 Add status to youtube items (new, seen, watch later)
-
+Resume button in toolbar
 Create Watch Later and Favorite List (act as groups)
 Add history as well
 
@@ -45,16 +69,3 @@ Add history as well
 ////BACK BURNER//
 
 Add video option in navbar when playing (watch later)
-
-
-
-////FIXME://
-
-Renaming on the draggable listview does not work on the header
-
-////NEED TO DO A THOROUGH TEST//
-(not tested with no internet connection)
-ImageLoader has to detect when an image is not available and update the reference (User has changed profile picture)
-    Feed (done)
-    User (not tested)
-    Group  (not tested)

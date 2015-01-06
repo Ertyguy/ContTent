@@ -69,6 +69,7 @@
                         android:paddingLeft="@dimen/toolbar_item_padding"
                         android:paddingStart="@dimen/toolbar_item_padding"
                         android:contentDescription="@string/edit"
+                        android:visibility="gone"
                         android:id="@+id/action_edit"
                         android:src="@drawable/ic_create_white_24dp"/>
 

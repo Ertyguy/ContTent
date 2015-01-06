@@ -52,7 +52,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             public void binderReady() {
                 super.binderReady();
 
-
                 //FIXME Throws nullpointer when pausing and resuming app
                 if(mediaFeedFragment != null && mediaFeedFragment.adapterViewPager != null) mediaFeedFragment.adapterViewPager.notifyDataSetChanged();
                 Log.d(TAG, "binderReady");
@@ -252,6 +251,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
     @Override
     public void onBackPressed() {
+        Log.d(TAG, "onBackPressed");
         if(videoPlayerLayout != null && !videoPlayerLayout.isDismiss && !videoPlayerLayout.isMinimized) {
             videoPlayerLayout.minimize();
             return;
@@ -329,6 +329,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     }
 
     public void openGroups() {
+        Log.d(TAG, "openGroups");
         //Init Groups
         toggleState(Var.LIST_GROUPS);
         groupFragment = GroupFragment.newInstance();
@@ -338,6 +339,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     }
 
     public void openUsers() {
+        Log.d(TAG, "openUsers");
+
         toggleState(Var.LIST_USERS);
         navigationDrawerFragment.adapter.notifyDataSetChanged();
 
@@ -348,7 +351,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         if(binder.getUser() != null)
             getSupportActionBar().setTitle(binder.getUser().getName());
 
-        toggleNavDrawerIndicator(true);
+        //toggleNavDrawerIndicator(true);
     }
 
     public void toggleNavDrawerIndicator(boolean show) {
@@ -359,6 +362,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         getSupportActionBar().setDisplayHomeAsUpEnabled(!show && validGroupUser);
         getSupportActionBar().setHomeButtonEnabled(!show && validGroupUser);
         if(show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+        navigationDrawerFragment.actionBarDrawerToggle.setHomeAsUpIndicator(getV7DrawerToggleDelegate().getThemeUpIndicator()); //Fixed issue with back icon disappearing after hitting back
 
 
         navigationDrawerFragment.drawerLayout.setDrawerLockMode(show ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -370,6 +374,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
         if(groupFragment != null && binder.getGroupState() != Var.GROUPS_LIST) {
             groupFragment.toggleState(Var.GROUPS_LIST);
+            Log.d(TAG, "homeNavDrawerIndicatorClick");
         } else {
             openUsers();
         }
