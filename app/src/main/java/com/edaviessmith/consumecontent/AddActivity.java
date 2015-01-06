@@ -205,12 +205,6 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
         userThumbnail_iv = (ImageView) header.findViewById(R.id.user_thumbnail_iv);
         userThumbnail_pb = (ProgressBar) header.findViewById(R.id.user_thumbnail_pb);
         userName_edt = (EditText) header.findViewById(R.id.user_name_edt);
-        userName_edt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new RenameDialog(AddActivity.this, editUser, userName_edt, editUser.getThumbnail());
-            }
-        });
         groups_v = header.findViewById(R.id.groups_v);
 
         search_fab = (Fab) header.findViewById(R.id.search_fab);
@@ -219,7 +213,6 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
 
         youtube_ll = header.findViewById(R.id.youtube_ll);
         twitter_ll = header.findViewById(R.id.twitter_ll);
-
 
         //Search
         search_rl = findViewById(R.id.search_rl);
@@ -550,7 +543,7 @@ public class AddActivity extends ActionActivity implements AdapterView.OnItemCli
                 editUser.addMediaFeed(mediaFeeds);
 
                 //Sent from a new group
-                if(binder.getEditGroup() != null && !Var.isEmpty(newGroupName)) {
+                if(binder.getEditGroup() != null) {
                     binder.setEditUser(editUser);
                 } else {
                     binder.saveUser(editUser);

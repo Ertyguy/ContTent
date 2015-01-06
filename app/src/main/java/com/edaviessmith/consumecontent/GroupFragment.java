@@ -41,7 +41,6 @@ import java.util.List;
 
 public class GroupFragment extends ActionFragment implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-
     public ContentActivity act;
     private RecyclerView groups_rv;
     private LinearLayoutManager linearLayoutManager;
@@ -118,6 +117,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         groupThumbnail_v = header.findViewById(R.id.group_thumbnail_v);
         groupThumbnail_v.setOnClickListener(this);
         groupThumbnail_iv = (ImageView) header.findViewById(R.id.group_thumbnail_iv);
+        groupThumbnail_iv.setOnClickListener(this);
         groupThumbnail_pb = (ProgressBar) header.findViewById(R.id.group_thumbnail_pb);
         groupName_edt = (EditText) header.findViewById(R.id.group_name_edt);
 
@@ -219,12 +219,12 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
 
 
     public void toggleState(int groupState) {
-        boolean changed = true;//(getBinder().getGroupState() != groupState);
+        //boolean changed = true;//(getBinder().getGroupState() != groupState);
         getBinder().setGroupState(groupState);
 
-        if(changed) {
+        //if(changed) {
             groupList = getGroups();
-        }
+        //}
 
         act.actionEdit.setVisibility((groupState == Var.GROUPS_LIST || groupState == Var.GROUPS_ALL) ? View.VISIBLE: View.GONE);
         act.toggleEditActions(false);
@@ -239,6 +239,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             act.getSupportActionBar().setTitle("Groups");
             act.actionEdit.setImageResource(R.drawable.ic_create_white_24dp);
             groupAdapter.notifyDataSetChanged();
+            getBinder().setEditGroup(null);
         }
         if(groupState == Var.GROUPS_ALL) {
             act.getSupportActionBar().setTitle("Edit Groups");
@@ -246,17 +247,22 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             groupAdapter.notifyDataSetChanged();
         }
         if(isGroupEdit(groupState)){
+
+            users.clear();
+            users.addAll(getBinder().getEditGroup().getUsers().values());
+
             if(getBinder().getEditUser() != null) { //Add user from binder then remove
                 getBinder().getEditGroup().getUsers().put(getBinder().getEditUser().getId(), getBinder().getEditUser());
                 users.add(getBinder().getEditUser());
+
+                Log.d(TAG,"edit new user added"+getBinder().getEditUser().getName());
                 getBinder().setEditUser(null);
+                editGroupAdapter.notifyDataSetChanged();
             }
-            //if(!DB.isValid(getBinder().getEditGroup().getId()) && DB.isValid(getBinder().getEditGroupId())) editGroup = getBinder().getGroup(getBinder().getEditGroupId());
 
             act.getSupportActionBar().setTitle(DB.isValid(getBinder().getEditGroup().getId())? "Edit Group": "New Group");
 
             visible_sw.setChecked(getBinder().getEditGroup().isVisible());
-
             addUser_fab.setDrawable(getResources().getDrawable(groupState == Var.GROUP_EDIT_OPTIONS
                     ? R.drawable.ic_close_white_36dp
                     : R.drawable.ic_add_white_18dp));
@@ -267,10 +273,6 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
             }
 
             groupName_edt.setText(getBinder().getEditGroup().getName());
-
-            users.clear();
-            users.addAll(getBinder().getEditGroup().getUsers().values());
-
 
             editGroupAdapter.notifyDataSetChanged();
         }
@@ -284,6 +286,18 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
 
+
+        if(groupThumbnail_iv == v) {
+            List<String> thumbnails = new ArrayList<String>();
+
+            for(User u: editGroupAdapter.getUsers()) {
+                for(String thumb: u.getThumbnails()) {
+                    thumbnails.add(thumb);
+                }
+            }
+
+            new ThumbnailDialog(this, thumbnails);
+        }
         if(act.actionEdit == v) {
             toggleState(getBinder().getGroupState() == Var.GROUPS_LIST ? Var.GROUPS_ALL : Var.GROUPS_LIST);
             groupAdapter.notifyDataSetChanged();
@@ -292,6 +306,7 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         if(act.actionDelete == v) {
 
             for(User user: selectedUsers) {
+                getBinder().getEditGroup().getRemoved().add(user);
                 users.remove(user);
             }
 
@@ -329,6 +344,9 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         if(save_fab == v) {
             getBinder().getEditGroup().setName(groupName_edt.getText().toString().trim());
             getBinder().getEditGroup().setVisible(visible_sw.isChecked());
+
+
+
             getBinder().getEditGroup().setUserList(users);
             getBinder().saveGroup(getBinder().getEditGroup());
             //editUser.setName(userName_edt.getText().toString().trim());
@@ -398,12 +416,19 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         for(User u: addUsers) {
             if(!users.contains(u)) {
                 users.add(u);
+                getBinder().getEditGroup().getUsers().put(u.getId(), u);
                 //TODO when leaving and coming back new users can be lost
             }
         }
         editGroupAdapter.notifyDataSetChanged();
 
         toggleState(Var.GROUP_EDIT);
+    }
+
+    public void setThumbnail(String thumbnail) {
+        getBinder().getEditGroup().setThumbnail(thumbnail);
+
+        getBinder().getImageLoader().DisplayImage(thumbnail, groupThumbnail_iv);
     }
 
 
@@ -519,11 +544,13 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         Context context;
         List<User> users;
 
-        public EditGroupAdapter(Context context,List<User> users) {
+        public EditGroupAdapter(Context context, List<User> users) {
             super(context, R.layout.item_group_user, users);
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.users = users;
         }
+
+        public List<User> getUsers() {return users; }
 
         @Override
         public int getCount() {

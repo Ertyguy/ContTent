@@ -8,7 +8,7 @@ Edit Groups
     Thumbnail picker (User thumbnail list [possibly include channels)
     Add Group
     Add member
-        New member (Activity transitions) [new group in group dialog)
+        New member (Activity transitions) (new group in group dialog issue with multiple new users)
         Existing Member (group dialog that becomes member dialog)
 
 

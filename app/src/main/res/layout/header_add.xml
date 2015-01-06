@@ -2,9 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-
+    android:layout_height="wrap_content">
 
     <RelativeLayout
         android:id="@+id/profile_info"
@@ -16,7 +14,6 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-
         <RelativeLayout
             android:id="@+id/user_thumbnail_v"
             android:layout_width="80dp"
@@ -24,8 +21,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:background="@drawable/selector_accent"
-            android:padding="5dp">
+            android:background="@drawable/selector_accent">
 
             <com.edaviessmith.consumecontent.view.RoundedImageView
                 android:layout_height="match_parent"
@@ -33,7 +29,8 @@
                 android:id="@+id/user_thumbnail_iv"
                 android:contentDescription="@string/user_thumbnail"
                 android:src="@drawable/ic_person_grey600_36dp"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:background="@drawable/selector_accent"/>
 
             <ProgressBar
                 style="?android:attr/android:progressBarStyle"

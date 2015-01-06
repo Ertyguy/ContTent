@@ -351,7 +351,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         if(binder.getUser() != null)
             getSupportActionBar().setTitle(binder.getUser().getName());
 
-        //toggleNavDrawerIndicator(true);
+        toggleNavDrawerIndicator(true);
     }
 
     public void toggleNavDrawerIndicator(boolean show) {

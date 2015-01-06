@@ -1,5 +1,6 @@
 package com.edaviessmith.consumecontent;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -26,7 +27,9 @@ public class ThumbnailDialog extends Dialog implements View.OnClickListener {
 
     private final static String TAG = "ThumbnailDialog";
 
+    Activity a;
     AddActivity act;
+    GroupFragment frag;
 
     List<String> thumbnails;
 
@@ -36,7 +39,16 @@ public class ThumbnailDialog extends Dialog implements View.OnClickListener {
 
     public ThumbnailDialog(AddActivity act,  List<String> thumbnails) {
         super(act);
+        this.a = act;
         this.act = act;
+        this.thumbnails = thumbnails;
+        init();
+    }
+
+    public ThumbnailDialog(GroupFragment frag,  List<String> thumbnails) {
+        super(frag.getActivity());
+        this.a = frag.getActivity();
+        this.frag = frag;
         this.thumbnails = thumbnails;
         init();
     }
@@ -50,8 +62,8 @@ public class ThumbnailDialog extends Dialog implements View.OnClickListener {
         setContentView(R.layout.dialog_thumbnails);
 
         DisplayMetrics displaymetrics = new DisplayMetrics();
-        act.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int width = (int) (displaymetrics.widthPixels * (Var.isDeviceLandscape(act) ? 0.65 : 0.95));
+        a.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int width = (int) (displaymetrics.widthPixels * (Var.isDeviceLandscape(a) ? 0.65 : 0.95));
 
         WindowManager.LayoutParams params = getWindow().getAttributes();
         params.width = width;
@@ -66,7 +78,7 @@ public class ThumbnailDialog extends Dialog implements View.OnClickListener {
         thumbnail_rv.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 
 
-        notificationAdapter = new ThumbnailAdapter(act);
+        notificationAdapter = new ThumbnailAdapter(a);
         thumbnail_rv.setAdapter(notificationAdapter);
 
         cancel_tv = findViewById(R.id.cancel_tv);
@@ -111,7 +123,8 @@ public class ThumbnailDialog extends Dialog implements View.OnClickListener {
         public void onClick(final View view) {
             int pos = thumbnail_rv.getChildPosition(view);
 
-            act.setThumbnail(thumbnails.get(pos));
+            if(act != null) act.setThumbnail(thumbnails.get(pos));
+            if(frag != null) frag.setThumbnail(thumbnails.get(pos));
             dismiss();
         }
 
@@ -121,7 +134,8 @@ public class ThumbnailDialog extends Dialog implements View.OnClickListener {
 
                 final ViewHolderItem holder = (ViewHolderItem) viewHolder;
 
-                act.binder.getImageLoader().DisplayImage(thumbnails.get(i), holder.thumbnail_iv, holder.thumbnail_pb);
+                if(act != null) act.binder.getImageLoader().DisplayImage(thumbnails.get(i), holder.thumbnail_iv, holder.thumbnail_pb);
+                if(frag != null) frag.getBinder().getImageLoader().DisplayImage(thumbnails.get(i), holder.thumbnail_iv, holder.thumbnail_pb);
 
             }
 

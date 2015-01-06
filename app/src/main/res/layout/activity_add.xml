@@ -105,7 +105,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:choiceMode="multipleChoice"
-        android:descendantFocusability="blocksDescendants"
         android:divider="@null"
         android:layout_below="@+id/toolbar_v"
         app:click_remove_id="@+id/click_remove"
