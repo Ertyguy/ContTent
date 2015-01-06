@@ -1,7 +1,6 @@
 package com.edaviessmith.consumecontent.data;
 
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -14,6 +13,7 @@ public class Group extends Content {
 
 
     public Group () {
+        setVisible(true);
         users = new LinkedHashMap<Integer, User>();
     }
 
@@ -66,11 +66,11 @@ public class Group extends Content {
 
     //Utility method to update users and set removed users
     public void setUserList(List<User> newUsers) {
-        removed = new ArrayList<User>(getUsers().values());
+        //removed = new ArrayList<User>(getUsers().values());
         LinkedHashMap<Integer, User> us = new LinkedHashMap<Integer, User>();
         int i = 0;
         for(User user : newUsers) { //Places user in order of sort not by ID
-            removed.remove(user);
+            //removed.remove(user);
             user.setSort(i++);
             us.put(user.getId(), user);
         }

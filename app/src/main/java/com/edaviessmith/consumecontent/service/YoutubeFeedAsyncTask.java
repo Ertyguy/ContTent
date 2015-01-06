@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.edaviessmith.consumecontent.data.YoutubeFeed;
 import com.edaviessmith.consumecontent.data.YoutubeItem;
-import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.util.Var;
 
 import org.json.JSONArray;
@@ -247,7 +246,7 @@ public class YoutubeFeedAsyncTask extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         Log.d(TAG,"adding youtube items "+youtubeItems.size());
         if(!cancel) {
-            if (youtubeFeed.addItems(youtubeItems)) {
+            if (youtubeFeed.addItems(youtubeItems) && youtubeFeed.getItems().get(0).getStatus() == Var.STATUS_NEW) {
                 actionDispatch.updateMediaFeedDatabase(userId, youtubeFeed.getId());
             }
 

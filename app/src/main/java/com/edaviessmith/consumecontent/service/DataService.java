@@ -312,13 +312,32 @@ public class DataService extends Service {
         }
 
 
-        public void setSelectedGroup(int id) {
-            selectedGroup = id;
+        public void setSelectedGroup(int groupId) {
+            selectedGroup = groupId;
 
-            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_GROUP, id);
+            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_GROUP, groupId);
             fetchUsers();
         }
 
+        public void setSelectedGroupUser(int groupId, int userId) {
+            selectedGroup = groupId;
+            //selectedUser = userId;
+
+            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_GROUP, groupId);
+            Var.setIntPreference(DataService.this, Var.PREF_SELECTED_USER + selectedGroup, userId);
+
+            fetchUsers();
+            /*tpe.submit(new Runnable() {
+                @Override
+                public void run() {
+                    users = UserORM.getUsersByGroupId(DataService.this, selectedGroup, groupList);
+                    updateUserList();
+
+                    if (!DB.isValid(selectedUser)) selectedUser = userList.get(0).getId();
+
+                }
+            });*/
+        }
 
         public ImageLoader getImageLoader() {
             return imageLoader;
@@ -413,7 +432,6 @@ public class DataService extends Service {
         public User getEditUser() {
             return editUser;
         }
-
 
     }
 

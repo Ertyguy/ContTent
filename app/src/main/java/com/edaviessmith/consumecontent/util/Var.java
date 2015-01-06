@@ -337,10 +337,9 @@ public class Var {
 
             Calendar today = Calendar.getInstance(Locale.getDefault());
             long now = today.getTimeInMillis();
-            //boolean hasPreviousAlarm = (PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE) != null);
             long nextAlarmPref = Var.getLongPreference(context, Var.PREF_NEXT_ALARM);
-            //If alarm isn't already active create a new alarm
-            //if (!hasPreviousAlarm) {
+
+
             try {
                 int notificationId = -1; //Send id in intent to know which notification to update
                 long nextAlarm = 0L;
@@ -355,8 +354,8 @@ public class Var {
                     }
                 }
 
-                //TODO debug to hardcode alarm in 1 minute
-                //nextAlarm = 1 * Var.MINUTE_MILLI;
+                //TODO debug to hardcode alarm in x minutes
+                //nextAlarm = 5 * Var.MINUTE_MILLI;
 
                 Log.d(TAG, "AlarmManager current Alarm: " + (nextAlarmPref / Var.MINUTE_MILLI) + ", next: " + ((nextAlarm + now) / Var.MINUTE_MILLI));
                 if (nextAlarm > 0L && (((nextAlarm + now) / Var.MINUTE_MILLI) != (nextAlarmPref / Var.MINUTE_MILLI))) {
@@ -377,9 +376,6 @@ public class Var {
             } catch (Exception e) {
                 e.printStackTrace(); // in case you want to see the stacktrace in your log cat output
             }
-            //} else {
-            //    Log.d(TAG, "AlarmManager already active");
-            //}
         }
     }
 

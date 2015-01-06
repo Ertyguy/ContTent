@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MediaFeedActivityService extends IntentService {
+public class AlarmIntentService extends IntentService {
 
-    private static String TAG = "MemberActivityService";
+    private static String TAG = "AlarmIntentService";
 
     private int threadCounter;
     private List<Integer> updatedMediaFeedIds;
@@ -36,8 +36,8 @@ public class MediaFeedActivityService extends IntentService {
     final static ExecutorService tpe = Executors.newSingleThreadExecutor();
 
 
-    public MediaFeedActivityService(){
-        super("MediaFeedActivityService");
+    public AlarmIntentService(){
+        super("AlarmIntentService");
     }
 
 
@@ -48,7 +48,8 @@ public class MediaFeedActivityService extends IntentService {
             @Override
             public void updateMediaFeedDatabase(int userId, int mediaFeedId) {
                 super.updateMediaFeedDatabase(userId, mediaFeedId);
-                updatedMediaFeedIds.add(mediaFeedId);
+
+                //TODO not marking now and older right
 
                 for(final YoutubeFeed youtubeFeed: youtubeFeeds) {
                     if(youtubeFeed.getId() == mediaFeedId) {
@@ -56,7 +57,9 @@ public class MediaFeedActivityService extends IntentService {
                         tpe.submit(new Runnable() {
                             @Override
                             public void run() {
-                                MediaFeedORM.saveYoutubeFeedItems(MediaFeedActivityService.this, youtubeFeed);
+                                MediaFeedORM.saveYoutubeFeedItems(AlarmIntentService.this, youtubeFeed);
+
+                                updatedMediaFeedIds.add(youtubeFeed.getId());
                                 threadCounter--;
                                 checkMediaFeedUpdated();
                             }
@@ -103,14 +106,12 @@ public class MediaFeedActivityService extends IntentService {
         List<User> users = UserORM.getUsersByMediaFeeds(this, updatedMediaFeedIds);
 
         if(users.size() > 0) {
-            String title = "Consume Content";
+            String title = getResources().getString(R.string.app_name);
             String text = "New upload from "+ users.get(0).getName();
 
-            //TODO create intent from notification also this notification is kind of garbage right now
             Intent intent = new Intent(this, ContentActivity.class);
-            //intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            //intent.putExtra(Constants.PREF_MEMBER, updatedMembers.get(0).getId());
-
+            intent.putExtra(Var.INTENT_USER_ID, users.get(0).getId());
+            intent.putExtra(Var.INTENT_GROUP_ID, users.get(0).getGroups().get(0).getId());
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setContentTitle(title)
                     .setContentText(text)
@@ -131,10 +132,9 @@ public class MediaFeedActivityService extends IntentService {
                 User user = users.get(i);
 
                 Intent in = new Intent(this, ContentActivity.class);
-                //in.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                //in.putExtra(Constants.PREF_MEMBER, user.id);
+                in.putExtra(Var.INTENT_USER_ID, users.get(i).getId());
+                in.putExtra(Var.INTENT_GROUP_ID, users.get(i).getGroups().get(0).getId());
 
-                //TODO reason to save icon as
                 NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_youtube_white, user.getName(), PendingIntent.getActivity(this, user.getId(), in, PendingIntent.FLAG_UPDATE_CURRENT));
 
                 builder.addAction(action);

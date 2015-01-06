@@ -2,9 +2,10 @@
 
 
 ////CRITICAL PATH//
+
 Fix Notifications
 
-Edit Groups
+ (DONE) Edit Groups
     Thumbnail picker (User thumbnail list [possibly include channels)
     Add Group
     Add member

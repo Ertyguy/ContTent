@@ -68,7 +68,7 @@
         </receiver>
 
         <service
-            android:name=".service.MediaFeedActivityService"
+            android:name=".service.AlarmIntentService"
             android:label="Notification Listener"
             android:exported="false" />
 

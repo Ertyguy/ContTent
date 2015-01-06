@@ -344,18 +344,11 @@ public class GroupFragment extends ActionFragment implements View.OnClickListene
         if(save_fab == v) {
             getBinder().getEditGroup().setName(groupName_edt.getText().toString().trim());
             getBinder().getEditGroup().setVisible(visible_sw.isChecked());
-
-
-
-            getBinder().getEditGroup().setUserList(users);
+            
+            getBinder().getEditGroup().setUserList(users); //Only used for sort
             getBinder().saveGroup(getBinder().getEditGroup());
-            //editUser.setName(userName_edt.getText().toString().trim());
-            //editUser.addMediaFeed(mediaFeeds);
-
-            //editUser.setThumbnail((String) userPicture_sp.getSelectedItem());//TODO set thumbnail
 
 
-            //binder.saveUser(editUser);
             toggleState(Var.GROUPS_LIST);
         }
 

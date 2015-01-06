@@ -17,7 +17,7 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
             //boolean bootEnabled = Util.notificationsOnBootEnabled();
             //If booting and boot is enabled or being called regularly
             if (intent.getAction().equals(Var.NOTIFY_ACTION)) {
-                Intent i = new Intent(context, MediaFeedActivityService.class);
+                Intent i = new Intent(context, AlarmIntentService.class);
                 i.putExtra(Var.NOTIFY_NOTIFICATION_ID, notificationId);
                 context.startService(i);
 

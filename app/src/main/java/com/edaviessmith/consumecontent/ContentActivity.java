@@ -26,15 +26,11 @@ import java.util.Date;
 
 public class ContentActivity extends ActionActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks, View.OnClickListener {
 
-    private static final String TAG_TASK_FRAGMENT = "task_fragment";
-
-
     private NavigationDrawerFragment navigationDrawerFragment;
     private MediaFeedFragment mediaFeedFragment;
     private GroupFragment groupFragment;
     private VideoPlayerLayout videoPlayerLayout;
     private VideoPlayerFragment videoPlayerFragment;
-
 
     Toolbar toolbar;
     private CharSequence actionBarTitle;
@@ -42,7 +38,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     View actionDelete, actionNotification;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
 
-    //public int contentState = -1;
 
     public ContentActivity() {
 
@@ -52,9 +47,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
             public void binderReady() {
                 super.binderReady();
 
-                //FIXME Throws nullpointer when pausing and resuming app
                 if(mediaFeedFragment != null && mediaFeedFragment.adapterViewPager != null) mediaFeedFragment.adapterViewPager.notifyDataSetChanged();
-                Log.d(TAG, "binderReady");
             }
 
             @Override
@@ -86,14 +79,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
                 Log.d(TAG,"updatedUser "+userId);
                 navigationDrawerFragment.adapter.notifyDataSetChanged();
                 openUsers();
-
-                //TODO not updating
-                if(binder.getState() == Var.LIST_USERS && userId == binder.getSelectedUser()) {
-
-                } else {
-
-                }
-
             }
         };
 
@@ -117,7 +102,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         videoPlayerLayout.init(this);
 
 		actionBarTitle = getTitle();
-
 
         actionDelete = findViewById(R.id.action_delete);
         actionDelete.setOnClickListener(this);
@@ -148,6 +132,9 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         //Init Navigation Drawer
         navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
+
+
+
     }
 
     @Override
@@ -158,8 +145,17 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     @Override
     protected void onBind() {
         super.onBind();
-        navigationDrawerFragment.setUp();
 
+        Intent intent = getIntent();
+        int userId = intent.getIntExtra(Var.INTENT_USER_ID, -1);
+        int groupId = intent.getIntExtra(Var.INTENT_GROUP_ID, -1);
+
+        if(DB.isValid(userId) && DB.isValid(groupId)) {
+            binder.setSelectedGroupUser(groupId, userId);
+
+        }
+
+        navigationDrawerFragment.setUp();
 
         toggleState(binder.getState());
         updateData();
@@ -295,8 +291,8 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         Log.d(TAG, "onNavigationDrawerItemSelected "+position);
-        if(binder != null){// && (contentState != Var.LIST_USERS ||  binder.getUser() == null || binder.getUser().getSort() != position)) {
-            Log.d(TAG, "onNavigationDrawerItemSelected "+ position + " - "+binder.getUser().getSort());
+        if(binder != null){
+            //Log.d(TAG, "onNavigationDrawerItemSelected "+ position + " - "+binder.getUser().getSort());
             binder.setSelectedUser(position);
 
             toggleState(Var.LIST_USERS);
@@ -315,7 +311,6 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         if(actionDelete == v) {
             groupFragment.deleteConfirmation();
         }
-
 
         if(actionSettings == v) {
             startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
@@ -355,7 +350,7 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     }
 
     public void toggleNavDrawerIndicator(boolean show) {
-        Log.d(TAG, "toggleNavDrawerIndicator " + show);
+
         boolean validGroupUser = DB.isValid(binder.getSelectedGroup()) && DB.isValid(binder.getSelectedUser());
         //The order matters
         if(!show) navigationDrawerFragment.actionBarDrawerToggle.setDrawerIndicatorEnabled(false);
