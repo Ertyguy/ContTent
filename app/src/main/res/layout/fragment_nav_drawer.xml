@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.edaviessmith.consumecontent.NavigationDrawerFragment"  >
+    tools:context="com.edaviessmith.contTent.NavigationDrawerFragment"  >
 
 
     <RelativeLayout
@@ -164,7 +164,7 @@
 
 
 
-    <com.edaviessmith.consumecontent.view.Fab
+    <com.edaviessmith.contTent.view.Fab
         android:id="@+id/action_fab"
         android:layout_width="72dp"
         android:layout_height="72dp"

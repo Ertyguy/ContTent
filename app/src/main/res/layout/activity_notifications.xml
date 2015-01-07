@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray"
-    tools:context="com.edaviessmith.consumecontent.AddActivity">
+    tools:context="com.edaviessmith.contTent.AddActivity">
 
     <android.support.v7.widget.Toolbar
         android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/alarm_lv" />
 
-        <com.edaviessmith.consumecontent.view.Fab
+        <com.edaviessmith.contTent.view.Fab
             android:id="@+id/save_fab"
             android:layout_width="72dp"
             android:layout_height="72dp"

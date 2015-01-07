@@ -5,7 +5,7 @@ android {
     buildToolsVersion "19.1.0"
 
     defaultConfig {
-        applicationId "com.edaviessmith.consumecontent"
+        applicationId "com.edaviessmith.contTent"
         minSdkVersion 11
         targetSdkVersion 21
         versionCode 1

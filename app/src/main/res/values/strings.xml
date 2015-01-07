@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ConsumeContent</string>
+    <string name="app_name">ContTent</string>
     <string name="twitter">Twitter</string>
     <string name="youtube">Youtube</string>
     <string name="notifications">Notifications</string>

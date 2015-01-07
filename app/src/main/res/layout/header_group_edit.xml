@@ -23,7 +23,7 @@
             android:layout_alignParentTop="true"
             android:background="@drawable/selector_accent">
 
-            <com.edaviessmith.consumecontent.view.RoundedImageView
+            <com.edaviessmith.contTent.view.RoundedImageView
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:id="@+id/group_thumbnail_iv"
@@ -94,7 +94,7 @@
         android:layout_below="@+id/group_info"
         android:id="@+id/item_list_divider" />
 
-        <com.edaviessmith.consumecontent.view.Fab
+        <com.edaviessmith.contTent.view.Fab
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:id="@+id/add_user_fab"
@@ -134,7 +134,7 @@
 
             </android.support.v7.widget.CardView>
 
-            <com.edaviessmith.consumecontent.view.Fab
+            <com.edaviessmith.contTent.view.Fab
                 android:id="@+id/youtube_fab"
                 android:layout_width="54dp"
                 android:layout_height="54dp"
@@ -174,7 +174,7 @@
 
             </android.support.v7.widget.CardView>
 
-            <com.edaviessmith.consumecontent.view.Fab
+            <com.edaviessmith.contTent.view.Fab
                 android:id="@+id/twitter_fab"
                 android:layout_width="54dp"
                 android:layout_height="54dp"

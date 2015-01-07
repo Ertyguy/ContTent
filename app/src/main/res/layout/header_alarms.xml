@@ -45,7 +45,7 @@
         android:layout_below="@+id/alarms_info"
         android:id="@+id/item_list_divider" />
 
-    <com.edaviessmith.consumecontent.view.Fab
+    <com.edaviessmith.contTent.view.Fab
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:id="@+id/add_alarm_fab"
         android:layout_width="72dp"

@@ -118,7 +118,7 @@
 
         <fragment
             android:id="@+id/navigation_drawer"
-            android:name="com.edaviessmith.consumecontent.NavigationDrawerFragment"
+            android:name="com.edaviessmith.contTent.NavigationDrawerFragment"
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start"
@@ -127,7 +127,7 @@
 
     </android.support.v4.widget.DrawerLayout>
 
-    <com.edaviessmith.consumecontent.view.VideoPlayerLayout
+    <com.edaviessmith.contTent.view.VideoPlayerLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/video_player_v">
@@ -231,7 +231,7 @@
                     android:textStyle="bold"
                     android:text="date"/>
 
-                <com.edaviessmith.consumecontent.view.Fab
+                <com.edaviessmith.contTent.view.Fab
                     android:id="@+id/action_fab"
                     android:layout_width="72dp"
                     android:layout_height="72dp"
@@ -258,6 +258,6 @@
 
         </RelativeLayout>
 
-    </com.edaviessmith.consumecontent.view.VideoPlayerLayout>
+    </com.edaviessmith.contTent.view.VideoPlayerLayout>
 
 </RelativeLayout>

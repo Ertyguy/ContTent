@@ -3,9 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.edaviessmith.consumecontent.MediaFeedFragment" >
+    tools:context="com.edaviessmith.contTent.MediaFeedFragment" >
 
-    <com.edaviessmith.consumecontent.view.SlidingTabLayout
+    <com.edaviessmith.contTent.view.SlidingTabLayout
         android:id="@+id/sliding_tabs"
         android:background="@color/primary"
         android:layout_width="match_parent"
