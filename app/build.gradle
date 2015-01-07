@@ -25,6 +25,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.0'
     compile 'com.android.support:recyclerview-v7:21.0.0'
     compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.google.android.gms:play-services:6.5.87'
     compile files('libs/twitter4j-core-4.0.2.jar')
     compile files('libs/signpost-core-1.2.1.1.jar')
     compile files('libs/signpost-commonshttp4-1.2.1.1.jar')

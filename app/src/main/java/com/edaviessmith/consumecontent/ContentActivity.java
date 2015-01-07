@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,6 +22,8 @@ import com.edaviessmith.consumecontent.service.ActionDispatch;
 import com.edaviessmith.consumecontent.util.Var;
 import com.edaviessmith.consumecontent.view.VideoPlayerFragment;
 import com.edaviessmith.consumecontent.view.VideoPlayerLayout;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.Date;
 
@@ -35,8 +38,9 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
     Toolbar toolbar;
     private CharSequence actionBarTitle;
     ImageView actionSettings, actionEdit;
-    View actionDelete, actionNotification;
+    View actionDelete, actionNotification, hideAd_iv;
     TextView videoTitle_tv, videoViews_tv, videoDescription_tv, videoDate_tv;
+    AdView adView;
 
 
     public ContentActivity() {
@@ -132,8 +136,43 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
         //Init Navigation Drawer
         navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
+        hideAd_iv = findViewById(R.id.hide_ad_iv);
+        hideAd_iv.setOnClickListener(this);
+        adView = (AdView) findViewById(R.id.adView);
+
+        showAd();
+    }
+
+    private void showAd() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adView.setEnabled(true);
+                adView.setVisibility(View.VISIBLE);
+                hideAd_iv.setVisibility(View.VISIBLE);
+
+                adView.loadAd(new AdRequest.Builder().build());
+            }
+        });
+    }
 
 
+    private void hideAd() {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adView.setEnabled(false);
+                adView.setVisibility(View.GONE);
+                hideAd_iv.setVisibility(View.GONE);
+            }
+        });
+
+        new Handler().postDelayed(new Runnable(){
+            public void run() {
+                showAd();
+            }
+        }, 4 * Var.MINUTE_MILLI);
 
     }
 
@@ -314,6 +353,10 @@ public class ContentActivity extends ActionActivity implements NavigationDrawerF
 
         if(actionSettings == v) {
             startActivity(new Intent(ContentActivity.this, AndroidDatabaseManager.class));
+        }
+
+        if(hideAd_iv == v) {
+            hideAd();
         }
 
     }

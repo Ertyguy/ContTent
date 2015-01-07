@@ -3,7 +3,7 @@
 
 ////CRITICAL PATH//
 
-Fix Notifications
+ (DONE) Fix Notifications
 
  (DONE) Edit Groups
     Thumbnail picker (User thumbnail list [possibly include channels)
@@ -21,7 +21,7 @@ Make all text that can change into selectors
 Bottom margin to dialogs to prevent overflow height
 
 //Implement
-Ads banner
+ (DONE) Ads banner
 Try to play the video again on a counter to overcome pausing while resizing issue
 Hide video when editing groups (blocks controls)
 
@@ -39,14 +39,14 @@ Implement notifications and settings options to work
     pewdiepie + friends (vanossGaming, SeaNanners Gaming)  http://pewdiepie.wikia.com/wiki/PewDiePie
     Machinema (theSw1tcher, happyhour)
 
+
+    Cartoon
     Vevo
     CinemaSins
     Epic Rap Battle
     Comedy (comedyCentral, Mojo)
 
 ////FIXME: Critical Path
-
-Renaming on the draggable ListView does not work on the header (AddActivity)
 
 (not tested with no internet connection) / Need to do a thourough test
 ImageLoader has to detect when an image is not available and update the reference (User has changed profile picture)
